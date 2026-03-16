@@ -1,0 +1,25 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="combobox(id,path,hiddenFields,selectedValue)">
+    <div class="combobox">
+        <input type="text" th:id="${id}" class="combobox-select form-control" th:value="${selectedValue}" readonly>
+
+        <th:block th:each="fieldName:${hiddenFields}">
+            <input type="hidden" th:class="'combobox-hidden-' + ${fieldName.key}" th:value="${fieldName.value}"  th:name="${fieldName.key}" >
+        </th:block>
+
+        <div class="combobox-list">
+            <input type="text" class="combobox-search" placeholder="Search..." name="q" th:hx-get="${path}"
+                hx-params="q" hx-trigger="keyup changed delay:500ms" hx-target="next .combobox-list-container"
+                hx-swap="innerHTML">
+            <div class="combobox-list-container" th:remove="body">
+                <!-- 
+                "path" should return a list of divs. data-* attributes will be used to
+                populate hidden fields in the combobox.
+                -->
+                <div class="combobox-list-item" data-id="1" data-batch-no="4">Apple</div>
+                <div class="combobox-list-item" data-id="2" data-batch-no="5">Banana</div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

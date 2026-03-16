@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: salesmanager4
+  datasource:
+    url: jdbc:postgresql://localhost:5432/salesmanager4?currentSchema=sales_manager
+    username: postgres
+    password: lahiru
+    driver-class-name: org.postgresql.Driver
+
+
+# logging:
+#   level:
+#     "[org.springframework.jdbc.core.JdbcTemplate]": DEBUG

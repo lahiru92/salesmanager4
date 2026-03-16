@@ -1,0 +1,16 @@
+<th:block th:each="item : ${items}">
+    <!-- <div th:class="'combobox-list-item'" 
+         th:data-item-id="${item.id}"
+         th:data-batch-id="${item.batchId}"
+         th:data-item-name="${item.name}"
+         th:data-item-price="${item.price}"
+         th:text="${item.name}"></div> -->
+
+    <div th:class="'combobox-list-item'" 
+         th:data-item-id="${item.itemId}"
+         th:data-item-name="${item.name}"
+         th:text="${item.name}">
+    </div>
+
+    
+</th:block>

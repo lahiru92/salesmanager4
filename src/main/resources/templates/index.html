@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3R Marketing</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap-icons-1.13.1.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/toastify.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/combobox.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+</head>
+
+<body class="container-fluid bg-body-secondary">
+
+    <div class="row container-fluid p-0" >
+
+        <div class="col-2 p-0 vh-100 d-flex flex-column sticky-top">
+            <div id="branding" class="text-bg-light pt-3 ps-3">
+                <img th:src="@{/img/3r64.png}" src="../static/img/3r64.png" width="32" height="32" class="me-2">
+                <span class="fw-semibold">3R Marketing</span>
+
+            </div>
+            <nav class="text-bg-light p-3 d-flex flex-column vh-100">
+
+                <a sec:authorize="hasRole('ADMIN')" hx-get="/users" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person"></i><span class="ms-2">Users</span></a>
+                <a sec:authorize="hasAnyRole('ADMIN','HR','MANAGER')" hx-get="/employees" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person-vcard"></i><span class="ms-2">Employees</span></a>
+                <a hx-get="/suppliers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-truck"></i><span class="ms-2">Suppliers</span></a>
+                <a hx-get="/customers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-shop-window"></i><span class="ms-2">Customers</span></a>
+                <a hx-get="/items" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-boxes"></i><span class="ms-2">Items</span></a>
+                <a hx-get="/categories" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-tags"></i><span class="ms-2">Categories</span></a>
+                <a hx-get="/inventory" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-list-check"></i><span class="ms-2">Inventory</span></a>
+                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-car-front"></i><span class="ms-2">Vehicles</span></a>
+                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-map"></i><span class="ms-2">Routes</span></a>
+                <a hx-get="/invoices" hx-target="#content"  class="btn btn btn-light text-start"><i class="bi bi-receipt"></i><span class="ms-2">Invoice</span></a>
+                <a hx-get="/grn" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">GRN</span></a>
+                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
+                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash</span></a>
+                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-cash-coin"></i><span class="ms-2">Cheques</span></a>
+                
+                <!-- Change password-->
+                <a hx-get="/users/change-password" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-key"></i><span class="ms-2">Change Password</span></a>
+
+
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn btn-light text-start"><i class="bi bi-box-arrow-right"></i><span class="ms-2">Log Out</span></button>
+                </form>
+
+            </nav>
+    
+
+        </div>
+
+        <!-- Main content -->
+        <div class="col" id="content" th:insert="~{${content}::content}">
+            Content goes here
+        </div>
+
+    </div>
+
+    <div class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex" id="toast-container">
+            <div class="toast-body">
+                Hello, world! This is a toast message.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                aria-label="Close"></button>
+        </div>
+    </div>
+
+
+    <script type="text/javascript" th:src="@{/js/htmx-2.0.8.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/jquery-3.7.1.slim.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script type="text/javascript" th:src="@{/js/toastify.js}"></script>
+    <script type="text/javascript" th:src="@{/js/combobox.js}"></script>
+    <script type="text/javascript" th:src="@{/js/script.js}"></script>
+</body>
+
+</html>

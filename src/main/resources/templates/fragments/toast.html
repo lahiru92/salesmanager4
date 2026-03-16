@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="toast (message, type)">
+    <script th:inline="javascript">
+        const type = /*[[${type}]]*/"info";
+
+        switch (type) {
+            case "info":
+            case "success":
+                bgColor = "#2196F3";
+                break;
+            case "warning":
+                bgColor = "#FF9800";
+                textColor = "#000000";
+                break;
+            case "error":
+                bgColor = "#F44336";
+                break;
+        }
+
+        Toastify({
+            text: /*[[${message}]]*/"Undefined",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: bgColor,
+                color: textColor
+            }
+        }).showToast();
+    </script>
+</div>
+
+</html>

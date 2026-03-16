@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="content">
+
+        <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+        <h1 class="fs-5">Adjust stock</h1>
+        
+        <div th:if="${message}">
+            <script th:inline="javascript">
+                Toastify({
+                    text: /*[[${message}]]*/"Undefined",
+                    duration: 3000
+                }).showToast();
+            </script>
+        </div>
+
+        <form hx-post="/stock-adjustments" hx-target="#content">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="itemName" class="form-label">Item</label>
+                        <div th:replace="~{fragments/combobox :: combobox('itemName','/items/dropdown',${ {'itemId':0,'batchId':0,'itemName':''} },'')}"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" required>
+                </div>
+                <div class="mb-3">
+                    <label for="unitCost" class="form-label">Unit Cost</label>
+                    <input type="number" class="form-control" id="unitCost" name="unitCost" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Adjustment Type</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="type" id="increase" value="IN" checked>
+                        <label class="form-check-label" for="increase">Increase</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="type" id="decrease" value="OUT">
+                        <label class="form-check-label" for="decrease">Decrease</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="reason" class="form-label">Reason</label>
+                    <textarea class="form-control" id="reason" name="reason" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+            </div>
+        </form>
+       
+        </div>
+
+    </div>
+</html>

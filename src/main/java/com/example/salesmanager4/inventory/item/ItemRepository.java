@@ -1,0 +1,41 @@
+package com.example.salesmanager4.inventory.item;
+
+import java.util.List;
+import java.util.Optional;
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jdbc.repository.query.Query;
+import org.springframework.data.repository.CrudRepository;
+
+public interface ItemRepository extends CrudRepository<Item, Long> {
+
+    Optional<Item> findByCode(String code);
+
+    List<Item> findByActiveTrueOrderByNameAsc();
+
+    List<Item> findByCategoryId(Long categoryId);
+
+    // List<Item> findByActiveTrueOrderByNameAscAndNameContainingIgnoreCase(String name);
+
+    @Query("""
+        SELECT * FROM item
+        WHERE active = true
+        AND name ILIKE CONCAT('%', :name, '%')
+        ORDER BY name ASC
+        """)
+    List<Item> findByName(String name);
+
+
+    @Query("""
+        SELECT i.item_id, i.code, i.name as item_name, c.name as category_name, i.unit, i.reorder_level, i.active
+        FROM item i
+        JOIN category c ON i.category_id = c.category_id
+        WHERE i.active = true
+        ORDER BY i.name ASC
+        """)
+    List<ItemListResponseDto> findItemList();
+
+}
+

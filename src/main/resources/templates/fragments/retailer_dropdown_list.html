@@ -1,0 +1,6 @@
+<th:block th:each="retailer : ${retailers}">
+    <div th:class="'combobox-list-item'" 
+         th:data-retailer-id="${retailer.id}"
+         th:data-retailer-name="${retailer.name}"
+         th:text="${retailer.name}"></div>
+</th:block>

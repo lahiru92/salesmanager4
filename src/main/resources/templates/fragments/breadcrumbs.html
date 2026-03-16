@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<nav class="pt-2" th:fragment="breadcrumbs(items)"  aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li th:each="item, stat:${items}" class="breadcrumb-item" th:classappend="${item.url == null}?'active':''">
+        <a href="#" th:hx-get="${item.url}" th:text="${item.label}" hx-target = "#content"
+            th:if="${item.url != null}"></a>
+        <span th:text="${item.label}" th:if="${item.url == null}"></span>
+    </li>
+
+  </ol>
+</nav>
+</html>

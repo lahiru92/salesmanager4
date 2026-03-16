@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="content">
+
+        <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+        <h1 class="fs-5" th:if="${mode == 'create'}">Create new item</h1>
+        <h1 class="fs-5" th:if="${mode == 'edit'}">Edit item</h1>
+
+        <div th:if="${message}">
+            <script th:inline="javascript">
+                Toastify({
+                    text: /*[[${message}]]*/"Undefined",
+                    duration: 3000
+                }).showToast();
+            </script>
+        </div>
+
+        <form th:attr="
+                hx-post=${mode=='create' ? '/items' : null},
+                hx-put=${mode=='edit' ? '/items/edit' : null}"
+              th:object ="${item}"
+              hx-target="#content">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="col-md-6">
+                <input type="hidden" id="itemid" name="itemId" th:value="${item.itemId}">
+                <input type="hidden" id="active" name="active" th:value="${item.active}">
+                <div class="mb-3">
+                    <label for="code" class="form-label">Code</label>
+                    <input type="text" class="form-control" id="code" name="code" th:value="${item.code}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="itemName" class="form-label">Item Name</label>
+                    <input type="text" class="form-control" id="itemName" name="name" th:value="${item.name}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" th:field="*{categoryId}" required>
+                        <option value="" >Select Category</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.categoryId}" th:text="${cat.name}"></option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="uom" class="form-label">UOM</label>
+                    <input type="text" class="form-control" id="uom" name="unit" th:value="${item.unit}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="reorderLevel" class="form-label">Reorder Level</label>
+                    <input type="number" class="form-control" id="reorderLevel" name="reorderLevel" th:value="${item.reorderLevel}" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+            </div>
+        </form>
+       
+        </div>
+
+    </div>
+</html>

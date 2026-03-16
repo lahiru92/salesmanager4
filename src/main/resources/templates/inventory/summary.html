@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="content">
+        
+        <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+            <h1 class="fs-5">Inventory Summary</h1>
+            <a hx-get="/stock-adjustments" hx-target="#content" class="btn btn-primary">Adjust Stock</a>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Item</th>
+                <th>Category</th>
+                <th class="text-end">Qty</th>
+                <th class="text-end">Avg Cost</th>
+                <th class="text-end">Value</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="row : ${inventory}">
+                <td th:text="${row.code}"></td>
+                <td th:text="${row.name}"></td>
+                <td th:text="${row.categoryname}"></td>
+
+                <td class="text-end"
+                    th:text="${row.stockqty}"></td>
+
+                <td class="text-end"
+                    th:text="${#numbers.formatDecimal(row.avgcost,1,2)}"></td>
+
+                <td class="text-end"
+                    th:text="${#numbers.formatDecimal(row.stockValue,1,2)}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</html>

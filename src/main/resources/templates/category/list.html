@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div  th:fragment="content">
+        <h1>Categories</h1>
+        <div class="container">
+            <form>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="text" name="name" placeholder="Category Name">
+                <button type="submit" th:hx-post="@{/categories}" th:hx-target="@{#category-list}">Add Category</button>
+            </form>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody id="category-list" th:fragment="category-list">
+                    <tr th:each="category : ${categories}">
+                        <td th:text="${category.name}">Category Name</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</html>

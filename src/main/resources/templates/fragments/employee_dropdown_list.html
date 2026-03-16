@@ -1,0 +1,8 @@
+
+<th:block th:each="employee : ${employees}">
+    <div th:class="'combobox-list-item'" 
+         th:data-employee-id="${employee.id}"
+         th:data-employee-name="${employee.name}"
+         th:data-employee-role="${employee.role}"
+         th:text="${employee.name}"></div>
+</th:block>

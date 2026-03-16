@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="content">
+        <h1>Invoice List</h1>
+        <p>This is a placeholder for the invoice list view.</p>
+        <a th:hx-get="@{/invoices/create}" hx-target="#content" class="btn btn-primary">Create New Invoice</a>
+    </div>
+</html>

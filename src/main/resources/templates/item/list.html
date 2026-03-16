@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="content">
+        
+        <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+            <h1 class="fs-5">Items</h1>
+            <a hx-get="/items/create" hx-target="#content" class="btn btn-primary">Create Item</a>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Item Name   </th>
+                <th>Category</th>
+                <th>UOM</th>
+                <th class="text-end">Reorder Level</th>
+                <th></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.code}"></td>
+                <td th:text="${item.itemName}"></td>
+                <td th:text="${item.categoryName}"></td>
+                <td th:text="${item.unit}"></td>
+                <td class="text-end"
+                    th:text="${item.reorderLevel}"></td>
+                <td>
+                    <a th:hx-get="|/items/${item.itemId}/edit|" hx-target="#content" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a th:hx-get="|/items/${item.itemId}/delete|" hx-target="#content" class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</html>
