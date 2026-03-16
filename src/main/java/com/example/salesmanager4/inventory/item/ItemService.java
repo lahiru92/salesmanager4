@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,14 +21,12 @@ public class ItemService {
 
 
     private final ItemRepository itemRepo;
-    private final ItemPagingAndSortingRepository itemPagingRepo;
     private final CategoryRepository categoryRepo;
     
 
     public ItemService(ItemRepository itemRepo,
-                       CategoryRepository categoryRepo, ItemPagingAndSortingRepository itemPagingRepo) {
+                       CategoryRepository categoryRepo) {
         this.itemRepo = itemRepo;
-        this.itemPagingRepo = itemPagingRepo;
         this.categoryRepo = categoryRepo;
     }
 
@@ -83,7 +83,15 @@ public class ItemService {
         itemRepo.save(item);
     }
 
-    public Page<ItemListResponseDto> listFilterdPaged(Pageable pageable) {
-        return itemPagingRepo.findItemListPaged(pageable);
+    public Page<ItemListResponseDto> listFilterdPaged(int page, int size) {
+        
+        long offset = (long) page * size;
+        int limit = size;
+        List<ItemListResponseDto> items = itemRepo.findItemListPaged(limit, offset);
+        long totalItems =  itemRepo.findItemListPagedCount();
+        
+        Pageable pageable = PageRequest.of(page, size);
+        
+        return new PageImpl<>(items, pageable, totalItems);
     }
 }

@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -36,6 +34,24 @@ public interface ItemRepository extends CrudRepository<Item, Long> {
         ORDER BY i.name ASC
         """)
     List<ItemListResponseDto> findItemList();
+
+    @Query("""
+            SELECT i.item_id, i.code, i.name as item_name, c.name as category_name, i.unit, i.reorder_level, i.active
+            FROM item i
+            JOIN category c ON i.category_id = c.category_id
+            WHERE i.active = true
+            ORDER BY i.item_id ASC
+            LIMIT :limit OFFSET :offset
+            """)
+    List<ItemListResponseDto> findItemListPaged(int limit, long offset);
+
+    @Query("""
+            SELECT count(*)
+            FROM item i
+            JOIN category c ON i.category_id = c.category_id
+            WHERE i.active = true
+            """)
+    long findItemListPagedCount();
 
 }
 

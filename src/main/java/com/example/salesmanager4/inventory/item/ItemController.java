@@ -2,9 +2,6 @@ package com.example.salesmanager4.inventory.item;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,12 +50,6 @@ public class ItemController {
 
         model.addAttribute("breadcrumbs", breadcrumbs);
         model.addAttribute("items", itemService.findItemList());
-
-        Pageable pageable = PageRequest.of(1, 5);
-        Page<ItemListResponseDto> page = itemService.listFilterdPaged(pageable);
-        log.info("Total items: " + page.getTotalElements());
-        log.info("Total pages: " + page.getTotalPages());
-        log.info("All items: " + page.getContent());
 
         return "item/list";
     }
