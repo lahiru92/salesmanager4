@@ -1,25 +1,3 @@
-// document.body.addEventListener('htmx:afterSwap', function(event) {
-//     // Check if the swapped element is a toast (or part of the toast container)
-//     if (event.detail.target.id === 'toast-container' || event.detail.target.closest('#toast-container')) {
-//         // Find all uninitialized toasts within the container
-//         const toastElements = document.querySelectorAll('.toast:not(.showing, .show)');
-        
-//         toastElements.forEach(toastEl => {
-
-//             console.log('Initializing toast:', toastEl); // Debug log to check the toast element
-
-//             // Initialize each new toast
-//             const toast = new bootstrap.Toast(toastEl);
-//             toast.show();
-
-//             // Optional: Remove the toast element from the DOM after it is hidden
-//             toastEl.addEventListener('hidden.bs.toast', function () {
-//                 toastEl.remove();
-//             });
-//         });
-//     }
-// });
-
 document.body.addEventListener("showToast", function (evt) {
     let bgColor = "#333333"; 
     let textColor = "#FFFFFF"; 
@@ -50,3 +28,24 @@ document.body.addEventListener("showToast", function (evt) {
     }).showToast();
     
 });
+
+// document.addEventListener("htmx:confirm", function(e) {
+//     // The event is triggered on every trigger for a request, so we need to check if the element
+//     // that triggered the request has a confirm question set via the hx-confirm attribute,
+//     // if not we can return early and let the default behavior happen
+//     if (!e.detail.question) return
+
+//     // This will prevent the request from being issued to later manually issue it
+//     e.preventDefault()
+
+//     Swal.fire({
+//         title: "Proceed?",
+//         theme: 'bootstrap-5',
+//         text: `${e.detail.question}`
+//     }).then(function (result) {
+//         if (result.isConfirmed) {
+//             // If the user confirms, we manually issue the request
+//             e.detail.issueRequest(true); // true to skip the built-in window.confirm()
+//         }
+//     })
+// })

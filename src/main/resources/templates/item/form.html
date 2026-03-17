@@ -25,6 +25,8 @@
             <div class="col-md-6">
                 <input type="hidden" id="itemid" name="itemId" th:value="${item.itemId}">
                 <input type="hidden" id="active" name="active" th:value="${item.active}">
+                <input type="hidden" id="page" name="page" th:value="${page}">
+                <input type="hidden" id="size" name="size" th:value="${size}">
                 <div class="mb-3">
                     <label for="code" class="form-label">Code</label>
                     <input type="text" class="form-control" id="code" name="code" th:value="${item.code}" required>
@@ -34,7 +36,7 @@
                     <input type="text" class="form-control" id="itemName" name="name" th:value="${item.name}" required>
                 </div>
                 <div class="mb-3">
-                    <label for="category" class="form-label">Category</label>
+                    <label for="categoryId" class="form-label">Category</label>
                     <select class="form-select" th:field="*{categoryId}" required>
                         <option value="" >Select Category</option>
                         <option th:each="cat : ${categories}" th:value="${cat.categoryId}" th:text="${cat.name}"></option>

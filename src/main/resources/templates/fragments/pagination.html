@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="pagination(page)" class="d-flex align-items-center align-self-center">
+    <nav aria-label="pagination">
+      <ul class="pagination m-0">
+        <li th:classappend="${page.hasPrevious()?'':'disabled'}" class="page-item">
+          <a class="page-link" 
+             th:href="@{/items(page=${page.getNumber()-1})}" 
+             th:hx-get="@{/items(page=${page.getNumber()-1})}" 
+             hx-target="#content" 
+             aria-label="Previous">
+            Previous
+          </a>
+        </li>
+        <li class="page-item" ><a class="page-link" th:text="|${page.getNumber()+1} of ${page.getTotalPages()}|"></a></li>
+        <li th:classappend="${page.hasNext()?'':'disabled'}" class="page-item">
+          <a class="page-link" 
+             th:href="@{/items(page=${page.getNumber()+1})}" 
+             th:hx-get="@{/items(page=${page.getNumber()+1})}" 
+             hx-target="#content"
+             aria-label="Next">
+            Next
+          </a>
+        </li>
+      </ul>
+    </nav>
+</div>
+
+
+</html>

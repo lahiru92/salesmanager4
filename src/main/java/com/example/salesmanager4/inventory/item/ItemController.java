@@ -2,6 +2,7 @@ package com.example.salesmanager4.inventory.item;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +29,8 @@ public class ItemController {
     private final ItemService itemService;
     private final CategoryService categoryService;
 
+    private final String DEFAULT_PAGE_SIZE = "10";
+
     public ItemController(ItemService itemService,
                           CategoryService categoryService) {
         this.itemService = itemService;
@@ -42,14 +45,18 @@ public class ItemController {
     
 
     @GetMapping
-    public String list(Model model) {
+    public String list(Model model, 
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
             new Breadcrumb("Items", null)
         );
 
+        Page<ItemListResponseDto> itemsPage = itemService.listFilterdPaged(page, size);
         model.addAttribute("breadcrumbs", breadcrumbs);
-        model.addAttribute("items", itemService.findItemList());
+        model.addAttribute("items", itemsPage.getContent());
+        model.addAttribute("page", itemsPage);
 
         return "item/list";
     }
@@ -77,7 +84,11 @@ public class ItemController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable("id") Long id, Model model) {
+    public String editForm(@PathVariable("id") Long id, 
+                            Model model, 
+                            @RequestParam(defaultValue = "0") int page, 
+                            @RequestParam(defaultValue = "${DEFAULT_PAGE_SIZE}") int size) {
+                                
         Item item = itemService.findById(id);
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -87,12 +98,14 @@ public class ItemController {
         model.addAttribute("breadcrumbs", breadcrumbs);
         model.addAttribute("mode", "edit");
         model.addAttribute("item", item);
+        model.addAttribute("page",page);
+        model.addAttribute("size",size);
         model.addAttribute("categories", categoryService.findAll());
         return "item/form";
     }
 
     @PutMapping("/edit")
-    public String update(@ModelAttribute Item item, RedirectAttributes ra, Model model) {
+    public String update(@ModelAttribute Item item, RedirectAttributes ra, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
         // TODO: Fix too many redirects
         //       This is caused by the form. Find out how to dynamically
@@ -101,7 +114,7 @@ public class ItemController {
         itemService.update(item);
         ra.addFlashAttribute("message", "Item updated");
         
-        return list(model);
+        return list(model, page, size);
 
     }
 

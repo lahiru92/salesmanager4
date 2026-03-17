@@ -37,6 +37,7 @@ public class ItemListTest {
         pages[4] = itemService.listFilterdPaged(4,5);
 
         for (Page<ItemListResponseDto> page : pages) {
+            page.getContent().forEach(System.out::println);
             System.out.println("================================ ");
             System.out.println("Total count: " + page.getTotalElements());
             System.out.println("Total pages: " + page.getTotalPages());
