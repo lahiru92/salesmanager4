@@ -14,10 +14,10 @@ public class Item {
 
     @Id
     private Long itemId;
-
     private String code;
     private String name;
     private Long categoryId;
+    private Long supplierId;
     private String unit;
     private BigDecimal reorderLevel;
     private boolean active;

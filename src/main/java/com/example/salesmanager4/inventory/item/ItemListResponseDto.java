@@ -4,6 +4,7 @@ package com.example.salesmanager4.inventory.item;
 public record ItemListResponseDto(
     Long itemId, 
     String code, 
+    String supplierName,
     String itemName, 
     String categoryName, 
     String unit,

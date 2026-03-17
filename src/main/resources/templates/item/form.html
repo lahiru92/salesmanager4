@@ -43,6 +43,13 @@
                     </select>
                 </div>
                 <div class="mb-3">
+                    <label for="supplierId" class="form-label">Supplier</label>
+                    <select class="form-select" th:field="*{supplierId}" required>
+                        <option value="" >Select Supplier</option>
+                        <option th:each="supplier : ${suppliers}" th:value="${supplier.supplierId}" th:text="${supplier.name}"></option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="uom" class="form-label">UOM</label>
                     <input type="text" class="form-control" id="uom" name="unit" th:value="${item.unit}" required>
                 </div>

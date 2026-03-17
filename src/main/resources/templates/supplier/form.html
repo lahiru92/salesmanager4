@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- Create a supplier form similar to item form. It should have fields for code, name, contact person, phone number and email. It should also have a dropdown to select supplier type (local or international). The form should be able to handle both create and edit modes. -->
+<!-- public class Supplier {
+    private Long supplierId;
+    private String name;
+    private String phone;
+    private String email;
+    private boolean active;
+} -->
+<html xmlns:th="http://www.thymeleaf.org">
+    <div th:fragment="content">
+
+        <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+        <h1 class="fs-5" th:if="${mode == 'create'}">Create new supplier</h1>
+        <h1 class="fs-5" th:if="${mode == 'edit'}">Edit supplier</h1>
+
+        <div th:if="${message}">
+            <script th:inline="javascript">
+                Toastify({
+                    text: /*[[${message}]]*/"Undefined",
+                    duration: 3000
+                }).showToast();
+            </script>
+        </div>
+
+        <form th:attr="
+                hx-post=${mode=='create' ? '/suppliers' : null},
+                hx-put=${mode=='edit' ? '/suppliers' : null}"
+              th:object ="${supplier}"
+              hx-target="#content">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <div class="col-md-6">
+                <input type="hidden" id="supplierId" name="supplierId" th:value="${supplier.supplierId}">
+                <input type="hidden" id="active" name="active" th:value="${supplier.active}">
+                <input type="hidden" id="page" name="page" th:value="${page}">
+                <input type="hidden" id="size" name="size" th:value="${size}">
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" th:value="${supplier.name}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contactPerson" class="form-label">Contact Person</label>
+                    <input type="text" class="form-control" id="contactPerson" name="contactPerson" th:value="${supplier.contactPerson}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone" name="phone" th:value="${supplier.phone}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" th:value="${supplier.email}" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+            </div>
+        </form>
+       
+        </div>
+
+    </div>
+</html>

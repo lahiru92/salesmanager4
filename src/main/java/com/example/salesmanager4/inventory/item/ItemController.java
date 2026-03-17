@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.salesmanager4.inventory.category.CategoryService;
+import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +29,16 @@ public class ItemController {
 
     private final ItemService itemService;
     private final CategoryService categoryService;
+    private final SupplierService supplierService;
 
     private final String DEFAULT_PAGE_SIZE = "10";
 
     public ItemController(ItemService itemService,
-                          CategoryService categoryService) {
+                          CategoryService categoryService,
+                          SupplierService supplierService) {
         this.itemService = itemService;
         this.categoryService = categoryService;
+        this.supplierService = supplierService;
     }
 
     @GetMapping("/dropdown")
@@ -58,7 +62,7 @@ public class ItemController {
         model.addAttribute("items", itemsPage.getContent());
         model.addAttribute("page", itemsPage);
 
-        return "item/list";
+        return "item/list::content";
     }
 
     @GetMapping("/create")
@@ -72,7 +76,8 @@ public class ItemController {
         model.addAttribute("mode", "create");
         model.addAttribute("item", new Item());
         model.addAttribute("categories", categoryService.findAll());
-        return "item/form";
+        model.addAttribute("suppliers", supplierService.findAllActive());
+        return "item/form::content";
     }
 
     @PostMapping
@@ -101,7 +106,8 @@ public class ItemController {
         model.addAttribute("page",page);
         model.addAttribute("size",size);
         model.addAttribute("categories", categoryService.findAll());
-        return "item/form";
+        model.addAttribute("suppliers", supplierService.findAllActive());
+        return "item/form::content";
     }
 
     @PutMapping("/edit")
