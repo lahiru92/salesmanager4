@@ -14,6 +14,7 @@ public class PurchaseOrderService {
     }
 
     public PurchaseOrder create(PurchaseOrder po) {
+        // TODO: Implement validation
         po.setStatus("DRAFT");
         return repo.save(po);
     }
