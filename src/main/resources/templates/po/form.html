@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content">
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <h1 class="fs-5" th:if="${mode == 'create'}">Create Purchase Order</h1>
+    <h1 class="fs-5" th:if="${mode == 'edit'}">Edit Purchase Order</h1>
+
+    <div th:if="${message}">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${message}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+
+    <form th:attr="
+            hx-post=${mode=='create' ? '/purchase-orders' : null},
+            hx-put=${mode=='edit' ? '/purchase-orders' : null}" hx-target="#content" th:object="${po}">
+
+        <input type="hidden" id="itemIndex" value="0" />
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <div class="row mb-3">
+            <div class="col-sm-3">
+                <label for="supplier" class="form-label">Supplier</label>
+                <div th:replace="~{fragments/combobox :: combobox('supplier','/suppliers/dropdown', ${ {'supplierId':''} }, '')}"></div>
+            </div>
+        
+            <div class="col-sm-3">
+                <label for="orderDate" class="form-label">Date</label>
+                <input class="form-control" type="date" th:field="*{orderDate}" />
+            </div>
+        </div>
+
+        <div id="items" class="container p-0">
+            <div class="row">
+                    <label class="form-label col">Item</label>
+                    <label class="form-label col">Quantity</label>
+                    <label class="form-label col">Price</label>
+            </div>
+
+            <div th:replace="~{po/item-row :: row (index=0)}"></div>
+            <div th:each="item, i : *{items}">
+                <input type="text" th:field="*{items[__${i.index}__].itemId}" placeholder="Item" />
+                <input type="number" th:field="*{items[__${i.index}__].quantity}" placeholder="Qty" />
+                <input type="number" th:field="*{items[__${i.index}__].price}" placeholder="Price" />
+                <button type="button" onclick="this.closest('div').remove()">Remove</button>
+            </div>
+        </div>
+        <button class="btn btn-secondary"
+                hx-get="/purchase-orders/item-row" 
+                hx-vals='js:{index: document.getElementById("itemIndex").value}'
+                hx-target="#items" 
+                hx-swap="beforeend" 
+                hx-on::after-request="
+                    document.getElementById('itemIndex').value++;
+                    calculateTotals();
+                ">
+            Add Row
+        </button>
+        <button class="btn btn-primary" type="submit">Save</button>
+        <div class="mt-4">
+            <label>Total</label>
+            <input type="text" id="grandTotal" readonly class="border p-2 bg-gray-100"/>
+        </div>
+    </form>
+</div>
+
+</html>

@@ -46,6 +46,14 @@ public class ItemController {
         model.addAttribute("items", itemService.findItemByName(q));
         return "fragments/items_dropdown_list";
     }
+
+    @GetMapping("/search")
+    public String searchItems(@RequestParam String query, Model model) {
+        List<Item> items = itemService.findItemByName(query);
+        model.addAttribute("items", items);
+        return "item/search-results";
+    }
+
     
 
     @GetMapping

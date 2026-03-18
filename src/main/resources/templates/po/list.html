@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content">
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">Purchase Orders</h1>
+        <a hx-get="/purchase-orders/create" hx-target="#content" class="btn btn-primary">Create Purchase Order</a>
+    </div>
+
+    <div th:if="${toastMessage}">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${toastMessage}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+    
+    <p>TODO: Implement purchase order list</p>
+
+</div>
+
+</html>

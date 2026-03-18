@@ -49,3 +49,37 @@ document.body.addEventListener("showToast", function (evt) {
 //         }
 //     })
 // })
+
+function calculateTotals() {
+    console.log('Calculating totals...');
+    let grandTotal = 0;
+
+    document.querySelectorAll('.item-row').forEach(row => {
+        let qty = parseFloat(row.querySelector('.qty')?.value) || 0;
+        let price = parseFloat(row.querySelector('.price')?.value) || 0;
+
+        let subtotal = qty * price;
+
+        row.querySelector('.subtotal').value = subtotal.toFixed(2);
+
+        grandTotal += subtotal;
+        console.log(`Row: qty=${qty}, price=${price}, subtotal=${subtotal}`);
+        console.log(`Current grand total: ${grandTotal}`);
+        
+    });
+
+    document.getElementById('grandTotal').value = grandTotal.toFixed(2);
+}
+
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('qty') || 
+        e.target.classList.contains('price')) {
+        calculateTotals();
+    }
+});
+
+// Remove row
+function removeRow(btn) {
+    btn.closest('.item-row').remove();
+    calculateTotals();
+}

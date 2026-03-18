@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div class="row mb-2 item-row" th:fragment="row (index)">
+    <div class="col">
+        <div
+            th:replace="~{fragments/combobox :: combobox('itemName','/inventory/itemlist',${ {'items['+index+'].itemId':0} },'')}">
+        </div>
+    </div>
+
+    <div class="col">
+        <input class="form-control qty" th:name="'items[' + ${index} + '].quantity'" placeholder="Qty" />
+    </div>
+    <div class="col">
+        <input class="form-control price" th:name="'items[' + ${index} + '].price'" placeholder="Price" />
+    </div>
+    <div class="col">
+        <input class="form-control subtotal" placeholder="Subtotal" readonly />
+    </div>
+    <div class="col">
+        <button type="button" class="btn btn-light" onclick="removeRow(this)">❌</button>
+    </div>
+</div>
+
+
+
+</html>

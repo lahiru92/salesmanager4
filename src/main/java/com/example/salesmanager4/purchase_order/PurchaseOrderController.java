@@ -1,0 +1,66 @@
+package com.example.salesmanager4.purchase_order;
+
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.salesmanager4.util.Breadcrumb;
+
+@Controller
+@RequestMapping("/purchase-orders")
+public class PurchaseOrderController {
+
+    private final PurchaseOrderService service;
+
+
+    public PurchaseOrderController(PurchaseOrderService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public String list(Model model) {
+
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Purchase Orders", null)
+        );
+        model.addAttribute("orders", service.findAll());
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        return "po/list::content";
+    }
+
+    @GetMapping("/create")
+    public String createForm(Model model) {
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Purchase Orders", "/purchase-orders"),
+            new Breadcrumb("Create Purchase Order", null)
+        );
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("po", new PurchaseOrder());
+        model.addAttribute("mode", "create");
+        return "po/form::content";
+    }
+
+    @PostMapping
+    public String save(@ModelAttribute PurchaseOrder po, Model model, RedirectAttributes ra) {
+        service.create(po);
+        System.out.println(po);
+        ra.addFlashAttribute("toastMessage", "Purchase order created successfully");
+        return "redirect:/purchase-orders";
+    }
+
+    @GetMapping("/item-row")
+    public String itemRow(Model model, @RequestParam int index) {
+        model.addAttribute("index", index+1);
+        model.addAttribute("item", new PurchaseOrderItem());
+        return "po/item-row::row";
+    }
+}

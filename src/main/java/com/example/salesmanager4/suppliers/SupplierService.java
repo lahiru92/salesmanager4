@@ -1,6 +1,5 @@
 package com.example.salesmanager4.suppliers;
 
-import java.lang.foreign.Linker.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,5 +54,7 @@ public class SupplierService {
         return supplierRepo.findByActiveIsTrue();
     }
     
-    
+    public List<Supplier> findByName(String name) {
+        return supplierRepo.findByName(name);
+    }
 }

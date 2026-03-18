@@ -1,0 +1,18 @@
+<div>
+    <div th:each="item : ${items}"
+         class="p-2 hover:bg-gray-200 cursor-pointer"
+         hx-on:click="
+            this.closest('.item-row')
+                .querySelector('input[type=hidden]')
+                .value='[[${item.id}]]';
+
+            this.closest('.item-row')
+                .querySelector('.item-search')
+                .value='[[${item.name}]]';
+
+            this.parentElement.innerHTML='';
+         ">
+
+        <span th:text="${item.name}"></span>
+    </div>
+</div>

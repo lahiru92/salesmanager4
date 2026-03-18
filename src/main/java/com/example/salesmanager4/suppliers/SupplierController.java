@@ -1,6 +1,5 @@
 package com.example.salesmanager4.suppliers;
 
-import java.lang.ProcessBuilder.Redirect;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.salesmanager4.inventory.item.Item;
 import com.example.salesmanager4.util.Breadcrumb;
 
 @Controller
@@ -109,9 +107,18 @@ public class SupplierController {
 
     }
 
+    // Disable supplier (soft delete)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> disable(@PathVariable("id") Long id) {
         supplierService.disable(id);
         return ResponseEntity.ok().build();
+    }
+
+    // Endpoint for supplier dropdown list
+    @GetMapping("/dropdown")
+    public String dropdownList(@RequestParam String q, Model model) {
+        List<Supplier> suppliers = supplierService.findByName(q);
+        model.addAttribute("suppliers", suppliers);
+        return "fragments/supplier_dropdown_list";
     }
 }

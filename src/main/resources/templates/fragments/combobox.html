@@ -7,7 +7,7 @@
             <input type="hidden" th:class="'combobox-hidden-' + ${fieldName.key}" th:value="${fieldName.value}"  th:name="${fieldName.key}" >
         </th:block>
 
-        <div class="combobox-list">
+        <div class="combobox-list col">
             <input type="text" class="combobox-search" placeholder="Search..." name="q" th:hx-get="${path}"
                 hx-params="q" hx-trigger="keyup changed delay:500ms" hx-target="next .combobox-list-container"
                 hx-swap="innerHTML">

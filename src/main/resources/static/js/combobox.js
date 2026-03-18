@@ -36,11 +36,16 @@ $(document).on('click', '.combobox-list-item', function () {
     const oobParent = combo.closest('.combobox-oob-parent');
     const oobReset = combo.closest('.combobox-oob-reset');
 
+    console.log('Combobox item selected:', value);
+
     // Get all data-* attributes of the selected item
     const dataset = this.dataset; 
 
+    console.log('Dataset of selected item:', dataset);
+
     Object.keys(dataset).forEach(key => {
         combo.find('.combobox-hidden-' + key).val(dataset[key]);
+        combo.find(`[class^="combobox-hidden-"][class*=".${key}"]`).val(dataset[key]);
     });
 
     if (oobParent.length) {
