@@ -28,3 +28,33 @@ document.body.addEventListener("showToast", function (evt) {
     }).showToast();
     
 });
+
+
+function initTomSelect(el, item) {
+    let ts = new TomSelect(el, {
+        valueField: 'itemId',
+        labelField: 'name',
+        searchField: ['name'],
+        preload: false,
+        persist: false,
+        maxOptions: 50,
+        load: function (query, callback) {
+            if (!query.length) {
+                callback();
+                return;
+            }
+
+
+            var url = '/items/api/list?q=' + encodeURIComponent(query);
+            fetch(url)
+                .then(response => response.json())
+                .then(json => { this.clearOptions(); callback(json); })
+                .catch(() => { callback(); });
+        },
+        render: {
+            option: function (item, escape) {
+                return '<div>' + escape(item.name) + '</div>';
+            }
+        }
+    })
+}

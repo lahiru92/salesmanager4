@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3R Marketing</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../static/css/bootstrap-icons-1.13.1.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../static/css/toastify.min.css"/>
+    <link rel="stylesheet" type="text/css" href="../../static/css/combobox.css"/>
+    <link rel="stylesheet" type="text/css" href="../../static/css/styles.css"/>
+    <link rel="stylesheet" type="text/css" href="../../static/css/tom-select.css"/>
+</head>
+<body>
+    <div x-data="purchaseOrder()">
+        <template x-for="(item, index) in items" :key="item.id">
+            <div class="flex gap-2">
+                <span x-text="item.name"></span>
+
+                <input type="number" x-model="item.qty" @input="updateSubtotal(index)">
+                <input type="number" x-model="item.price" @input="updateSubtotal(index)">
+
+                <span x-text="item.subtotal"></span>
+
+                <button @click="removeItem(index)">X</button>
+            </div>
+        </template>
+
+        <div>Total: <span x-text="total"></span></div>
+
+    </div>
+
+    <script>
+        function purchaseOrder() {
+            return {
+                items: [{ id: 1, name: 'Item A', qty: 2, price: 10, subtotal: 20 }],
+
+                addItem(item) {
+                    // prevent duplicates
+                    if (this.items.some(i => i.id === item.id)) {
+                        alert("Item already added");
+                        return;
+                    }
+
+                    this.items.push({
+                        id: item.id,
+                        name: item.name,
+                        qty: 1,
+                        price: item.price,
+                        subtotal: item.price
+                    });
+
+                    this.calculateTotal();
+                },
+
+                removeItem(index) {
+                    this.items.splice(index, 1);
+                    this.calculateTotal();
+                },
+
+                updateSubtotal(index) {
+                    let item = this.items[index];
+                    item.subtotal = item.qty * item.price;
+                    this.calculateTotal();
+                },
+
+                get total() {
+                    return this.items.reduce((sum, i) => sum + i.subtotal, 0);
+                }
+            }
+        }
+        </script>
+
+    <script type="text/javascript" src="../../static/js/htmx-2.0.8.min.js"></script>
+    <script type="text/javascript" src="../../static/js/jquery-3.7.1.slim.min.js"></script>
+    <script type="text/javascript" src="../../static/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="../../static/js/toastify.js"></script>
+    <script type="text/javascript" src="../../static/js/tom-select-complete.js"></script>
+    <script type="text/javascript" src="../../static/js/alpinejs-3.15.8.js"></script>
+    <script type="text/javascript" src="../../static/js/combobox.js"></script>
+    <script type="text/javascript" src="../../static/js/script.js"></script>
+
+</body>
+
+</html>
