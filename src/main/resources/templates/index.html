@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" th:href="@{/css/toastify.min.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/css/combobox.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/css/styles.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/tom-select.css}"/>
 </head>
 
 <body class="container-fluid bg-body-tertiary">
@@ -35,7 +36,7 @@
                 <a href="#" class="btn btn btn-light text-start"><i class="bi bi-map"></i><span class="ms-2">Routes</span></a>
                 <a hx-get="/invoices" hx-target="#content"  class="btn btn btn-light text-start"><i class="bi bi-receipt"></i><span class="ms-2">Invoice</span></a>
                 <a hx-get="/grn" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">GRN</span></a>
-                <a hx-get="/purchase-orders" hx-target="#content" hx-on::after-request="calculateTotals();" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
+                <a hx-get="/purchase-orders" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
                 <a href="#" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash</span></a>
                 <a href="#" class="btn btn btn-light text-start"><i class="bi bi-cash-coin"></i><span class="ms-2">Cheques</span></a>
                 
@@ -74,6 +75,8 @@
     <script type="text/javascript" th:src="@{/js/jquery-3.7.1.slim.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/toastify.js}"></script>
+    <script type="text/javascript" th:src="@{/js/tom-select-complete.js}"></script>
+    <script type="text/javascript" th:src="@{/js/alpinejs-3.15.8.js}"></script>
     <script type="text/javascript" th:src="@{/js/combobox.js}"></script>
     <script type="text/javascript" th:src="@{/js/script.js}"></script>
 </body>

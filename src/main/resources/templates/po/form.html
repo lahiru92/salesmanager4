@@ -56,7 +56,6 @@
                 hx-swap="beforeend" 
                 hx-on::after-request="
                     document.getElementById('itemIndex').value++;
-                    calculateTotals();
                 ">
             Add Row
         </button>
@@ -66,6 +65,7 @@
             <input type="text" id="grandTotal" readonly class="border p-2 bg-gray-100"/>
         </div>
     </form>
+
 </div>
 
 </html>

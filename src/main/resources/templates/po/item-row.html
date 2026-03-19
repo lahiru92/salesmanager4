@@ -1,24 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div class="row mb-2 item-row" th:fragment="row (index)">
+<div class="row mb-2 item-row" th:fragment="row (index)" x-data="{price:0,qty:1}">
     <div class="col">
-        <div
-            th:replace="~{fragments/combobox :: combobox('itemName','/inventory/itemlist',${ {'items['+index+'].itemId':0} },'')}">
-        </div>
+        <select th:name="'items[' + ${index} + '].itemId'"
+                class="item-search"
+                placeholder="Type to search items..."
+                x-init="new TomSelect($el, {
+                    valueField: 'itemId',
+                    labelField: 'name',
+                    searchField: ['name'],
+                    preload: false,
+                    persist: false,
+                    maxOptions: 50,
+                    load: function(query, callback) {
+                        if (!query.length) {        
+                            callback();
+                            return;
+                        }
+
+
+                        var url = '/items/api/list?q=' + encodeURIComponent(query);
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(json => { this.clearOptions(); callback(json); })
+                            .catch(() => { callback(); });
+                    },
+                    render: {
+                        option: function(item, escape) {
+                            return '<div>' + escape(item.name) + '</div>';
+                        }
+                    }
+                })">
+            <option value=""></option>
+        </select>
     </div>
 
     <div class="col">
-        <input class="form-control qty" th:name="'items[' + ${index} + '].quantity'" placeholder="Qty" />
+        <input x-model="qty" class="form-control" th:name="'items[' + ${index} + '].quantity'" placeholder="Qty" />
     </div>
     <div class="col">
-        <input class="form-control price" th:name="'items[' + ${index} + '].price'" placeholder="Price" />
+        <input x-model="price" class="form-control" th:name="'items[' + ${index} + '].price'" placeholder="Price" />
     </div>
     <div class="col">
-        <input class="form-control subtotal" placeholder="Subtotal" readonly />
+        <input type="text" name="subtotal" :value="(qty * price).toFixed(2)" class="form-control" placeholder="Subtotal" readonly />
     </div>
     <div class="col">
-        <button type="button" class="btn btn-light" onclick="removeRow(this)">❌</button>
+        <button type="button" class="btn btn-light" @click="$el.closest('.item-row').remove()"><i class="bi bi-trash"></i></button>
     </div>
 </div>
 
