@@ -1,5 +1,6 @@
 package com.example.salesmanager4.purchase_order;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
@@ -11,7 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.salesmanager4.purchase_order.dto.PurchaseItemDto;
+import com.example.salesmanager4.purchase_order.dto.PurchaseOrderHeader;
 import com.example.salesmanager4.util.Breadcrumb;
+
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping("/purchase-orders")
@@ -54,6 +60,20 @@ public class PurchaseOrderController {
         service.create(po);
         System.out.println(po);
         ra.addFlashAttribute("toastMessage", "Purchase order created successfully");
+        return "redirect:/purchase-orders";
+    }
+
+    @PostMapping("/save-json")
+    public String saveJString(@RequestParam Long supplierId, @RequestParam String orderDate, @RequestParam String itemsJson) throws Exception {
+
+        List<PurchaseItemDto> items = new ObjectMapper().readValue(itemsJson,
+                new TypeReference<List<PurchaseItemDto>>() {
+                });
+
+        // validate
+        // save
+        System.out.println(itemsJson);
+        System.out.println(items);
         return "redirect:/purchase-orders";
     }
 
