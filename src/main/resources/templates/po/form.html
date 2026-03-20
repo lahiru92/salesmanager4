@@ -1,23 +1,20 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="content">
+<div th:fragment="content" x-data="purchaseOrder()">
     <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5" th:if="${mode == 'create'}">Create Purchase Order</h1>
         <h1 class="fs-5" th:if="${mode == 'edit'}">Edit Purchase Order</h1>
-        
-        <div>
-            <button class="btn btn-primary"
-                    hx-post="/purchase-orders/save-json" 
-                    hx-include="#po-form" 
-                    hx-target="#content"
-                    >Save
-            </button> 
-        </div>
-    </div>
 
+        <form hx-include="#po-form" hx-post="/purchase-orders/save-json" hx-target="#content" @htmx:confirm="handleHtmxSubmit">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" id="itemsJson" name="itemsJson" :value="JSON.stringify(cleanItems())" />
+            <input type="submit" class="btn btn-primary" value="Save">
+        </form>
+    </div>
+    <div class="text-danger mb-2" x-text="errors.form"></div>
     <div th:if="${message}">
         <script th:inline="javascript">
             Toastify({
@@ -28,42 +25,64 @@
     </div>
 
     <div id="po-form">
-    <!-- <form hx-post="/purchase-orders/save-json" 
-                  hx-include="[name='_csrf']" 
-                  hx-trigger="submit" 
-                  hx-target="#content"
-                  @submit.prevent="handleSubmit($event)"> -->
-        
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <div class="row mb-3">
-            <div class="col-sm-3">
-                <label for="supplier" class="form-label">Supplier</label>
-                <div
-                    th:replace="~{fragments/combobox :: combobox('supplier','/suppliers/dropdown', ${ {'supplierId':''} }, '')}">
-                </div>
-            </div>
+        <input type="hidden" id="itemsJson" name="itemsJson" :value="JSON.stringify(cleanItems())" />
 
-            <div class="col-sm-3">
-                <label for="orderDate" class="form-label">Date</label>
-                <input class="form-control" name="orderDate" type="date" />
+        <div class="card p-2 bg-light">
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <label for="supplier" class="form-label">Supplier</label>
+                    <div
+                        th:replace="~{fragments/combobox :: combobox('supplier','/suppliers/dropdown', ${ {'supplierId':''} }, '')}">
+                    </div>
+                </div>
+    
+                <div class="col-sm-3">
+                    <label for="orderDate" class="form-label">Date</label>
+                    <input class="form-control" name="orderDate" type="date" />
+                </div>
             </div>
         </div>
 
-        <div x-data="purchaseOrder()">
-            
+        <div>
+            <div class="row mb-2">
+
+                <div class="col-4">
+                    <span class="form-label">Item</span>
+                </div>
+
+                <div class="col">
+                   <span class="form-label">Qty</span>
+                </div>
+
+                <div class="col">
+                    <span class="form-label">Price</span>
+                </div>
+
+                <div class="col">
+                    <span class="form-label">Total</span>
+                </div>
+                <div class="col">
+                    <span class="form-label">&nbsp;</span>
+                </div>
+            </div>
+
             <template x-for="(item, index) in items" :key="item.uid">
                 <div class="row mb-2">
 
-                    <div class="col">
+                    <div class="col-4">
                         <select x-init="initTomSelect($el, index)"></select>
+                        <div class="text-danger small" x-text="errors.items[index]?.itemId"></div>
                     </div>
 
                     <div class="col">
-                        <input type="number" x-model="item.qty" class="form-control" >
+                        <input type="number" x-model="item.qty" class="form-control">
+                        <div class="text-danger small" x-text="errors.items[index]?.qty"></div>
                     </div>
 
                     <div class="col">
-                        <input type="number" x-model="item.price" class="form-control">
+                        <input type="number" x-model="item.price" class="form-control" @blur="validate()">
+                        <div class="text-danger small" x-text="errors.items[index]?.price"></div>
                     </div>
 
                     <div class="col">
@@ -83,19 +102,9 @@
                 Add Row
             </button>
 
-            <input type="text" :value="total.toFixed(2)" readonly class="border p-2 bg-gray-100"/>
-            <!-- <form hx-post="/purchase-orders/save-json" 
-                  hx-include="[name='_csrf']" 
-                  hx-trigger="submit" 
-                  hx-target="#content"
-                  @submit.prevent="handleSubmit($event)"> -->
-                <input type="hidden" id="itemsJson" name="itemsJson" :value="JSON.stringify(cleanItems())" />
-                <!-- <button type="submit">Save</button> -->
-            <!-- </form> -->
+            <input type="text" :value="total.toFixed(2)" readonly class="border p-2 bg-gray-100" />
         </div>
     </div>
-    <!-- </form> -->
-
 </div>
 
 </html>

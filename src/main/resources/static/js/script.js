@@ -32,8 +32,44 @@ document.body.addEventListener("showToast", function (evt) {
 
 function purchaseOrder() {
     return {
-        items: [],
+        items: [{"itemId": null, "name": "", "qty": "", "price": "", "uid": Date.now()}],
+        errors: {
+            items: [],
+            form: null
+        },
+        validate() {
+            this.errors.items = [];
 
+            this.items.forEach((item, index) => {
+                let rowErrors = {};
+
+                if (!item.itemId) {
+                    rowErrors.itemId = "Item is required";
+                }
+
+                if (!item.qty || item.qty <= 0) {
+                    rowErrors.qty = "Qty must be > 0";
+                }
+
+                if (item.price == null || item.price < 0 || item.price === '') {
+                    rowErrors.price = "Invalid price";
+                }
+
+                this.errors.items[index] = rowErrors;
+            });
+
+            // Remove completely empty rows from validation
+            this.errors.items = this.errors.items.map((err, i) => {
+                let item = this.items[i];
+                if (!item.itemId && !item.qty && !item.price) {
+                    return {}; // ignore blank row
+                }
+                return err;
+            });
+
+            // Check if any errors exist
+            return this.errors.items.every(e => Object.keys(e).length === 0);
+        },
         addRow() {
             this.items.push({
                 uid: Date.now() + Math.random(),
@@ -89,13 +125,22 @@ function purchaseOrder() {
                     price: i.price
                 }));
         },
-        handleSubmit(e) {
-            if (this.cleanItems().length === 0) {
-                alert("Please add at least one item");
-                return;
+        handleHtmxSubmit(e) {
+            const validItems = this.validate();
+            if (this.cleanItems().length === 0 ) {
+                console.log("No items to submit");
+                this.errors.form = "Please add at least one item";
+                e.preventDefault();
+                return ;
             }
 
-            e.target.submit(); // continue submission
+            if (!validItems) {
+                console.log("Validation failed", this.errors);
+                this.errors.form = "Please fix errors before submitting";
+                e.preventDefault();
+                return ;
+            }
+
         },
         get total() {
             return this.items.reduce((sum, i) => sum + (i.qty * i.price), 0);
