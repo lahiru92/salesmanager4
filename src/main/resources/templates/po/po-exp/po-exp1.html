@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test 1</title>
+    <script src="po-exp1-script.js"></script>
+</head>
+
+<body>
+    <div x-data="{ 
+        rows: [{ id: 1, name: 'John Doe' }], 
+        errors: { items: [] },
+        nextId: 2,
+        addRow() {
+            this.rows.push({ id: this.nextId++, name: '' });
+        },
+        removeRow(index) {
+            this.rows.splice(index, 1);
+        },
+        validate() {
+            this.errors.items = this.rows.map(row => {
+                const error = {};
+                if (!row.name) {
+                    error.name = 'Name is required';
+                }
+                return error;
+            });
+        },
+        initTomSelect(el, index) {
+            new TomSelect(el, {
+                valueField: 'id',
+                labelField: 'name',
+                searchField: 'name',
+                options: [
+                    { id: 1, name: 'Item A' },
+                    { id: 2, name: 'Item B' },
+                    { id: 3, name: 'Item C' }
+                ],
+                onChange(value) {
+                    console.log('Selected item ID:', value);
+                }
+            });
+        }
+    }">
+        <table class="data-entry-table" x-data="purchaseOrder()">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <template x-for="(item, index) in items" :key="item.uid">
+                    <tr>
+
+                        <td>
+                            <select :name="`items[${index}].itemId`" x-init="initTomSelect($el, index)"></select>
+                            <div class="text-danger small" x-text="errors.items[index]?.itemId"></div>
+                        </td>
+
+                        <td>
+                            <input :name="`items[${index}].qty`" type="number" x-model="item.qty" class="form-control">
+                            <div class="text-danger small" x-text="errors.items[index]?.qty"></div>
+                        </td>
+
+                        <td>
+                            <input :name="`items[${index}].price`" type="number" x-model="item.price"
+                                class="form-control" @blur="validate()">
+                            <div class="text-danger small" x-text="errors.items[index]?.price"></div>
+                        </td>
+
+                        <td>
+                            <input type="text" :value="(item.qty * item.price).toFixed(2)" readonly
+                                class="form-control">
+                        </td>
+
+                        <td>
+                            <button type="button" @click="removeRow(index)" class="btn btn-light">
+                                <i class="bi bi-trash">x</i>
+                            </button>
+                        </td>
+
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+    <!-- tom select -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" />
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</body>
+
+</html>

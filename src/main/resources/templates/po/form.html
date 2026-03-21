@@ -60,17 +60,17 @@
                         <tr>
 
                             <td>
-                                <select x-init="initTomSelect($el, index)"></select>
-                                <div class="text-danger small" x-text="errors.items[index]?.itemId"></div>
+                                <select :name="`items[${index}].itemId`" x-init="initTomSelect($el, index)"></select>
+                                <div class="text-danger small"  x-text="errors.items[index]?.itemId"></div>
                             </td>
 
                             <td>
-                                <input type="number" x-model="item.qty" class="form-control">
+                                <input :name="`items[${index}].qty`" type="number" x-model="item.qty" class="form-control">
                                 <div class="text-danger small" x-text="errors.items[index]?.qty"></div>
                             </td>
 
                             <td>
-                                <input type="number" x-model="item.price" class="form-control" @blur="validate()">
+                                <input :name="`items[${index}].price`" type="number" x-model="item.price" class="form-control" @blur="validate()">
                                 <div class="text-danger small" x-text="errors.items[index]?.price"></div>
                             </td>
 

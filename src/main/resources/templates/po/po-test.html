@@ -16,10 +16,8 @@
     <div x-data="purchaseOrder()">
         <template x-for="(item, index) in items" :key="item.id">
             <div class="flex gap-2">
-                <span x-text="item.name"></span>
-
-                <input type="number" x-model="item.qty" @input="updateSubtotal(index)">
-                <input type="number" x-model="item.price" @input="updateSubtotal(index)">
+                <input type="number" :name="`items[${index}].qty`"  x-model="item.qty" @input="updateSubtotal(index)">
+                <input type="number" :name="`items[${index}].price`" x-model="item.price" @input="updateSubtotal(index)">
 
                 <span x-text="item.subtotal"></span>
 
