@@ -2,3 +2,36 @@ tr.htmx-swapping td {
   opacity: 0;
   transition: opacity 0.5s ease-out;
 }
+
+.search-wrapper {
+  position: relative;
+  width: 300px;
+}
+
+.my-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.my-dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.my-dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.my-dropdown-item:focus {
+  background-color: #007bff;
+}
+

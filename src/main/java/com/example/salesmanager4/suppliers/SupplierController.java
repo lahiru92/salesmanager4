@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.salesmanager4.util.Breadcrumb;
@@ -120,5 +121,12 @@ public class SupplierController {
         List<Supplier> suppliers = supplierService.findByName(q);
         model.addAttribute("suppliers", suppliers);
         return "fragments/supplier_dropdown_list";
+    }
+
+    // Endpoint for supplier dropdown list
+    @GetMapping("/api/list")
+    @ResponseBody
+    public List<Supplier> supplierList(@RequestParam String q) {
+        return supplierService.findByName(q);
     }
 }

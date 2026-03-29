@@ -1,0 +1,8 @@
+<th:block th:each="item : ${items}">
+    <div  tabindex="0"
+          th:class="'my-dropdown-item'" 
+          th:data-item-id="${item.itemId}"
+          th:data-item-name="${item.name}"
+          th:text="${item.name}">
+    </div>    
+</th:block>

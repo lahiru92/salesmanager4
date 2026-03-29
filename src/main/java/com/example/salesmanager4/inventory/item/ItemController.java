@@ -48,6 +48,12 @@ public class ItemController {
         return "fragments/items_dropdown_list";
     }
 
+    @GetMapping("/dropdown2")
+    public String dropdownList2(@RequestParam String q, Model model) {
+        model.addAttribute("items", itemService.findItemByName(q));
+        return "fragments/items_dropdown_list2";
+    }
+
     @GetMapping("/api/list")
     @ResponseBody
     public List<Item> dropdownList(@RequestParam String q) {

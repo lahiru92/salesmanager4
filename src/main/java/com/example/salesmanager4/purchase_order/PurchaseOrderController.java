@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,9 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.salesmanager4.purchase_order.dto.Po;
+import com.example.salesmanager4.purchase_order.dto.PoLine;
 import com.example.salesmanager4.purchase_order.dto.PurchaseItemDto;
 import com.example.salesmanager4.util.Breadcrumb;
 
+import jakarta.validation.Valid;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -47,20 +51,46 @@ public class PurchaseOrderController {
             new Breadcrumb("Purchase Orders", "/purchase-orders"),
             new Breadcrumb("Create Purchase Order", null)
         );
+
+        List<PoLine> items = List.of(
+            new PoLine(1,"Butter bonchi", 12, 130.32),
+            new PoLine(2,"Gova", 23, 132.20),
+            new PoLine(3, "Rabu", 37, 98.87),
+            new PoLine(4, "Thumba Karavila", 28, 21.00)
+        );
+
+        Po po = new Po(1, null, items);
+
         model.addAttribute("breadcrumbs", breadcrumbs);
-        model.addAttribute("po", new PurchaseOrder());
+        model.addAttribute("po", po);
         model.addAttribute("mode", "create");
+
+        
         return "po/form::content";
     }
 
     @PostMapping
-    public String save(@ModelAttribute PurchaseOrder po, Model model, RedirectAttributes ra) {
-        service.create(po);
+    public String save(@Valid @ModelAttribute Po po,BindingResult bindingResult, Model model,  RedirectAttributes ra) {
+        // service.create(po);
         System.out.println(po);
+
+        if (bindingResult.hasErrors() ){
+            List<Breadcrumb> breadcrumbs = List.of(
+                new Breadcrumb("Home", "/"),
+                new Breadcrumb("Purchase Orders", "/purchase-orders"),
+                new Breadcrumb("Create Purchase Order", null)
+            );
+            model.addAttribute("breadcrumbs", breadcrumbs);
+            model.addAttribute("mode", "create");
+            return "po/form::content";
+        }
+
         ra.addFlashAttribute("toastMessage", "Purchase order created successfully");
         return "redirect:/purchase-orders";
     }
 
+
+    
     @PostMapping("/save-json")
     public String saveJString(@RequestParam Long supplierId, @RequestParam String orderDate, @RequestParam String itemsJson) throws Exception {
 
