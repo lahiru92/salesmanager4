@@ -18,7 +18,7 @@ function addItem() {
     row.className = 'po-row';
     row.innerHTML = `
         <td>
-            <input type="text" class="itemName" value=${itemData.name} readonly>
+            <input type="text" class="itemName" value="${itemData.name}" readonly>
             <input type="hidden" class="itemid" value="${id}">
         </td>
         <td><input type="number" class="qty" value="${qty}" oninput="reIndexAndTotal()"></td>
