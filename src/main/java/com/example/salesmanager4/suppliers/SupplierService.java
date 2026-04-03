@@ -45,7 +45,7 @@ public class SupplierService {
         return supplierRepo.findByActiveIsTrue(pageable);
     }
 
-    Supplier findById(Long supplierId) {
+    public Supplier findById(Long supplierId) {
         return supplierRepo.findById(supplierId)
                 .orElseThrow(() -> new IllegalArgumentException("Supplier not found"));
     }

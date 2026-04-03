@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.salesmanager4.purchase_order.dto.Po;
 import com.example.salesmanager4.purchase_order.dto.PoLine;
 import com.example.salesmanager4.purchase_order.dto.PurchaseItemDto;
+import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
 
 import jakarta.validation.Valid;
@@ -26,10 +27,12 @@ import tools.jackson.databind.ObjectMapper;
 public class PurchaseOrderController {
 
     private final PurchaseOrderService service;
+    private final SupplierService supplierService;
 
 
-    public PurchaseOrderController(PurchaseOrderService service) {
+    public PurchaseOrderController(PurchaseOrderService service, SupplierService supplierService) {
         this.service = service;
+        this.supplierService = supplierService;
     }
 
     @GetMapping
@@ -59,7 +62,7 @@ public class PurchaseOrderController {
             new PoLine(4, "Thumba Karavila", 28, 21.00)
         );
 
-        Po po = new Po(1, null, items);
+        Po po = new Po(4L, "Munchee", null, items);
 
         model.addAttribute("breadcrumbs", breadcrumbs);
         model.addAttribute("po", po);
@@ -82,6 +85,9 @@ public class PurchaseOrderController {
             );
             model.addAttribute("breadcrumbs", breadcrumbs);
             model.addAttribute("mode", "create");
+            if (po.supplierId() != null) {
+                model.addAttribute("supplierName", supplierService.findById(po.supplierId()).getName());
+            }
             return "po/form::content";
         }
 

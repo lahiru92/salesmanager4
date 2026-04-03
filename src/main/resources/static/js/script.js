@@ -138,7 +138,13 @@ document.addEventListener('htmx:afterSettle', function(evt) {
     
 });
 
-// document.addEventListener('click', function(evt) {
-//     console.log(evt.target);
-    
-// });
+
+document.body.addEventListener('htmx:beforeRequest', function (evt) {
+    if (evt.target.closest('form.needs-validation')) {
+        const form = evt.target.closest('form.needs-validation');
+        if (form && !form.checkValidity()) {
+            evt.preventDefault();
+            form.classList.add('was-validated');
+        }
+    }
+});

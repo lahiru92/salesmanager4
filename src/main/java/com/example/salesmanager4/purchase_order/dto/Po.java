@@ -11,7 +11,9 @@ import jakarta.validation.constraints.NotNull;
 public record Po( 
     
     @NotNull
-    Integer supplierId, 
+    Long supplierId, 
+
+    String supplierName,
     
     @NotBlank
     String orderDate, 
