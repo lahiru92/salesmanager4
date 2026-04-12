@@ -59,7 +59,7 @@ public class PurchaseOrderController {
             new PoLine(1,"Butter bonchi", 12, 130.32),
             new PoLine(2,"Gova", 23, 132.20),
             new PoLine(3, "Rabu", 37, 98.87),
-            new PoLine(4, "Thumba Karavila", 28, 21.00)
+            new PoLine(24, "Thumba Karavila", 28, 21.00)
         );
 
         Po po = new Po(4L, "Munchee", null, items);

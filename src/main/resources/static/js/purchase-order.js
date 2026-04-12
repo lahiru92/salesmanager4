@@ -14,6 +14,20 @@ function addItem() {
 
     if (!id || qty <= 0) return alert("Select item and quantity");
 
+    const existingRows = document.querySelectorAll('.po-row');
+    for (let row of existingRows) {
+        if (row.querySelector('.itemid').value === id) {
+            row.classList.add('table-warning');
+            setTimeout(function() {
+                row.classList.remove('table-warning');
+            }, 2000);
+
+            tsInstance.wrapper.classList.add('is-invalid');
+            return;
+        }
+    }
+
+
     const row = document.createElement('tr');
     row.className = 'po-row';
     row.innerHTML = `
@@ -64,6 +78,7 @@ function reIndexAndTotal() {
 
     document.getElementById('grand-total').innerText = grandTotal.toFixed(2);
 }
+
 
 function calculateSubTotal(input) {
     // Allows live updates if user edits a row already in the table
