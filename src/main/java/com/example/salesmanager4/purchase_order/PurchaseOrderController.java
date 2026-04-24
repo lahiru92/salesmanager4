@@ -55,17 +55,18 @@ public class PurchaseOrderController {
             new Breadcrumb("Create Purchase Order", null)
         );
 
-        List<PoLine> items = List.of(
-            new PoLine(1,"Butter bonchi", 12, 130.32),
-            new PoLine(2,"Gova", 23, 132.20),
-            new PoLine(3, "Rabu", 37, 98.87),
-            new PoLine(24, "Thumba Karavila", 28, 21.00)
-        );
+        // List<PoLine> items = List.of(
+        //     new PoLine(1,"Butter bonchi", 12, 130.32),
+        //     new PoLine(2,"Gova", 23, 132.20),
+        //     new PoLine(3, "Rabu", 37, 98.87),
+        //     new PoLine(24, "Thumba Karavila", 28, 21.00)
+        // );
 
-        Po po = new Po(4L, "Munchee", null, items);
+        // Po po = new Po(4L, "Munchee", null, items);
 
         model.addAttribute("breadcrumbs", breadcrumbs);
-        model.addAttribute("po", po);
+        // model.addAttribute("po", po);
+        model.addAttribute("po", new Po(null,null,null,List.of()));
         model.addAttribute("mode", "create");
 
         

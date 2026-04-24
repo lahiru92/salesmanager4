@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="content" th:object = ${po} th:class="purchase-order">
-    <script type="text/javascript" th:src="@{/js/purchase-order.js}"></script>
+<div th:fragment="content" th:object = ${po} th:class="purchase-order" th:data-init="purchase-order">
+    <!-- <script type="text/javascript" th:src="@{/js/purchase-order.js}"></script> -->
 
     <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
 
@@ -40,7 +40,7 @@
                 
                 <div class="col-3">
                     <label class="form-label" for="orderDate">Order Date</label>
-                    <input class="form-control" type="date" th:field="*{orderDate}"/>
+                    <input class="form-control" type="date" th:field="*{orderDate}" required/>
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('orderDate')}" th:errors="*{orderDate}"></div>
                     <div class="invalid-feedback" th:unless="${#fields.hasErrors('orderDate')}">Order Date is required</div>
                     
@@ -75,7 +75,7 @@
                             <p th:if="${#fields.hasErrors('items[' + itemStat.index + '].price')}" 
                                th:errors="*{items[__${itemStat.index}__].price}"></p>
                         <td class="subtotal" th:if="${item.price != null and item.qty != null}" th:text="${item.price * item.qty}"></td>
-                        <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                        <td><button type="button" data-action="po:remove-item">Remove</button></td>
                     </tr>
                 </tbody>
                 <tfoot >
@@ -83,24 +83,20 @@
                         <td>
                             <select id="f-id" type=text placeholder="Item Id"></select>
                         </td>
-                        <td><input id="f-qty" type=number placeholder="Quantity"/></td>
-                        <td><input id="f-price" type=number placeholder="Unit Price"/></td>
-                        <td><input type=number placeholder="Sub Total" readonly/></td>
-                        <td><button type="button" onClick="addItem()">Add Item</button></td>
+                        <td><input data-action="po:subtotal" id="f-qty" type=number placeholder="Quantity"/></td>
+                        <td><input data-action="po:subtotal" id="f-price" type=number placeholder="Unit Price"/></td>
+                        <td><input id="f-subtotal" type=number placeholder="Sub Total" readonly/></td>
+                        <td><button class="btn btn-primary" type="button" data-action="po:add-item">Add Item</button></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-end">Grand Total:</td>
+                        <td id="grand-total" colspan="2"></td>
                     </tr>
                 </tfoot>
             </table>
-            <input type="submit">
+            <input class="btn btn-primary" type="submit">
         </form>
-        <p id="grand-total"></p>
     </div>
-
-    <button command="show-modal" commandfor="my-dialog">Open dialog</button>
-
-<dialog id="my-dialog">
-  <p>This dialog was opened using an invoker command.</p>
-  <button commandfor="my-dialog" command="close">Close</button>
-</dialog>
     
 </div>
 

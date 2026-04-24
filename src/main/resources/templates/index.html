@@ -75,14 +75,17 @@
 
 
     <script type="text/javascript" th:src="@{/js/htmx-2.0.8.min.js}"></script>
-    <script type="text/javascript" th:src="@{/js/hyperscript-0.9.14.js}"></script>
+    <!-- <script type="text/javascript" th:src="@{/js/hyperscript-0.9.14.js}"></script> -->
     <script type="text/javascript" th:src="@{/js/jquery-3.7.1.slim.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script type="text/javascript" th:src="@{/js/toastify.js}"></script>
     <script type="text/javascript" th:src="@{/js/tom-select-complete.js}"></script>
-    <script type="text/javascript" th:src="@{/js/alpinejs-3.15.8.js}"></script>
-    <script type="text/javascript" th:src="@{/js/combobox.js}"></script>
-    <script type="text/javascript" th:src="@{/js/script.js}"></script>
+    <!-- <script type="text/javascript" th:src="@{/js/alpinejs-3.15.8.js}"></script> -->
+    <!-- <script type="text/javascript" th:src="@{/js/combobox.js}"></script> -->
+    <!-- <script type="text/javascript" th:src="@{/js/script.js}"></script> -->
+    <script type="module" th:src="@{/js/core/app.js}"></script>
+    <script type="module" th:src="@{/js/core/init-registry.js}"></script>
+    <script type="module" th:src="@{/js/modules/purchase-order.js}"></script>
 </body>
 
 </html>
