@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.salesmanager4.purchase_order.dto.Po;
-import com.example.salesmanager4.purchase_order.dto.PoLine;
 import com.example.salesmanager4.purchase_order.dto.PurchaseItemDto;
 import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
@@ -75,7 +74,7 @@ public class PurchaseOrderController {
 
     @PostMapping
     public String save(@Valid @ModelAttribute Po po,BindingResult bindingResult, Model model,  RedirectAttributes ra) {
-        // service.create(po);
+        service.create(po);
         System.out.println(po);
 
         if (bindingResult.hasErrors() ){

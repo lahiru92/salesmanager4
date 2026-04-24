@@ -9,7 +9,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record PoLine(
     @NotNull
     @Positive
-    Integer itemId, 
+    Long itemId, 
     
     String name,
     
