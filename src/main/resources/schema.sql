@@ -14,3 +14,27 @@ CREATE TABLE purchase_order_item (
     quantity INT,
     price DECIMAL(10,2)
 );
+
+CREATE TABLE employee (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    known_name VARCHAR,
+    full_name VARCHAR,
+    address_line_1 VARCHAR,
+    address_line_2 VARCHAR,
+    address_line_3 VARCHAR,
+    address_line_4 VARCHAR,
+    address_line_5 VARCHAR,
+    phone_mobile VARCHAR,
+    phone_home VARCHAR,
+    phone_office VARCHAR,
+    email_personal VARCHAR,
+    email_office VARCHAR,
+    date_of_birth DATE,
+    nic_number VARCHAR,
+    passport_number VARCHAR,
+    drivers_license_no VARCHAR,
+    designation VARCHAR,
+    date_joined DATE,
+    created_by BIGINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+)

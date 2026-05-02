@@ -40,7 +40,7 @@ public class UserService {
         String tempPassword = PasswordGenerator.generateTemporaryPassword(12);
 
         // Securely hash and save
-        UserDTO updatedUser = new UserDTO(user.username(), passwordEncoder.encode(tempPassword), user.enabled(), user.authorities());
+        UserDTO updatedUser = user.withPassword(tempPassword);
         userRepository.save(updatedUser);
 
         // Return plain-text only once so admin can give it to the user

@@ -5,21 +5,32 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import com.example.salesmanager4.purchase_order.dto.Po;
+import com.example.salesmanager4.users.CurrentUserService;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class PurchaseOrderService {
 
     private final PurchaseOrderRepository repo;
-
-    public PurchaseOrderService(PurchaseOrderRepository repo) {
-        this.repo = repo;
-    }
+    private final CurrentUserService currentUserService;
 
     public PurchaseOrder create(Po po) {
-        return repo.save(toPurchaseOrder(po, "DRAFT"));
+
+        Long employeeId = currentUserService.getEmployeeId();
+        if (employeeId == null) {
+            throw new RuntimeException("Employee ID not found for current user");
+        };
+
+        PurchaseOrder purchaseOrder = toPurchaseOrder(po);
+        purchaseOrder.setStatus("DRAFT");
+        purchaseOrder.setCreatedBy(employeeId);
+        return repo.save(purchaseOrder);
     }
 
     public Iterable<PurchaseOrder> findAll() {
@@ -30,13 +41,12 @@ public class PurchaseOrderService {
         return repo.findById(id);
     }
 
-    private PurchaseOrder toPurchaseOrder(Po po, String status) {
+    private PurchaseOrder toPurchaseOrder(Po po) {
 
         PurchaseOrder purchaseOrder = new PurchaseOrder();
 
         purchaseOrder.setSupplierId(po.supplierId());
         purchaseOrder.setOrderDate(LocalDate.parse(po.orderDate()));
-        purchaseOrder.setStatus(status);
         purchaseOrder.setItems(po.items().stream()
                 .map(item -> {
                     PurchaseOrderItem i = new PurchaseOrderItem();

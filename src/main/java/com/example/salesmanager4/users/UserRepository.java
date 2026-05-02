@@ -3,6 +3,8 @@ package com.example.salesmanager4.users;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
+import java.util.Optional;
+
 
 public interface UserRepository extends CrudRepository<UserDTO, String> {
 
@@ -16,4 +18,6 @@ public interface UserRepository extends CrudRepository<UserDTO, String> {
 
     @Query("SELECT * FROM users ORDER BY username")
     Iterable<UserDTO> findAllOrderByUsername();
+
+    Optional<UserDTO> findByUsername(String username);
 }
