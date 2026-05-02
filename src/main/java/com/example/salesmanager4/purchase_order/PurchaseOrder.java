@@ -20,6 +20,7 @@ public class PurchaseOrder {
     private Long supplierId;
     private LocalDate orderDate;
     private String status; // DRAFT, SENT, RECEIVED
+    private Long createdBy;
 
     @MappedCollection(idColumn = "purchase_order_id")
     private List<PurchaseOrderItem> items = new ArrayList<>();
