@@ -7,19 +7,17 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.salesmanager4.purchase_order.dto.Po;
-import com.example.salesmanager4.purchase_order.dto.PurchaseItemDto;
 import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
 
 import jakarta.validation.Valid;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 @Controller
 @RequestMapping("/purchase-orders")
@@ -41,8 +39,13 @@ public class PurchaseOrderController {
             new Breadcrumb("Home", "/"),
             new Breadcrumb("Purchase Orders", null)
         );
-        model.addAttribute("orders", service.findAll());
+
+        // TODO Add pagination, sorting, filtering
+        // TODO Add supplier and employee names to the list view
+        model.addAttribute("purchaseOrders", service.findAll());
         model.addAttribute("breadcrumbs", breadcrumbs);
+
+        // TODO Color code status
         return "po/list::content";
     }
 
@@ -65,8 +68,28 @@ public class PurchaseOrderController {
 
         model.addAttribute("breadcrumbs", breadcrumbs);
         // model.addAttribute("po", po);
-        model.addAttribute("po", new Po(null,null,null,List.of()));
+        model.addAttribute("po", new Po());
         model.addAttribute("mode", "create");
+
+        
+        return "po/form::content";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editForm(@PathVariable("id") Long id, Model model) {
+
+        Po poEntity = service.findById(id).orElseThrow();
+
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Purchase Orders", "/purchase-orders"),
+            new Breadcrumb("Edit Purchase Order", null)
+        );
+
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("po", poEntity);
+        model.addAttribute("mode", "edit");
+        model.addAttribute("supplierName", poEntity.supplierName());
 
         
         return "po/form::content";
@@ -74,10 +97,9 @@ public class PurchaseOrderController {
 
     @PostMapping
     public String save(@Valid @ModelAttribute Po po,BindingResult bindingResult, Model model,  RedirectAttributes ra) {
-        service.create(po);
-        System.out.println(po);
 
-        if (bindingResult.hasErrors() ){
+        // TODO handle proper error if list is empty
+        if (bindingResult.hasErrors() || po.items().isEmpty() || po.items() == null) {
             List<Breadcrumb> breadcrumbs = List.of(
                 new Breadcrumb("Home", "/"),
                 new Breadcrumb("Purchase Orders", "/purchase-orders"),
@@ -91,25 +113,14 @@ public class PurchaseOrderController {
             return "po/form::content";
         }
 
+        service.create(po);
+        System.out.println(po);
+
         ra.addFlashAttribute("toastMessage", "Purchase order created successfully");
         return "redirect:/purchase-orders";
     }
 
 
-    
-    @PostMapping("/save-json")
-    public String saveJString(@RequestParam Long supplierId, @RequestParam String orderDate, @RequestParam String itemsJson) throws Exception {
-
-        List<PurchaseItemDto> items = new ObjectMapper().readValue(itemsJson,
-                new TypeReference<List<PurchaseItemDto>>() {
-                });
-
-        // validate
-        // save
-        System.out.println(itemsJson);
-        System.out.println(items);
-        return "redirect:/purchase-orders";
-    }
 
     @GetMapping("/item-row")
     public String itemRow(Model model, @RequestParam int index) {

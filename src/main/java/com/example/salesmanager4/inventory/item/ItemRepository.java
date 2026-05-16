@@ -55,5 +55,7 @@ public interface ItemRepository extends CrudRepository<Item, Long> {
             """)
     long findItemListPagedCount();
 
+    List<Item> findByItemIdIn(List<Long> itemIds);
+
 }
 

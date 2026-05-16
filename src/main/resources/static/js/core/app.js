@@ -42,4 +42,13 @@ document.body.addEventListener('htmx:beforeRequest', function (evt) {
         }
     }
 
+    if (evt.target.getAttribute('hx-include')) {
+        const includeSelector = evt.target.getAttribute('hx-include');
+        const form = document.querySelector(includeSelector);
+        if (form && !form.checkValidity()) {
+            evt.preventDefault();
+            form.classList.add('was-validated');
+        }   
+    }
+
 });

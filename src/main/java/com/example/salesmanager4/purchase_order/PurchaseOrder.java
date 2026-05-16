@@ -1,6 +1,7 @@
 package com.example.salesmanager4.purchase_order;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class PurchaseOrder {
     private LocalDate orderDate;
     private String status; // DRAFT, SENT, RECEIVED
     private Long createdBy;
+    private LocalDateTime createdAt;
 
     @MappedCollection(idColumn = "purchase_order_id")
     private List<PurchaseOrderItem> items = new ArrayList<>();

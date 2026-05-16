@@ -9,6 +9,10 @@
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5" th:if="${mode == 'create'}">Create Purchase Order</h1>
         <h1 class="fs-5" th:if="${mode == 'edit'}">Edit Purchase Order</h1>
+        <div>
+            <a hx-post="/purchase-orders/submit" hx-target="#content" class="btn btn-outline-secondary" th:if="*{status == 'DRAFT'}">Submit for Approval</a>
+            <a hx-post="/purchase-orders" hx-target="#content" hx-include="#purchase-order-form" class="btn btn-primary">Save</a>
+        </div>
     </div>
 
     <div th:if="${message}">
@@ -23,14 +27,19 @@
     <div th:fragment="purchase-order">
         <form hx-post="/purchase-orders" hx-target="#content" id="purchase-order-form" class="needs-validation" novalidate>
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" th:field="*{id}" th:if="${mode == 'edit'}">
             <div class="row p-2 mb-3">
+                <div th:if="${mode == 'edit'}" class="col-3">
+                    <label class="form-label" for="id">ID</label>
+                    <input class="form-control" type="text" id="id" th:field="*{id}" disabled/>
+                </div>
                 <div class="col-3">
                     <label class="form-label" for="supplier">Supplier</label>
                     <input type="hidden" th:field="*{supplierName}">
                     <select id="supplier" type="text" placeholder="Supplier" class="form-select" th:field="*{supplierId}"
                         th:classappend="${#fields.hasErrors('supplierId')} ? 'is-invalid' : ''"
                      required>
-                        <option th:if="*{supplierName != null}" th:value="*{supplierId}" th:text="*{supplierName}"></option>
+                        <option th:if="*{supplierName != null}" th:value="*{supplierId}" th:text="${supplierName}"></option>
                     </select>
 
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('supplierId')}" th:errors="*{supplierId}"></div>
@@ -67,11 +76,11 @@
                                th:errors="*{items[__${itemStat.index}__].itemId}"></p>
                         </td>
                         <td>
-                            <input type="text" class="po-input qty" th:field="*{items[__${itemStat.index}__].qty}" oninput="calculateSubTotal(this)">
+                            <input type="text" class="po-input qty" th:field="*{items[__${itemStat.index}__].qty}" data-action="po:subtotal">
                             <p th:if="${#fields.hasErrors('items[' + itemStat.index + '].qty')}" 
                                th:errors="*{items[__${itemStat.index}__].qty}"></p>
                         </td>
-                        <td><input type="text" class="po-input price" th:field="*{items[__${itemStat.index}__].price}" oninput="calculateSubTotal(this)"></td>
+                        <td><input type="text" class="po-input price" th:field="*{items[__${itemStat.index}__].price}" data-action="po:subtotal"></td>
                             <p th:if="${#fields.hasErrors('items[' + itemStat.index + '].price')}" 
                                th:errors="*{items[__${itemStat.index}__].price}"></p>
                         <td class="subtotal" th:if="${item.price != null and item.qty != null}" th:text="${item.price * item.qty}"></td>
@@ -90,11 +99,11 @@
                     </tr>
                     <tr>
                         <td colspan="3" class="text-end">Grand Total:</td>
-                        <td id="grand-total" colspan="2"></td>
+                        <td id="grand-total" colspan="2" th:text="*{getGrandTotal()}"></td>
                     </tr>
                 </tfoot>
             </table>
-            <input class="btn btn-primary" type="submit">
+            <input class="btn btn-primary" type="submit" value="Save">
         </form>
     </div>
     

@@ -26,7 +26,7 @@
             </div>
             <nav class="text-bg-light p-3 d-flex flex-column vh-100">
 
-                <a hx-get="/purchase-orders/create" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
+                <a hx-get="/purchase-orders" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
 
                 <a sec:authorize="hasRole('ADMIN')" hx-get="/users" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person"></i><span class="ms-2">Users</span></a>
                 <a sec:authorize="hasAnyRole('ADMIN','HR','MANAGER')" hx-get="/employees" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person-vcard"></i><span class="ms-2">Employees</span></a>

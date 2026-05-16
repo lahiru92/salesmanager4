@@ -8,6 +8,6 @@ spring:
     driver-class-name: org.postgresql.Driver
 
 
-# logging:
-#   level:
-#     "[org.springframework.jdbc.core.JdbcTemplate]": DEBUG
+logging:
+  level:
+    "[org.springframework.jdbc.core.JdbcTemplate]": DEBUG

@@ -1,8 +1,28 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
+<head>
+    <title>Purchase Orders</title>
+    <link rel="stylesheet" href="\src\main\resources\static\css\bootstrap.min.css">
+</head>
+
+
 <div th:fragment="content">
-    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}">
+        <nav class="pt-2" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#" hx-get="/" hx-target="#content">Home</a>
+
+                </li>
+                <li class="breadcrumb-item active">
+
+                    <span>Purchase Orders</span>
+                </li>
+
+            </ol>
+        </nav>
+    </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">Purchase Orders</h1>
@@ -17,8 +37,41 @@
             }).showToast();
         </script>
     </div>
-    
+
     <p>TODO: Implement purchase order list</p>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Supplier</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="po : ${purchaseOrders}">
+                        <td th:text="${po.id}">1</td>
+                        <td th:text="${po.supplierId}">Supplier Name</td>
+                        <td th:text="${po.status}">DRAFT</td>
+                        <td th:text="${po.createdBy}">Employee Name</td>
+                        <td th:text="${#temporals.format(po.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+                        <td >2024-01-01 12:00</td>
+                        <td>
+                            <a th:href="@{/purchase-orders/{id}(id=${po.id})}" class="btn btn-sm btn-secondary">View</a>
+                            <a th:hx-get="@{/purchase-orders/edit/{id}(id=${po.id})}" hx-target="#content" class="btn btn-sm btn-secondary">Edit</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 
 </div>
 
