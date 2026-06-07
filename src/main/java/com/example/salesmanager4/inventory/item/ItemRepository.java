@@ -57,5 +57,12 @@ public interface ItemRepository extends CrudRepository<Item, Long> {
 
     List<Item> findByItemIdIn(List<Long> itemIds);
 
+    @Query("""
+        SELECT * FROM item
+        WHERE name ILIKE CONCAT('%', :name, '%')
+        AND supplier_id = :supplierId
+        """)
+    List<Item> findByNameAndSupplierId(String name, Long supplierId);
+
 }
 

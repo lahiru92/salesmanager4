@@ -56,7 +56,10 @@ public class ItemController {
 
     @GetMapping("/api/list")
     @ResponseBody
-    public List<Item> dropdownList(@RequestParam String q) {
+    public List<Item> dropdownList(@RequestParam String q, @RequestParam(required = false) Long supplierId) {
+        if (supplierId != null) {
+            return itemService.findByNameAndSupplierId(q, supplierId);
+        }
         return itemService.findItemByName(q);
     }
 

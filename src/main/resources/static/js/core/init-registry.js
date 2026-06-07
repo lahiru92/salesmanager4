@@ -1,7 +1,9 @@
 import * as purchaseOrder from '../modules/purchase-order.js';
+import * as grn from '../modules/grn.js';
 
 const registry = {
-    'purchase-order': purchaseOrder
+    'purchase-order': purchaseOrder,
+    'grn': grn
 };
 
 export function runInitializers(root) {

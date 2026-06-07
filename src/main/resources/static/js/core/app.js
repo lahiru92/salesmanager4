@@ -1,5 +1,6 @@
 import { runInitializers } from './init-registry.js';
 import * as purchaseOrder from '../modules/purchase-order.js';
+import * as grn from '../modules/grn.js';
 
 // ACTIONS (user interaction)
 const actions = {
@@ -7,7 +8,10 @@ const actions = {
     'po:remove-item': (e) => {
         purchaseOrder.removeItem(e.target);
     },
-    'inv:add-item': () => invoice.addItem(),
+    'grn:add-item': () => grn.addItem(),
+    'grn:remove-item': (e) => {
+        grn.removeItem(e.target);
+    }
 };
 
 document.body.addEventListener('click', (e) => {
@@ -22,6 +26,10 @@ document.body.addEventListener('input', (e) => {
   console.log('Input action:', action);
   if (action === 'po:subtotal') {
     purchaseOrder.subtotal(e);
+  }
+
+  if (action === 'grn:subtotal') {
+    grn.subtotal(e);
   }
 });
 

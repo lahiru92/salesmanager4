@@ -64,6 +64,10 @@ public class ItemService {
         return itemRepo.findByName(name);
     }
 
+    public List<Item> findByNameAndSupplierId(String name, Long supplierId) {
+        return itemRepo.findByNameAndSupplierId(name, supplierId);
+    }
+
     public Item findById(Long id) {
         return itemRepo.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Item not found"));
