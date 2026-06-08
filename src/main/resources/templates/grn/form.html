@@ -122,12 +122,12 @@
                                     </select>
                                 </td>
                                 <td></td>
-                                <td><input class="form-control" data-action="grn:subtotal" id="f-received-qty" type="number"/></td>
-                                <td><input class="form-control" data-action="grn:subtotal" id="f-rejected-qty" type="number"/></td>
-                                <td><input class="form-control" id="f-accepted-qty" type="number" readonly/></td>
+                                <td><input class="form-control received-qty" data-action="grn:subtotal" id="f-received-qty" type="number"/></td>
+                                <td><input class="form-control rejected-qty" data-action="grn:subtotal" id="f-rejected-qty" type="number"/></td>
+                                <td><input class="form-control accepted-qty" id="f-accepted-qty" type="number" readonly/></td>
                                 <td></td>
-                                <td><input class="form-control" data-action="grn:subtotal" id="f-price" type="number"/></td>
-                                <td><input class="form-control" id="f-subtotal" type="number" placeholder="Sub Total" readonly/></td>
+                                <td><input class="form-control price" data-action="grn:subtotal" id="f-price" type="number"/></td>
+                                <td><input class="form-control subtotal" id="f-subtotal" type="number" placeholder="Sub Total" readonly/></td>
                                 <td><button class="btn btn-primary" type="button" data-action="grn:add-item"><i class="bi bi-plus"></i></button></td>
                             </tr>
                             
@@ -149,10 +149,10 @@
                                 <input type="text" class="ordered-qty form-control-plaintext" readonly> 
                             </td>
                             <td>
-                                <input type="text" class="received-qty form-control"> 
+                                <input type="text" class="received-qty form-control" data-action="grn:subtotal"> 
                             </td>
                             <td>
-                                <input type="text" class="rejected-qty form-control">
+                                <input type="text" class="rejected-qty form-control" data-action="grn:subtotal">
                                 <div class="invalid-feedback rejected-qty-error"></div>   
                             </td>
                             <td>
@@ -164,10 +164,10 @@
                                 <input type="text" class="ordered-price form-control-plaintext" readonly> 
                             </td>
                             <td>
-                                <input type="text" class="grn-input price form-control">
+                                <input type="text" class="grn-input price form-control" data-action="grn:subtotal">
                                 <div class="invalid-feedback price-error"></div>
                             </td>
-                            <td class="subtotal"></td>
+                            <td><input class="form-control subtotal" type="number" placeholder="Sub Total" readonly/></td>
                             <td><button class="btn btn-outline-danger" type="button" data-action="grn:remove-item"><i class="bi bi-trash"></i></button></td>
                         </tr>
                     </template>

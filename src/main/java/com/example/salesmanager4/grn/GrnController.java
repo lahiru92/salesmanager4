@@ -41,7 +41,6 @@ public class GrnController {
     }
 
     @PostMapping
-    @ResponseBody
     public String create(@Valid @RequestBody GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
         //TODO: process POST request
         log.info("Received GRN Header: {}", grnRequest);
@@ -51,7 +50,7 @@ public class GrnController {
             return "Validation failed: " + bindingResult.getAllErrors().toString();
         }
 
-        return "Success";
+        return "grn/form::content";
     }
     
 }

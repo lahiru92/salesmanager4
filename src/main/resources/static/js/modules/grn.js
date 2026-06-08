@@ -62,14 +62,15 @@ export function subtotal(e) {
   const row = e.target.closest('tr');
   if (!row) return;
 
-  const receivedQty  = parseFloat(row.querySelector('#f-received-qty')?.value) || 0;
-  const rejectedQty = parseFloat(row.querySelector('#f-rejected-qty')?.value) || 0;
-  const price = parseFloat(row.querySelector('#f-price')?.value) || 0;
+  const receivedQty  = parseFloat(row.querySelector('.received-qty')?.value) || 0;
+  const rejectedQty = parseFloat(row.querySelector('.rejected-qty')?.value) || 0;
+  const price = parseFloat(row.querySelector('.price')?.value) || 0;
 
   let acceptedQty = receivedQty - rejectedQty;
 
-  row.querySelector('#f-accepted-qty').value = acceptedQty;
-  row.querySelector('#f-subtotal').value = (acceptedQty * price).toFixed(2);
+  row.querySelector('.accepted-qty').value = acceptedQty;
+  row.querySelector('.subtotal').value = (acceptedQty * price).toFixed(2);
+  grandTotal();
 }
 
 export function addItem() {
@@ -97,7 +98,47 @@ export function addItem() {
   clone.querySelector('.rejected-qty').value = rejectedQty;
   clone.querySelector('.accepted-qty').value = receivedQty - rejectedQty;
   clone.querySelector('.price').value = price;
-  clone.querySelector('.subtotal').innerText = ((receivedQty - rejectedQty) * price).toFixed(2);
+  clone.querySelector('.subtotal').value = ((receivedQty - rejectedQty) * price).toFixed(2);
 
   rowContainer.appendChild(clone);
+
+  // Clear input fields
+  document.querySelector('#f-id')?.tomselect.clear();
+  document.querySelector('#f-received-qty').value = '';
+  document.querySelector('#f-rejected-qty').value = '';
+  document.querySelector('#f-accepted-qty').value = '';
+  document.querySelector('#f-price').value = '';
+  document.querySelector('#f-subtotal').value = '';
+
+  reindex();
+  grandTotal();
+}
+
+export function reindex() {
+  const rows = document.querySelectorAll('.grn-row');
+  rows.forEach((row, index) => {
+    row.querySelector('.item-name').setAttribute('name', `items[${index}].name`);
+    row.querySelector('.item-id').setAttribute('name', `items[${index}].id`);
+    row.querySelector('.received-qty').setAttribute('name', `items[${index}].receivedQty`);
+    row.querySelector('.rejected-qty').setAttribute('name', `items[${index}].rejectedQty`);
+    row.querySelector('.accepted-qty').setAttribute('name', `items[${index}].acceptedQty`);
+    row.querySelector('.price').setAttribute('name', `items[${index}].price`);
+    row.querySelector('.subtotal').setAttribute('name', `items[${index}].subtotal`);
+  });
+}
+
+export function grandTotal() {
+  let total = 0;
+  const rows = document.querySelectorAll('.grn-row');
+  rows.forEach(row => {
+    const sub = parseFloat(row.querySelector('.subtotal')?.value) || 0;
+    total += sub;
+  });
+  document.getElementById('grand-total').innerText = total.toFixed(2);
+}
+
+export function removeItem(btn) {
+    btn.closest('tr').remove();
+    reindex();
+    grandTotal();
 }
