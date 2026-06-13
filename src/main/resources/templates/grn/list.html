@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content">
+    <button hx-get="/grn/3" hx-target="#content">View grn #3</button>
+    <button hx-get="/grn/4" hx-target="#content">View grn #4</button>
+    <button hx-get="/grn/3/edit" hx-target="#content">Edit grn #3</button>
+    <button hx-get="/grn/4/edit" hx-target="#content">Edit grn #4</button>
+    <button hx-get="/grn/create" hx-target="#content">New</button>
+</div>
+</html>

@@ -1,25 +1,29 @@
 package com.example.salesmanager4.grn;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Valid
 public class GrnRequestDto {
 
-    @NotNull
     Long id;
 
-    @NotNull
     Long purchaseOrderId;
     
     String status;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) 
     LocalDate receivedDate;
 
     @NotNull
@@ -33,12 +37,15 @@ public class GrnRequestDto {
     @Valid
     List<GrnRequestLineDto> items;
 
+
     public BigDecimal getGrandTotal() {
         if (items != null) {
-            return items.stream()
+            BigDecimal grandTotal = items.stream()
                         .map(GrnRequestLineDto::getSubTotal)
                         .filter(subTotal -> subTotal != null)
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
+            return grandTotal.setScale(2, RoundingMode.HALF_UP);
+
         }
         return BigDecimal.ZERO;
     }

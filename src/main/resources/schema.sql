@@ -38,3 +38,26 @@ CREATE TABLE employee (
     created_by BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
 )
+
+
+CREATE TABLE grn (
+    id  BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    purchase_order_id BIGINT,
+    status VARCHAR,
+    received_date DATE,
+    supplier_id BIGINT,
+    employee_id BIGINT
+);
+
+CREATE TABLE grn_item (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    grn_key BIGINT,
+    grn_id  BIGINT,
+    item_id BIGINT,
+    item_name VARCHAR,
+    ordered_qty DECIMAL(12,2),
+    received_qty DECIMAL(12,2),
+    rejected_qty DECIMAL(12,2),
+    unit_price DECIMAL(12,2),
+    ordered_price DECIMAL(12,2) 
+);

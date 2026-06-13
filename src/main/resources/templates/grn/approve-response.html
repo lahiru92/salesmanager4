@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <!-- <div th:fragment="approved-response"> -->
+        <button th:fragment="approved-response" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i>Approved</button>
+    <!-- </div> -->
+
+    <div th:fragment="approve-error">
+        <a th:hx-post="@{/grn/{id}/approve (id=*{id}) }" hx-swap="outerHTML" hx-include="#csrf" class="btn btn-outline-secondary">Approve</a>
+        <script th:inline="javascript">
+            Toastify({
+                text: "Error occurred while approving GRN",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+</html>

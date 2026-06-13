@@ -1,6 +1,7 @@
 package com.example.salesmanager4.grn;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -36,7 +37,7 @@ public class GrnRequestLineDto {
 
     public BigDecimal getSubTotal() {
         if (acceptedQty != null && unitPrice != null) {
-            return acceptedQty.multiply(unitPrice);
+            return acceptedQty.multiply(unitPrice).setScale(2, RoundingMode.HALF_UP);
         }
         return BigDecimal.ZERO;
     }

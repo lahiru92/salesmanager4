@@ -19,7 +19,7 @@ function initItemSelect(root) {
     labelField: 'name',
     searchField: ['name'],
 
-    load: function(query, callback) {
+    load: function (query, callback) {
       if (!query.length) return callback();
 
       const supplierId = supplierSelectInstance ? supplierSelectInstance.getValue() : null;
@@ -46,7 +46,7 @@ function initSupplierSelect(root) {
     labelField: 'name',
     searchField: ['name'],
 
-    load: function(query, callback) {
+    load: function (query, callback) {
       if (!query.length) return callback();
 
       fetch('/suppliers/api/list?q=' + query)
@@ -62,9 +62,9 @@ export function subtotal(e) {
   const row = e.target.closest('tr');
   if (!row) return;
 
-  const receivedQty  = parseFloat(row.querySelector('.received-qty')?.value) || 0;
+  const receivedQty = parseFloat(row.querySelector('.received-qty')?.value) || 0;
   const rejectedQty = parseFloat(row.querySelector('.rejected-qty')?.value) || 0;
-  const price = parseFloat(row.querySelector('.price')?.value) || 0;
+  const price = parseFloat(row.querySelector('.unit-price')?.value) || 0;
 
   let acceptedQty = receivedQty - rejectedQty;
 
@@ -88,7 +88,7 @@ export function addItem() {
 
   const itemId = itemSelectInstance.getValue();
   const itemData = itemSelectInstance.options[itemId];
-  const receivedQty  = parseFloat(document.querySelector('#f-received-qty')?.value) || 0;
+  const receivedQty = parseFloat(document.querySelector('#f-received-qty')?.value) || 0;
   const rejectedQty = parseFloat(document.querySelector('#f-rejected-qty')?.value) || 0;
   const price = parseFloat(document.querySelector('#f-price')?.value) || 0;
 
@@ -97,7 +97,7 @@ export function addItem() {
   clone.querySelector('.received-qty').value = receivedQty;
   clone.querySelector('.rejected-qty').value = rejectedQty;
   clone.querySelector('.accepted-qty').value = receivedQty - rejectedQty;
-  clone.querySelector('.price').value = price;
+  clone.querySelector('.unit-price').value = price;
   clone.querySelector('.subtotal').value = ((receivedQty - rejectedQty) * price).toFixed(2);
 
   rowContainer.appendChild(clone);
@@ -117,12 +117,13 @@ export function addItem() {
 export function reindex() {
   const rows = document.querySelectorAll('.grn-row');
   rows.forEach((row, index) => {
-    row.querySelector('.item-name').setAttribute('name', `items[${index}].name`);
-    row.querySelector('.item-id').setAttribute('name', `items[${index}].id`);
+    row.querySelector('.item-name').setAttribute('name', `items[${index}].itemName`);
+    row.querySelector('.item-id').setAttribute('name', `items[${index}].itemId`);
     row.querySelector('.received-qty').setAttribute('name', `items[${index}].receivedQty`);
     row.querySelector('.rejected-qty').setAttribute('name', `items[${index}].rejectedQty`);
     row.querySelector('.accepted-qty').setAttribute('name', `items[${index}].acceptedQty`);
-    row.querySelector('.price').setAttribute('name', `items[${index}].price`);
+    row.querySelector('.unit-price').setAttribute('name', `items[${index}].unitPrice`);
+    // row.querySelector('.ordered-price').setAttribute('name', `items[${index}].orderedPrice`);
     row.querySelector('.subtotal').setAttribute('name', `items[${index}].subtotal`);
   });
 }
@@ -138,7 +139,7 @@ export function grandTotal() {
 }
 
 export function removeItem(btn) {
-    btn.closest('tr').remove();
-    reindex();
-    grandTotal();
+  btn.closest('tr').remove();
+  reindex();
+  grandTotal();
 }
