@@ -13,7 +13,7 @@
         <h1 class="fs-5" th:if="${mode == 'edit'}">Edit GRN</h1>
         <h1 class="fs-5" th:if="${mode == 'view'}" th:text="'GRN #' + ${grn.id}"></h1>
         <div id="action-bar">
-            <button th:if="*{status}" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i>Approved</button>
+            <button th:if="*{status} == 'APPROVED'" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i>Approved</button>
             <a th:if="${mode == 'view' and #object.status == 'DRAFT'}" th:hx-post="@{/grn/{id}/approve (id=*{id}) }" hx-swap="outerHTML" hx-include="#csrf" class="btn btn-outline-secondary">Approve</a>
             <a th:if="${mode =='create'}" hx-post="/grn" hx-target="#content" hx-include="#grn-form" class="btn btn-primary">Save</a>
             <a th:if="${mode =='edit'}" th:hx-post="@{/grn/{id}/update (id=*{id})}" hx-target="#content" hx-include="#grn-form" class="btn btn-primary">Update</a>

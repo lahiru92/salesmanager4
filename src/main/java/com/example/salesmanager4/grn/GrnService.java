@@ -2,9 +2,10 @@ package com.example.salesmanager4.grn;
 
 import java.util.List;
 
-import org.apache.juli.logging.Log;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.salesmanager4.inventory.stock.StockTransactionService;
 import com.example.salesmanager4.users.CurrentUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class GrnService {
 
     private final GrnRepository grnRepository;
     private final CurrentUserService currentUserService;
+    private final StockTransactionService stockTransactionService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 
@@ -46,12 +48,23 @@ public class GrnService {
         return grnRequestDto;
     }
 
+    @Transactional
     public void approveGrn(Long id) {
         Grn grn = findById(id);
         if (!"DRAFT".equals(grn.getStatus())) {
             throw new RuntimeException("Only DRAFT GRNs can be approved");
         }
         grnRepository.setStatusById(id, "APPROVED");
+        // Update stock for each item
+        grn.getItems().forEach(item -> {
+            stockTransactionService.stockIn(
+                item.getItemId(),
+                (item.getReceivedQty().subtract(item.getRejectedQty())),
+                item.getUnitPrice(),
+                "GRN",
+                id
+            );
+        });
     }
 
     private Grn mapToGrn(GrnRequestDto grnRequest) {

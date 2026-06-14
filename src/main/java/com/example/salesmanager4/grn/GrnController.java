@@ -1,10 +1,6 @@
 package com.example.salesmanager4.grn;
 
 import java.util.List;
-import java.util.function.Supplier;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -12,8 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.view.RedirectView;
-
 import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
 
@@ -22,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 
 @Slf4j
 @Controller
@@ -157,7 +150,7 @@ public class GrnController {
             error = true;
         }
 
-        if (!existingGrn.getStatus().equals("DRAFT")) {
+        if (existingGrn != null && !existingGrn.getStatus().equals("DRAFT")) {
             log.error("Cannot edit GRN with status: {}", existingGrn.getStatus());
             error = true;
         }
