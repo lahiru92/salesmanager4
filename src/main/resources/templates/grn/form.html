@@ -36,27 +36,53 @@
             <input type="hidden" th:field="*{id}" th:if="${mode == 'edit'}">
 
             <div th:if="${!editable}">
-                <table class="table w-auto">
-                    <tr>
-                        <th scope="row">GRN ID</th>
-                        <td th:text="*{id}"></td>
-                    </tr>
-                    <tr th:if="*{purchaseOrderId != null}">
-                        <th>Purchase Order ID</th>
-                        <td th:text="*{purchaseOrderId}"></td>
-                    </tr>
-                    <tr>
-                        <th>Created By</th>
-                        <td th:text="*{employeeName}"></td>
-                    </tr>
-                    <tr>
-                        <th>Supplier</th>
-                        <td th:text="*{supplierName}"></td>
-                    </tr>
-                    <tr>
-                        <th>Received Date</th>
-                        <td th:text="*{receivedDate}"></td>
-                    </tr>
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-borderless w-auto">
+                            <tr>
+                                <th scope="row">GRN ID</th>
+                                <td th:text="*{id}"></td>
+                            </tr>
+                            <tr th:if="*{purchaseOrderId != null}">
+                                <th>Purchase Order ID</th>
+                                <td th:text="*{purchaseOrderId}"></td>
+                            </tr>
+                            <tr>
+                                <th>Created By</th>
+                                <td th:text="*{employeeName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Supplier</th>
+                                <td th:text="*{supplierName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Received Date</th>
+                                <td th:text="*{receivedDate}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <table class="table table-borderless w-auto">
+                            <tr>
+                                <th>Cash</th>
+                                <td>12345</td>
+                            </tr>
+                            <tr>
+                                <th>Cheques</th>
+                                <td>12345</td>
+                            </tr>
+                            <tr>
+                                <th>Credit</th>
+                                <td>12345</td>
+                            </tr>
+                            <tr>
+                                <th>Credit Due</th>
+                                <td>2026-10-12</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
             </div>
 
             <div th:if="${editable}" class="row p-2 mb-3">
@@ -157,8 +183,8 @@
                             </tr>
                         </tbody>
         
-                        <tfoot th:if="${editable}">
-                            <tr th:if="*{purchaseOrderId == null}">
+                        <tfoot>
+                            <tr th:if="${editable and #object.purchaseOrderId == null}">
                                 <td>
                                     <select id="f-id">
                                     </select>
@@ -220,6 +246,33 @@
                 </div>
             </div>
         
+            <!-- <div class="container"> -->
+                <div class="container p-2 mt-3" th:if="${editable}">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label" for="cash">Cash</label>
+                            <input type="number" class="form-control text-end" id="cash" name="cash" step="0.01">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="form-label" for="cheques">Cheques</label>
+                            <input type="number" class="form-control" id="cheques" name="cheques" step="0.01">
+                        </div>
+                    </div>
+                    <div class="row">
+                        
+                        <div class="col-3">
+                            <label class="form-label" for="credit">Credit</label>
+                            <input type="number" class="form-control" id="credit" name="credit" step="0.01">
+                        </div>
+                        <div class="col-3">
+                            <label class="form-label" for="dueDate">Due date</label>
+                            <input type="date" class="form-control" id="dueDate" name="dueDate">
+                        </div>
+                    </div>
+                </div>
+            <!-- </div> -->
         </form>
     </div>
     

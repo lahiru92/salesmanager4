@@ -1,6 +1,11 @@
 package com.example.salesmanager4.grn;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -8,9 +13,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +34,25 @@ public class GrnController {
     private final SupplierService supplierService;
 
     @GetMapping
-    public String list(Model model) {
+    public String list(GrnListRequestDto requestDto,
+        @PageableDefault(page=0, size=10, sort="id", direction = Sort.Direction.DESC) Pageable pageable, 
+        Model model,
+        HttpServletRequest req) {
+
+        Page<GrnListResponseDto> grns = grnService.listGrns(requestDto, pageable);
+
+        if (req.getHeader("Hx-Target").equals("grn-table")) {
+            model.addAttribute("grns", grns);
+            return "grn/list::grn-table";
+        }
+
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("GRNs", null)
+        );
+
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("grns", grns);
         return "grn/list::content";
     }
 
@@ -186,9 +211,16 @@ public class GrnController {
     
 
     @PostMapping("/{id}/approve")
-    public String approve(@PathVariable Long id) {
+    public String approve(@PathVariable Long id, HttpServletRequest req, Model model) {
         try {
             grnService.approveGrn(id);
+
+            if ("inline".equals(req.getHeader("X-Approvemode"))) {
+                model.addAttribute("grnId", id);
+                model.addAttribute("oobTarget", req.getHeader("X-oob-target"));
+                return "/grn/inline-approve-response";
+            }
+
             return "/grn/approve-response::approved-response";
         } catch (RuntimeException e) {
             log.error("Error approving GRN: {}", e.getMessage());

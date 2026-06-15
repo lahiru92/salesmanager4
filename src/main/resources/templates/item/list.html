@@ -43,6 +43,6 @@
             </tr>
             </tbody>
         </table>
-        <div th:replace="~{fragments/pagination :: pagination(${page})}"></div>
+        <div th:replace="~{fragments/pagination :: pagination(target='#content',baseUrl='/items',page=${page})}"></div>
     </div>
 </html>

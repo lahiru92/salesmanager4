@@ -1,0 +1,6 @@
+    <td>
+        <button class="btn btn-sm btn-light" th:hx-get="@{/grn/{id}(id=${grnId})}" hx-target="#content"><i class="bi bi-eye"></i></button>
+    </td>
+    <td th:id="${oobTarget}" hx-swap-oob="true">
+        <span class="badge text-bg-success" >Approved</span>
+    </td>

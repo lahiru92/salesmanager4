@@ -2,10 +2,52 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:fragment="content">
-    <button hx-get="/grn/3" hx-target="#content">View grn #3</button>
-    <button hx-get="/grn/4" hx-target="#content">View grn #4</button>
-    <button hx-get="/grn/3/edit" hx-target="#content">Edit grn #3</button>
-    <button hx-get="/grn/4/edit" hx-target="#content">Edit grn #4</button>
-    <button hx-get="/grn/create" hx-target="#content">New</button>
+
+    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">GRN List</h1>
+    </div>
+
+
+    <div th:fragment="grn-table" id="grn-table" th:with="grn=${grns.getContent()}">
+        <div class="card overflow-hidden mb-3">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Supplier Name</th>
+                            <th>Grn Date</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="grn,grnStat : ${grn}">
+                            <td th:text="${grn.id}">1</td>
+                            <td th:text="${grn.supplierName}">Supplier A</td>
+                            <td th:text="${grn.receivedDate}">2024-01-01</td>
+                            <td th:id="|grn-status-${grnStat.index}|">
+                                <span th:if="${grn.status == 'DRAFT'}" class="badge text-bg-dark" >Draft</span>
+                                <span th:if="${grn.status == 'APPROVED'}" class="badge text-bg-success" >Approved</span>
+                                <span th:if="${grn.status == 'REJECTED'}" class="badge text-bg-danger" >Rejected</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-light" th:hx-get="@{/grn/{id}(id=${grn.id})}" hx-target="#content" title="View"><i class="bi bi-eye"></i></button>
+                                <button th:if="${grn.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-get="@{/grn/{id}/edit(id=${grn.id})}" hx-target="#content" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                                <button th:if="${grn.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-post="@{/grn/{id}/approve(id=${grn.id})}" hx-target="closest td" hx-include="#csrf" th:hx-headers='|{"X-Approvemode":"inline","X-oob-target":"grn-status-${grnStat.index}"}|' hx-confirm="Are you sure?" title="Approve"><i class="bi bi-file-earmark-check"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/pagination :: pagination(target='#grn-table', baseUrl='/grn', page=${grns})}"></div>
+
+    </div>
+    
 </div>
 </html>

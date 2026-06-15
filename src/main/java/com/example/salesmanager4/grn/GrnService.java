@@ -2,6 +2,8 @@ package com.example.salesmanager4.grn;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GrnService {
 
     private final GrnRepository grnRepository;
+    private final GrnJdbcRepository grnJdbcRepository;
     private final CurrentUserService currentUserService;
     private final StockTransactionService stockTransactionService;
 
@@ -65,6 +68,10 @@ public class GrnService {
                 id
             );
         });
+    }
+
+    public Page<GrnListResponseDto> listGrns(GrnListRequestDto requestDto, Pageable pageable) {
+        return grnJdbcRepository.findAllByPage(requestDto, pageable);
     }
 
     private Grn mapToGrn(GrnRequestDto grnRequest) {

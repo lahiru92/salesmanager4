@@ -31,6 +31,11 @@ public class GrnRequestDto {
     Long employeeId;
     String employeeName;
 
+    BigDecimal cash;
+    BigDecimal credit;
+    BigDecimal cheques;
+    LocalDate creditDueDate;
+
     @NotEmpty
     @Valid
     List<GrnRequestLineDto> items;
