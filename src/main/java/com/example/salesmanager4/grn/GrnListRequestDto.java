@@ -1,5 +1,6 @@
 package com.example.salesmanager4.grn;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.Data;
@@ -11,4 +12,8 @@ public class GrnListRequestDto {
     private LocalDate toReceivedDate;
     private Long supplierId;
     private Long employeeId;
+    private BigDecimal total;
+    private BigDecimal cash;
+    private BigDecimal cheque;
+    private BigDecimal credit;
 }

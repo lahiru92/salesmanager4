@@ -1,5 +1,6 @@
 package com.example.salesmanager4.grn;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class Grn {
     private LocalDate receivedDate;
     private Long supplierId;
     private Long employeeId;
+
+    private BigDecimal cash;
+    private BigDecimal cheque;
+    private BigDecimal credit;
 
     @MappedCollection(idColumn = "grn_id")
     private List<GrnItem> items;

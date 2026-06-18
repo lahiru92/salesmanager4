@@ -8,8 +8,58 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">GRN List</h1>
+        <div>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filters" aria-expanded="false" aria-controls="collapseExample">
+                Filter
+            </button>
+            <button hx-get="/grn/create" hx-target="#content" class="btn btn-primary">Create GRN</button>
+        </div>
     </div>
 
+    <div class="card mb-3 collapse" id="filters">
+        <div class="card-header">Filters</div>
+        <div class="card-body">
+            <div class="row align-items-end mb-3">
+                <div class="col-sm-2">
+                    <label class="form-label" for="fromDate">From Date</label>
+                    <input class="form-control" type="date" id="fromDate" name="fromDate">
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label" for="toDate">To Date</label>
+                    <input class="form-control" type="date" id="toDate" name="fromDate">
+                </div>
+                <div class="col">
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                        <button type="button" class="btn btn-outline-secondary">Today</button>
+                        <button type="button" class="btn btn-outline-secondary">This Week</button>
+                        <button type="button" class="btn btn-outline-secondary">This Month</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <label class="form-label">Supplier</label>
+                    <select class="form-select">
+                        <option>Supp a</option>
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select">
+                        <option>Draft</option>
+                        <option>Approved</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="col">
+                <button class="btn btn-primary">Apply</button>
+                <button class="btn btn-light">Reset</button>
+            </div>
+        </div>
+    </div>
 
     <div th:fragment="grn-table" id="grn-table" th:with="grn=${grns.getContent()}">
         <div class="card overflow-hidden mb-3">
@@ -20,6 +70,7 @@
                             <th>ID</th>
                             <th>Supplier Name</th>
                             <th>Grn Date</th>
+                            <th class="text-end">Total</th>
                             <th>Status</th>
                             <th></th>
                         </tr>
@@ -29,6 +80,7 @@
                             <td th:text="${grn.id}">1</td>
                             <td th:text="${grn.supplierName}">Supplier A</td>
                             <td th:text="${grn.receivedDate}">2024-01-01</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(grn.total, 1,'COMMA', 2, 'POINT')}">100,000</td>
                             <td th:id="|grn-status-${grnStat.index}|">
                                 <span th:if="${grn.status == 'DRAFT'}" class="badge text-bg-dark" >Draft</span>
                                 <span th:if="${grn.status == 'APPROVED'}" class="badge text-bg-success" >Approved</span>

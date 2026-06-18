@@ -61,3 +61,8 @@ CREATE TABLE grn_item (
     unit_price DECIMAL(12,2),
     ordered_price DECIMAL(12,2) 
 );
+
+alter table grn add column cash numeric(12,2);
+alter table grn add column cheque numeric(12,2);
+alter table grn add column credit numeric(12,2);
+alter table grn add column total numeric(12,2);
