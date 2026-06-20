@@ -41,7 +41,7 @@ public class GrnController {
 
         Page<GrnListResponseDto> grns = grnService.listGrns(requestDto, pageable);
 
-        if (req.getHeader("Hx-Target").equals("grn-table")) {
+        if ("grn-table".equals(req.getHeader("Hx-Target"))) {
             model.addAttribute("grns", grns);
             return "grn/list::grn-table";
         }
@@ -121,9 +121,13 @@ public class GrnController {
     }
 
     @PostMapping
-    public String create(@Valid @ModelAttribute GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
+    public String create(@Valid @ModelAttribute("grn") GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
         //TODO: process POST request
         log.info("Received GRN Header: {}", grnRequest);
+
+        if (!grnRequest.isBalanced()) {
+            bindingResult.reject("payments.mismatch","Paid amounts not balanced with the total.");
+        }
 
         if (bindingResult.hasErrors()) {
             log.error("Validation errors: {}", bindingResult.getAllErrors());
@@ -136,7 +140,6 @@ public class GrnController {
             );
 
             model.addAttribute("breadcrumbs", breadcrumbs);
-            model.addAttribute("grn", grnRequest);
             model.addAttribute("mode", "create");
 
             if (grnRequest.getSupplierId() != null) {
@@ -154,8 +157,10 @@ public class GrnController {
 
 
     @PostMapping("/{id}/update")
-    public String update(@PathVariable Long id, @Valid @ModelAttribute GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
+    public String update(@PathVariable Long id, @Valid @ModelAttribute("grn") GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
         
+        log.info("Update request for grn {}", id);
+
         boolean error = false;
 
         if (!id.equals(grnRequest.getId())) {
@@ -180,6 +185,14 @@ public class GrnController {
             error = true;
         }
 
+        if (!grnRequest.isBalanced()) {
+            bindingResult.reject("payments.mismatch", "Paid amounts not balanced with the total.");
+            bindingResult.reject("test1", "Test error 1");
+            bindingResult.reject("test2", "Test error 2");
+            bindingResult.reject("test3", "Test error 3");
+            error = true;
+        }
+
         if (error) {
             log.error("Validation errors: {}", bindingResult.getAllErrors());
             // return "grn/form::content";
@@ -191,8 +204,7 @@ public class GrnController {
             );
 
             model.addAttribute("breadcrumbs", breadcrumbs);
-            model.addAttribute("grn", grnRequest);
-            model.addAttribute("mode", "create");
+            model.addAttribute("mode", "edit");
             model.addAttribute("message", "Validation errors occurred. Please correct the errors and try again.");
 
             if (grnRequest.getSupplierId() != null) {

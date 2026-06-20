@@ -66,3 +66,40 @@ alter table grn add column cash numeric(12,2);
 alter table grn add column cheque numeric(12,2);
 alter table grn add column credit numeric(12,2);
 alter table grn add column total numeric(12,2);
+alter table grn add column credit_due date;
+
+
+CREATE TABLE cash_transactions (
+	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	txn_date DATE,
+	txn_type VARCHAR,
+	amount   numeric(12,2),
+	ref_type varchar,
+	ref_id   bigint,
+	txn_timestamp timestamp DEFAULT CURRENT_TIMESTAMP
+)
+
+CREATE TABLE cheque_transactions (
+	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	txn_date DATE,
+	txn_type VARCHAR,
+	cheque_no integer,
+	cheque_date date,
+	bank char(8),
+	amount   numeric(12,2),
+	ref_type varchar,
+	ref_id   bigint,
+	clearing_status varchar,
+	txn_timestamp timestamp DEFAULT CURRENT_TIMESTAMP
+)
+
+CREATE TABLE creditor_transactions (
+	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	supplier_id bigint,
+	txn_date DATE,
+	txn_type VARCHAR,
+	amount   numeric(12,2),
+	ref_type varchar,
+	ref_id   bigint,
+	txn_timestamp timestamp DEFAULT CURRENT_TIMESTAMP
+)

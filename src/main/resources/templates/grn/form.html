@@ -20,6 +20,16 @@
         </div>
     </div>
 
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <div th:each="err : ${#fields.globalErrors()}">
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>&nbsp</span>
+                <span th:text="${err}"></span>
+            </div>
+        </div>
+    </div>
+
     <div th:if="${message}">
         <script th:inline="javascript">
             Toastify({
@@ -251,24 +261,24 @@
                     <div class="row">
                         <div class="col-3">
                             <label class="form-label" for="cash">Cash</label>
-                            <input type="number" class="form-control text-end" id="cash" name="cash" step="0.01">
+                            <input type="number" class="form-control text-end" id="cash" name="cash" step="0.01" th:value="*{cash}">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-3">
                             <label class="form-label" for="cheques">Cheques</label>
-                            <input type="number" class="form-control" id="cheques" name="cheques" step="0.01">
+                            <input type="number" class="form-control" id="cheques" name="cheque" step="0.01" th:value="*{cheque}">
                         </div>
                     </div>
                     <div class="row">
                         
                         <div class="col-3">
                             <label class="form-label" for="credit">Credit</label>
-                            <input type="number" class="form-control" id="credit" name="credit" step="0.01">
+                            <input type="number" class="form-control" id="credit" name="credit" step="0.01" th:value="*{credit}">
                         </div>
                         <div class="col-3">
                             <label class="form-label" for="dueDate">Due date</label>
-                            <input type="date" class="form-control" id="dueDate" name="dueDate">
+                            <input type="date" class="form-control" id="dueDate" name="creditDue" th:value="*{creditDue}">
                         </div>
                     </div>
                 </div>

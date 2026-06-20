@@ -86,6 +86,10 @@ public class GrnService {
         grn.setReceivedDate(grnRequest.getReceivedDate());
         grn.setSupplierId(grnRequest.getSupplierId());
         grn.setEmployeeId(grnRequest.getEmployeeId());
+        grn.setCash(grnRequest.getCash());
+        grn.setCredit(grnRequest.getCredit());
+        grn.setCheque(grnRequest.getCheque());
+        grn.setCreditDue(grnRequest.getCreditDue());
         // Map items if needed
 
         grn.setItems(grnRequest.getItems().stream()

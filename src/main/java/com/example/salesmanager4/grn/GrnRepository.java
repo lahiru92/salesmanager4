@@ -19,7 +19,11 @@ public interface GrnRepository extends CrudRepository<Grn, Long> {
             g.supplier_id AS supplierId,
             s.name AS supplierName,
             g.employee_id AS employeeId,
-            e.known_name AS employeeName
+            e.known_name AS employeeName,
+            g.cash,
+            g.credit,
+            g.cheque,
+            g.credit_due AS creditDue 
         FROM grn g
         LEFT JOIN supplier s on g.supplier_id = s.supplier_id
         LEFT JOIN employee e on g.employee_id = e.id

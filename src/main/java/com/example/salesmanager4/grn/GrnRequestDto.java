@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -33,8 +35,8 @@ public class GrnRequestDto {
 
     BigDecimal cash;
     BigDecimal credit;
-    BigDecimal cheques;
-    LocalDate creditDueDate;
+    BigDecimal cheque;
+    LocalDate creditDue;
 
     @NotEmpty
     @Valid
@@ -51,5 +53,15 @@ public class GrnRequestDto {
 
         }
         return BigDecimal.ZERO;
+    }
+
+    public boolean isBalanced() {
+        BigDecimal grandTotal = this.getGrandTotal();
+        BigDecimal payment = Stream.of(cash, cheque, credit)
+        .filter(Objects::nonNull)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return grandTotal.compareTo(payment) == 0;
+
     }
 }

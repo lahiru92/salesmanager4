@@ -47,18 +47,12 @@ public class GrnJdbcRepository {
                     g.credit,
                     sum((i.received_qty - i.rejected_qty)*i.unit_price) as total
                 """;
-        String countSelection = "COUNT(*)";
 
         String query = """
                 FROM grn g
                 LEFT JOIN supplier s on g.supplier_id = s.supplier_id
                 LEFT JOIN employee e on g.employee_id = e.id
                 INNER JOIN grn_item i on g.id = i.grn_id
-                """;
-        String queryC = """
-                FROM grn g
-                LEFT JOIN supplier s on g.supplier_id = s.supplier_id
-                LEFT JOIN employee e on g.employee_id = e.id
                 """;
 
         String whereClause = "WHERE 1=1";
@@ -113,7 +107,7 @@ public class GrnJdbcRepository {
         
 
         String sql = "SELECT " + querySelection + " " + query + " " + whereClause + " " + groupBy + " " + orderByClause + " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset();
-        String countQuery = "SELECT " + countSelection + " " + queryC + " " + whereClause;
+        String countQuery = "SELECT COUNT(*) FROM grn g " + whereClause;
 
         List<GrnListResponseDto> content = namedParameterJdbcTemplate.query(sql, parameters, new BeanPropertyRowMapper<>(GrnListResponseDto.class));
         Long total = namedParameterJdbcTemplate.queryForObject(countQuery, parameters, Long.class);

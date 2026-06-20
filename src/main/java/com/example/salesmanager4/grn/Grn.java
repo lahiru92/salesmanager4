@@ -25,6 +25,7 @@ public class Grn {
     private BigDecimal cash;
     private BigDecimal cheque;
     private BigDecimal credit;
+    private LocalDate creditDue;
 
     @MappedCollection(idColumn = "grn_id")
     private List<GrnItem> items;
