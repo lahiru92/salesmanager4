@@ -75,19 +75,19 @@
                         <table class="table table-borderless w-auto">
                             <tr>
                                 <th>Cash</th>
-                                <td>12345</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(grn.cash, 1,'COMMA', 2, 'POINT')}">12345</td>
                             </tr>
                             <tr>
                                 <th>Cheques</th>
-                                <td>12345</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(grn.cheque, 1,'COMMA', 2, 'POINT')}">12345</td>
                             </tr>
                             <tr>
                                 <th>Credit</th>
-                                <td>12345</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(grn.credit, 1,'COMMA', 2, 'POINT')}">12345</td>
                             </tr>
                             <tr>
                                 <th>Credit Due</th>
-                                <td>2026-10-12</td>
+                                <td th:text="*{creditDue}">2026-10-12</td>
                             </tr>
                         </table>
                     </div>
