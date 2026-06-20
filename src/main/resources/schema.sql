@@ -69,9 +69,10 @@ alter table grn add column total numeric(12,2);
 alter table grn add column credit_due date;
 
 
-CREATE TABLE cash_transactions (
+drop table cash_transaction;
+CREATE TABLE cash_transaction (
 	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	txn_date DATE,
+	txn_date DATE  DEFAULT CURRENT_DATE,
 	txn_type VARCHAR,
 	amount   numeric(12,2),
 	ref_type varchar,

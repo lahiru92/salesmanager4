@@ -7,6 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.salesmanager4.cash.CashTransaction;
+import com.example.salesmanager4.cash.CashTransactionService;
+import com.example.salesmanager4.cash.CashTxnType;
+import com.example.salesmanager4.common.RefType;
 import com.example.salesmanager4.inventory.stock.StockTransactionService;
 import com.example.salesmanager4.users.CurrentUserService;
 
@@ -22,6 +26,7 @@ public class GrnService {
     private final GrnJdbcRepository grnJdbcRepository;
     private final CurrentUserService currentUserService;
     private final StockTransactionService stockTransactionService;
+    private final CashTransactionService cashTransactionService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 
@@ -57,7 +62,10 @@ public class GrnService {
         if (!"DRAFT".equals(grn.getStatus())) {
             throw new RuntimeException("Only DRAFT GRNs can be approved");
         }
+        
+        // Save GRN
         grnRepository.setStatusById(id, "APPROVED");
+        
         // Update stock for each item
         grn.getItems().forEach(item -> {
             stockTransactionService.stockIn(
@@ -68,6 +76,12 @@ public class GrnService {
                 id
             );
         });
+
+        // Update payments
+        cashTransactionService.postCashTransaction(
+            new CashTransaction(CashTxnType.IN, grn.getTotal(), RefType.GRN, grn.getId())
+        );
+
     }
 
     public Page<GrnListResponseDto> listGrns(GrnListRequestDto requestDto, Pageable pageable) {

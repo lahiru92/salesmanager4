@@ -1,6 +1,7 @@
 package com.example.salesmanager4.grn;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -29,4 +30,16 @@ public class Grn {
 
     @MappedCollection(idColumn = "grn_id")
     private List<GrnItem> items;
+
+    public BigDecimal getTotal() {
+        if (items != null) {
+            BigDecimal grandTotal = items.stream()
+                        .map(GrnItem::getSubTotal)
+                        .filter(subTotal -> subTotal != null)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            return grandTotal.setScale(2, RoundingMode.HALF_UP);
+
+        }
+        return BigDecimal.ZERO;
+    }
 }

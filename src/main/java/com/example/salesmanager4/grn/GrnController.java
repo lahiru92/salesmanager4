@@ -122,7 +122,6 @@ public class GrnController {
 
     @PostMapping
     public String create(@Valid @ModelAttribute("grn") GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
-        //TODO: process POST request
         log.info("Received GRN Header: {}", grnRequest);
 
         if (!grnRequest.isBalanced()) {

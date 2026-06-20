@@ -1,6 +1,7 @@
 package com.example.salesmanager4.grn;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
@@ -22,4 +23,16 @@ public class GrnItem {
     private BigDecimal rejectedQty;
     private BigDecimal unitPrice;
     private BigDecimal orderedPrice;
+
+    public BigDecimal getSubTotal() {
+        if (receivedQty != null && unitPrice != null) {
+
+            if (rejectedQty == null) {
+                rejectedQty = BigDecimal.ZERO;
+            }
+
+            return unitPrice.multiply(receivedQty.subtract(rejectedQty));
+        }
+        return BigDecimal.ZERO;
+    }
 }
