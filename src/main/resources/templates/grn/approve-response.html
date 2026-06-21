@@ -13,4 +13,13 @@
             }).showToast();
         </script>
     </div>
+
+    <div th:fragment="inline-approve-error">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${toast}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
 </html>

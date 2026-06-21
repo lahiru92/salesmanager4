@@ -18,6 +18,7 @@ import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -222,7 +223,7 @@ public class GrnController {
     
 
     @PostMapping("/{id}/approve")
-    public String approve(@PathVariable Long id, HttpServletRequest req, Model model) {
+    public String approve(@PathVariable Long id, HttpServletRequest req, HttpServletResponse res, Model model) {
         try {
             grnService.approveGrn(id);
 
@@ -235,6 +236,13 @@ public class GrnController {
             return "/grn/approve-response::approved-response";
         } catch (RuntimeException e) {
             log.error("Error approving GRN: {}", e.getMessage());
+
+            if ("inline".equals(req.getHeader("X-Approvemode"))) {
+                model.addAttribute("toast","Approval failed");
+                res.setHeader("HX-Retarget", "#toast");
+                return "/grn/approve-response::inline-approve-error";
+            }
+
             return "/grn/approve-response::approve-error";
         }
 

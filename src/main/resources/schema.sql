@@ -94,13 +94,29 @@ CREATE TABLE cheque_transactions (
 	txn_timestamp timestamp DEFAULT CURRENT_TIMESTAMP
 )
 
-CREATE TABLE creditor_transactions (
-	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	supplier_id bigint,
-	txn_date DATE,
-	txn_type VARCHAR,
-	amount   numeric(12,2),
-	ref_type varchar,
-	ref_id   bigint,
-	txn_timestamp timestamp DEFAULT CURRENT_TIMESTAMP
+
+CREATE TABLE creditor_transaction (
+    id              BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    supplier_id     bigint,
+    txn_date        DATE,
+    txn_type        VARCHAR, -- PAYABLE, PAYMENT
+    amount          numeric(12,2),
+    due_date        date,
+    ref_type        varchar, -- GRN
+    ref_id          bigint,
+    txn_timestamp   timestamp DEFAULT CURRENT_TIMESTAMP
 )
+
+CREATE VIEW creditor_balance AS
+SELECT
+    supplier_id,
+    due_date,
+    SUM(
+        CASE
+            WHEN txn_type = 'PAYABLE' THEN amount
+            WHEN txn_type = 'PAYMENT' THEN -amount
+            ELSE 0
+        END
+    ) AS balance
+FROM creditor_transaction
+GROUP BY supplier_id, due_date;

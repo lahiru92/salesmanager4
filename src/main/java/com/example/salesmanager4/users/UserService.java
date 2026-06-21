@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
-    public final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public Iterable<UserDTO> getAllUsers() {
         return userRepository.findAll();
@@ -40,7 +40,7 @@ public class UserService {
         String tempPassword = PasswordGenerator.generateTemporaryPassword(12);
 
         // Securely hash and save
-        UserDTO updatedUser = user.withPassword(tempPassword);
+        UserDTO updatedUser = user.withPassword(passwordEncoder.encode(tempPassword));
         userRepository.save(updatedUser);
 
         // Return plain-text only once so admin can give it to the user

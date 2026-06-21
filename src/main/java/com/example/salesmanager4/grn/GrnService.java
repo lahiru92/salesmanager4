@@ -1,5 +1,6 @@
 package com.example.salesmanager4.grn;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,9 @@ import com.example.salesmanager4.cash.CashTransaction;
 import com.example.salesmanager4.cash.CashTransactionService;
 import com.example.salesmanager4.cash.CashTxnType;
 import com.example.salesmanager4.common.RefType;
+import com.example.salesmanager4.creditors.creditortransaction.CreditorTransaction;
+import com.example.salesmanager4.creditors.creditortransaction.CreditorTransactionService;
+import com.example.salesmanager4.creditors.creditortransaction.CreditorTxnType;
 import com.example.salesmanager4.inventory.stock.StockTransactionService;
 import com.example.salesmanager4.users.CurrentUserService;
 
@@ -27,6 +31,7 @@ public class GrnService {
     private final CurrentUserService currentUserService;
     private final StockTransactionService stockTransactionService;
     private final CashTransactionService cashTransactionService;
+    private final CreditorTransactionService creditorTransactionService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 
@@ -58,7 +63,9 @@ public class GrnService {
 
     @Transactional
     public void approveGrn(Long id) {
+
         Grn grn = findById(id);
+
         if (!"DRAFT".equals(grn.getStatus())) {
             throw new RuntimeException("Only DRAFT GRNs can be approved");
         }
@@ -78,9 +85,14 @@ public class GrnService {
         });
 
         // Update payments
-        cashTransactionService.postCashTransaction(
-            new CashTransaction(CashTxnType.IN, grn.getTotal(), RefType.GRN, grn.getId())
+        if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  
+            cashTransactionService.postCashTransaction(
+                new CashTransaction(CashTxnType.IN, grn.getCash(), RefType.GRN, grn.getId())
         );
+
+        if (grn.getCredit() != null && grn.getCredit().compareTo(BigDecimal.ZERO) > 0) {
+            creditorTransactionService.postPayable(new CreditorTransaction(grn.getSupplierId(), CreditorTxnType.PAYABLE, grn.getCredit(), grn.getCreditDue(), RefType.GRN, grn.getId()));
+        }
 
     }
 

@@ -89,7 +89,7 @@
                             <td>
                                 <button class="btn btn-sm btn-light" th:hx-get="@{/grn/{id}(id=${grn.id})}" hx-target="#content" title="View"><i class="bi bi-eye"></i></button>
                                 <button th:if="${grn.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-get="@{/grn/{id}/edit(id=${grn.id})}" hx-target="#content" title="Edit"><i class="bi bi-pencil-square"></i></button>
-                                <button th:if="${grn.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-post="@{/grn/{id}/approve(id=${grn.id})}" hx-target="closest td" hx-include="#csrf" th:hx-headers='|{"X-Approvemode":"inline","X-oob-target":"grn-status-${grnStat.index}"}|' hx-confirm="Are you sure?" title="Approve"><i class="bi bi-file-earmark-check"></i></button>
+                                <button th:if="${grn.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-post="@{/grn/{id}/approve(id=${grn.id})}" hx-target="closest td" hx-include="#csrf" th:hx-headers='|{"X-Approvemode":"inline","X-oob-target":"grn-status-${grnStat.index}"}|' hx-confirm="Are you sure?" title="Approve"><i class="bi bi-check-lg"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -100,6 +100,8 @@
         <div th:replace="~{fragments/pagination :: pagination(target='#grn-table', baseUrl='/grn', page=${grns})}"></div>
 
     </div>
+
+    <div id="toast"></div>
     
 </div>
 </html>
