@@ -120,3 +120,27 @@ SELECT
     ) AS balance
 FROM creditor_transaction
 GROUP BY supplier_id, due_date;
+
+drop table supplier_payment;
+CREATE TABLE supplier_payment (
+	id                   bigint primary key generated always as identity,
+	supplier_id          bigint,
+	payment_method       varchar,
+	total_payment_amount numeric(12,2),
+	cheque_number        varchar,
+	bank                 varchar,
+	bank_account         varchar,
+	reference_number     varchar,
+	payment_date         date
+);
+
+
+drop table supplier_payment_allocation;
+CREATE TABLE supplier_payment_allocation (
+	id                   bigint primary key generated always as identity,
+	payment_id           bigint references supplier_payment(id),
+	grn_id               bigint references grn(id),
+	allocated_amount     numeric(12,2)
+)
+
+
