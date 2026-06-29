@@ -235,7 +235,7 @@ public class GrnController {
 
             return "/grn/approve-response::approved-response";
         } catch (RuntimeException e) {
-            log.error("Error approving GRN: {}", e.getMessage());
+            log.error("Error approving GRN: {}", e);
 
             if ("inline".equals(req.getHeader("X-Approvemode"))) {
                 model.addAttribute("toast","Approval failed");

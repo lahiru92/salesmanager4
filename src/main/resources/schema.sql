@@ -6,6 +6,12 @@ CREATE SCHEMA IF NOT EXISTS sales_manager;
 SET search_path TO sales_manager;
 
 -- ------------------------------------------------------------
+--  Enums
+-- ------------------------------------------------------------
+CREATE TYPE payment_direction AS ENUM ('IN', 'OUT');
+CREATE TYPE payment_type AS ENUM ('CASH', 'CHEQUE', 'BANK_TRANSFER');
+
+-- ------------------------------------------------------------
 --  Authentication
 -- ------------------------------------------------------------
 
@@ -149,6 +155,7 @@ CREATE TABLE grn (
     credit_due        DATE
 );
 
+
 CREATE TABLE grn_item (
     id            BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     grn_key       BIGINT,
@@ -223,11 +230,11 @@ GROUP BY supplier_id, due_date;
 -- ------------------------------------------------------------
 --  Supplier payments
 -- ------------------------------------------------------------
-
 CREATE TABLE supplier_payment (
     id                   BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     supplier_id          BIGINT,
     payment_method       VARCHAR,
+	direction            VARCHAR,
     total_payment_amount NUMERIC(12,2),
     cheque_number        VARCHAR,
     bank                 VARCHAR,

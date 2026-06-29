@@ -8,13 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.salesmanager4.cash.CashTransaction;
 import com.example.salesmanager4.cash.CashTransactionService;
-import com.example.salesmanager4.cash.CashTxnType;
-import com.example.salesmanager4.common.RefType;
-import com.example.salesmanager4.creditors.creditortransaction.CreditorTransaction;
 import com.example.salesmanager4.creditors.creditortransaction.CreditorTransactionService;
-import com.example.salesmanager4.creditors.creditortransaction.CreditorTxnType;
+import com.example.salesmanager4.finance.payments.PaymentDirection;
+import com.example.salesmanager4.finance.payments.PaymentType;
+import com.example.salesmanager4.finance.payments.payable.SupplierPaymentAllocationService;
+import com.example.salesmanager4.finance.payments.payable.SupplierPaymentRequest;
+import com.example.salesmanager4.finance.payments.payable.SupplierPaymentService;
 import com.example.salesmanager4.inventory.stock.StockTransactionService;
 import com.example.salesmanager4.users.CurrentUserService;
 
@@ -32,6 +32,9 @@ public class GrnService {
     private final StockTransactionService stockTransactionService;
     private final CashTransactionService cashTransactionService;
     private final CreditorTransactionService creditorTransactionService;
+
+    private final SupplierPaymentService supplierPaymentService;
+    private final SupplierPaymentAllocationService supplierPaymentAllocationService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 
@@ -85,14 +88,47 @@ public class GrnService {
         });
 
         // Update payments
-        if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  
-            cashTransactionService.postCashTransaction(
-                new CashTransaction(CashTxnType.IN, grn.getCash(), RefType.GRN, grn.getId())
-        );
+        // if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  
+        //     cashTransactionService.postCashTransaction(
+        //         new CashTransaction(CashTxnType.IN, grn.getCash(), RefType.GRN, grn.getId())
+        // );
 
-        if (grn.getCredit() != null && grn.getCredit().compareTo(BigDecimal.ZERO) > 0) {
-            creditorTransactionService.postPayable(new CreditorTransaction(grn.getSupplierId(), CreditorTxnType.PAYABLE, grn.getCredit(), grn.getCreditDue(), RefType.GRN, grn.getId()));
+        // if (grn.getCredit() != null && grn.getCredit().compareTo(BigDecimal.ZERO) > 0) {
+        //     creditorTransactionService.postPayable(new CreditorTransaction(grn.getSupplierId(), CreditorTxnType.PAYABLE, grn.getCredit(), grn.getCreditDue(), RefType.GRN, grn.getId()));
+        // }
+
+        if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  {
+
+            supplierPaymentService.createPaymentAndAllocate(grn.getId(), new SupplierPaymentRequest(
+                grn.getSupplierId(),
+                grn.getId(),
+                PaymentType.CASH,
+                PaymentDirection.OUT,
+                grn.getCash(),
+                null,
+                null,
+                null,
+                null,
+                grn.getReceivedDate()
+            ));
         }
+
+        if (grn.getCheque() != null && grn.getCheque().compareTo(BigDecimal.ZERO) > 0)  {
+
+            supplierPaymentService.createPaymentAndAllocate(grn.getId(), new SupplierPaymentRequest(
+                grn.getSupplierId(),
+                grn.getId(),
+                PaymentType.CHEQUE,
+                PaymentDirection.OUT,
+                grn.getCheque(),
+                null,
+                null,
+                null,
+                null,
+                grn.getReceivedDate()                
+            ));
+        }
+
 
     }
 
