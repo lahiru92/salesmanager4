@@ -30,11 +30,7 @@ public class GrnService {
     private final GrnJdbcRepository grnJdbcRepository;
     private final CurrentUserService currentUserService;
     private final StockTransactionService stockTransactionService;
-    private final CashTransactionService cashTransactionService;
-    private final CreditorTransactionService creditorTransactionService;
-
     private final SupplierPaymentService supplierPaymentService;
-    private final SupplierPaymentAllocationService supplierPaymentAllocationService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 

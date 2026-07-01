@@ -1,0 +1,1 @@
+INSERT INTO USERS VALUES('admin','$2a$12$JOeUYwSgnoh6.G6LpJfaOOz.hBBkcxGgxVGCorYtWFBD9WbYUt/le',1,1);
