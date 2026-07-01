@@ -8,11 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.salesmanager4.cash.CashTransactionService;
-import com.example.salesmanager4.creditors.creditortransaction.CreditorTransactionService;
 import com.example.salesmanager4.finance.payments.PaymentDirection;
 import com.example.salesmanager4.finance.payments.PaymentType;
-import com.example.salesmanager4.finance.payments.payable.SupplierPaymentAllocationService;
 import com.example.salesmanager4.finance.payments.payable.SupplierPaymentRequest;
 import com.example.salesmanager4.finance.payments.payable.SupplierPaymentService;
 import com.example.salesmanager4.inventory.stock.StockTransactionService;
@@ -30,11 +27,8 @@ public class GrnService {
     private final GrnJdbcRepository grnJdbcRepository;
     private final CurrentUserService currentUserService;
     private final StockTransactionService stockTransactionService;
-    private final CashTransactionService cashTransactionService;
-    private final CreditorTransactionService creditorTransactionService;
 
     private final SupplierPaymentService supplierPaymentService;
-    private final SupplierPaymentAllocationService supplierPaymentAllocationService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 
@@ -86,16 +80,6 @@ public class GrnService {
                 id
             );
         });
-
-        // Update payments
-        // if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  
-        //     cashTransactionService.postCashTransaction(
-        //         new CashTransaction(CashTxnType.IN, grn.getCash(), RefType.GRN, grn.getId())
-        // );
-
-        // if (grn.getCredit() != null && grn.getCredit().compareTo(BigDecimal.ZERO) > 0) {
-        //     creditorTransactionService.postPayable(new CreditorTransaction(grn.getSupplierId(), CreditorTxnType.PAYABLE, grn.getCredit(), grn.getCreditDue(), RefType.GRN, grn.getId()));
-        // }
 
         if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  {
 
