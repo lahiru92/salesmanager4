@@ -1,246 +1,246 @@
 -- ============================================================
---  sales_manager – full schema (structure only, no data)
---  H2 Database Compatible Version
+--  SALES_MANAGER – FULL SCHEMA (STRUCTURE ONLY, NO DATA)
+--  H2 DATABASE COMPATIBLE VERSION
 -- ============================================================
 
--- CREATE SCHEMA IF NOT EXISTS sales_manager;
--- SET SCHEMA sales_manager;
+-- CREATE SCHEMA IF NOT EXISTS SALES_MANAGER;
+-- SET SCHEMA SALES_MANAGER;
 
 -- ------------------------------------------------------------
---  Authentication
+--  AUTHENTICATION
 -- ------------------------------------------------------------
 
-CREATE TABLE users (
-    username   VARCHAR(50) PRIMARY KEY,
-    password   VARCHAR(500) NOT NULL,
-    enabled    BOOLEAN      NOT NULL,
-    employee_id BIGINT
+CREATE TABLE USERS (
+    USERNAME   VARCHAR(50) PRIMARY KEY,
+    PASSWORD   VARCHAR(500) NOT NULL,
+    ENABLED    BOOLEAN      NOT NULL,
+    EMPLOYEE_ID BIGINT
 );
 
-CREATE TABLE authorities (
-    username  VARCHAR(50) NOT NULL REFERENCES users(username),
-    authority VARCHAR(50) NOT NULL
+CREATE TABLE AUTHORITIES (
+    USERNAME  VARCHAR(50) NOT NULL REFERENCES USERS(USERNAME),
+    AUTHORITY VARCHAR(50) NOT NULL
 );
 
-CREATE UNIQUE INDEX ix_auth_username ON authorities (username, authority);
+CREATE UNIQUE INDEX IX_AUTH_USERNAME ON AUTHORITIES (USERNAME, AUTHORITY);
 
 -- ------------------------------------------------------------
---  Category
+--  CATEGORY
 -- ------------------------------------------------------------
 
-CREATE TABLE category (
-    category_id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name            VARCHAR(100) NOT NULL,
-    normalized_name VARCHAR(100) NOT NULL UNIQUE
-);
-
--- ------------------------------------------------------------
---  Supplier
--- ------------------------------------------------------------
-
-CREATE TABLE supplier (
-    supplier_id    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name           VARCHAR(150) NOT NULL,
-    phone          VARCHAR(30),
-    email          VARCHAR(100),
-    active         BOOLEAN DEFAULT TRUE,
-    contact_person VARCHAR(150)
+CREATE TABLE CATEGORY (
+    CATEGORY_ID     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NAME            VARCHAR(100) NOT NULL,
+    NORMALIZED_NAME VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- ------------------------------------------------------------
---  Item
+--  SUPPLIER
 -- ------------------------------------------------------------
 
-CREATE TABLE item (
-    item_id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    code          VARCHAR(50)  NOT NULL UNIQUE,
-    name          VARCHAR(200) NOT NULL,
-    category_id   BIGINT       NOT NULL REFERENCES category(category_id),
-    unit          VARCHAR(20)  NOT NULL,
-    reorder_level NUMERIC(10,2) DEFAULT 0,
-    active        BOOLEAN DEFAULT TRUE,
-    supplier_id   BIGINT
+CREATE TABLE SUPPLIER (
+    SUPPLIER_ID    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    NAME           VARCHAR(150) NOT NULL,
+    PHONE          VARCHAR(30),
+    EMAIL          VARCHAR(100),
+    ACTIVE         BOOLEAN DEFAULT TRUE,
+    CONTACT_PERSON VARCHAR(150)
 );
 
 -- ------------------------------------------------------------
---  Stock transaction
+--  ITEM
 -- ------------------------------------------------------------
 
-CREATE TABLE stock_transaction (
-    stock_txn_id   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    item_id        BIGINT       NOT NULL REFERENCES item(item_id),
-    txn_date       TIMESTAMP    NOT NULL,
-    txn_type       CHAR(3)      NOT NULL,
-    quantity       NUMERIC(12,2) NOT NULL,
-    unit_cost      NUMERIC(12,2),
-    reference_type VARCHAR(30),
-    reference_id   BIGINT,
-    remarks        VARCHAR(255),
-    CONSTRAINT chk_txn_type CHECK (txn_type IN ('IN ', 'OUT'))
-);
-
-CREATE INDEX idx_stock_item_date ON stock_transaction (item_id, txn_date);
-CREATE INDEX idx_stock_txn_type  ON stock_transaction (txn_type);
-
--- ------------------------------------------------------------
---  Employee
--- ------------------------------------------------------------
-
-CREATE TABLE employee (
-    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    known_name          VARCHAR,
-    full_name           VARCHAR,
-    address_line1       VARCHAR,
-    address_line2       VARCHAR,
-    address_line3       VARCHAR,
-    address_line4       VARCHAR,
-    address_line5       VARCHAR,
-    phone_mobile        VARCHAR,
-    phone_home          VARCHAR,
-    phone_office        VARCHAR,
-    email_personal      VARCHAR,
-    email_office        VARCHAR,
-    date_of_birth       DATE,
-    nic_number          VARCHAR,
-    passport_number     VARCHAR,
-    drivers_license_no  VARCHAR,
-    designation         VARCHAR,
-    date_joined         DATE,
-    created_by          BIGINT,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE ITEM (
+    ITEM_ID       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    CODE          VARCHAR(50)  NOT NULL UNIQUE,
+    NAME          VARCHAR(200) NOT NULL,
+    CATEGORY_ID   BIGINT       NOT NULL REFERENCES CATEGORY(CATEGORY_ID),
+    UNIT          VARCHAR(20)  NOT NULL,
+    REORDER_LEVEL NUMERIC(10,2) DEFAULT 0,
+    ACTIVE        BOOLEAN DEFAULT TRUE,
+    SUPPLIER_ID   BIGINT
 );
 
 -- ------------------------------------------------------------
---  Purchase order
+--  STOCK TRANSACTION
 -- ------------------------------------------------------------
 
-CREATE TABLE purchase_order (
-    id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    supplier_id BIGINT,
-    order_date  DATE,
-    status      VARCHAR(20),
-    created_by  BIGINT,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE STOCK_TRANSACTION (
+    STOCK_TXN_ID   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ITEM_ID        BIGINT       NOT NULL REFERENCES ITEM(ITEM_ID),
+    TXN_DATE       TIMESTAMP    NOT NULL,
+    TXN_TYPE       CHAR(3)      NOT NULL,
+    QUANTITY       NUMERIC(12,2) NOT NULL,
+    UNIT_COST      NUMERIC(12,2),
+    REFERENCE_TYPE VARCHAR(30),
+    REFERENCE_ID   BIGINT,
+    REMARKS        VARCHAR(255),
+    CONSTRAINT CHK_TXN_TYPE CHECK (TXN_TYPE IN ('IN ', 'OUT'))
 );
 
-CREATE TABLE purchase_order_item (
-    id                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    purchase_order_key BIGINT,
-    purchase_order_id  BIGINT,
-    item_id            BIGINT,
-    quantity           INTEGER,
-    price              NUMERIC(10,2)
-);
+CREATE INDEX IDX_STOCK_ITEM_DATE ON STOCK_TRANSACTION (ITEM_ID, TXN_DATE);
+CREATE INDEX IDX_STOCK_TXN_TYPE  ON STOCK_TRANSACTION (TXN_TYPE);
 
 -- ------------------------------------------------------------
---  Goods received note (GRN)
+--  EMPLOYEE
 -- ------------------------------------------------------------
 
-CREATE TABLE grn (
-    id                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    purchase_order_id BIGINT,
-    status            VARCHAR,
-    received_date     DATE,
-    supplier_id       BIGINT,
-    employee_id       BIGINT,
-    cash              NUMERIC(12,2),
-    cheque            NUMERIC(12,2),
-    credit            NUMERIC(12,2),
-    total             NUMERIC(12,2),
-    credit_due        DATE
-);
-
-CREATE TABLE grn_item (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    grn_key       BIGINT,
-    grn_id        BIGINT,
-    item_id       BIGINT,
-    item_name     VARCHAR,
-    ordered_qty   NUMERIC(12,2),
-    received_qty  NUMERIC(12,2),
-    rejected_qty  NUMERIC(12,2),
-    unit_price    NUMERIC(12,2),
-    ordered_price NUMERIC(12,2)
+CREATE TABLE EMPLOYEE (
+    ID                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    KNOWN_NAME          VARCHAR,
+    FULL_NAME           VARCHAR,
+    ADDRESS_LINE1       VARCHAR,
+    ADDRESS_LINE2       VARCHAR,
+    ADDRESS_LINE3       VARCHAR,
+    ADDRESS_LINE4       VARCHAR,
+    ADDRESS_LINE5       VARCHAR,
+    PHONE_MOBILE        VARCHAR,
+    PHONE_HOME          VARCHAR,
+    PHONE_OFFICE        VARCHAR,
+    EMAIL_PERSONAL      VARCHAR,
+    EMAIL_OFFICE        VARCHAR,
+    DATE_OF_BIRTH       DATE,
+    NIC_NUMBER          VARCHAR,
+    PASSPORT_NUMBER     VARCHAR,
+    DRIVERS_LICENSE_NO  VARCHAR,
+    DESIGNATION         VARCHAR,
+    DATE_JOINED         DATE,
+    CREATED_BY          BIGINT,
+    CREATED_AT          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ------------------------------------------------------------
---  Cash & cheque transactions
+--  PURCHASE ORDER
 -- ------------------------------------------------------------
 
-CREATE TABLE cash_transaction (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    txn_date      DATE      DEFAULT CURRENT_DATE,
-    txn_type      VARCHAR,
-    amount        NUMERIC(12,2),
-    ref_type      VARCHAR,
-    ref_id        BIGINT,
-    txn_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE PURCHASE_ORDER (
+    ID          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    SUPPLIER_ID BIGINT,
+    ORDER_DATE  DATE,
+    STATUS      VARCHAR(20),
+    CREATED_BY  BIGINT,
+    CREATED_AT  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE cheque_transactions (
-    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    txn_date        DATE,
-    txn_type        VARCHAR,
-    cheque_no       INTEGER,
-    cheque_date     DATE,
-    bank            CHAR(8),
-    amount          NUMERIC(12,2),
-    ref_type        VARCHAR,
-    ref_id          BIGINT,
-    clearing_status VARCHAR,
-    txn_timestamp   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE PURCHASE_ORDER_ITEM (
+    ID                 BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PURCHASE_ORDER_KEY BIGINT,
+    PURCHASE_ORDER_ID  BIGINT,
+    ITEM_ID            BIGINT,
+    QUANTITY           INTEGER,
+    PRICE              NUMERIC(10,2)
 );
 
 -- ------------------------------------------------------------
---  Creditor / supplier ledger
+--  GOODS RECEIVED NOTE (GRN)
 -- ------------------------------------------------------------
 
-CREATE TABLE creditor_transaction (
-    id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    supplier_id   BIGINT,
-    txn_date      DATE,
-    txn_type      VARCHAR,        -- PAYABLE | PAYMENT
-    amount        NUMERIC(12,2),
-    due_date      DATE,
-    ref_type      VARCHAR,        -- e.g. GRN
-    ref_id        BIGINT,
-    txn_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE GRN (
+    ID                BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PURCHASE_ORDER_ID BIGINT,
+    STATUS            VARCHAR,
+    RECEIVED_DATE     DATE,
+    SUPPLIER_ID       BIGINT,
+    EMPLOYEE_ID       BIGINT,
+    CASH              NUMERIC(12,2),
+    CHEQUE            NUMERIC(12,2),
+    CREDIT            NUMERIC(12,2),
+    TOTAL             NUMERIC(12,2),
+    CREDIT_DUE        DATE
 );
 
-CREATE VIEW creditor_balance AS
+CREATE TABLE GRN_ITEM (
+    ID            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    GRN_KEY       BIGINT,
+    GRN_ID        BIGINT,
+    ITEM_ID       BIGINT,
+    ITEM_NAME     VARCHAR,
+    ORDERED_QTY   NUMERIC(12,2),
+    RECEIVED_QTY  NUMERIC(12,2),
+    REJECTED_QTY  NUMERIC(12,2),
+    UNIT_PRICE    NUMERIC(12,2),
+    ORDERED_PRICE NUMERIC(12,2)
+);
+
+-- ------------------------------------------------------------
+--  CASH & CHEQUE TRANSACTIONS
+-- ------------------------------------------------------------
+
+CREATE TABLE CASH_TRANSACTION (
+    ID            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    TXN_DATE      DATE      DEFAULT CURRENT_DATE,
+    TXN_TYPE      VARCHAR,
+    AMOUNT        NUMERIC(12,2),
+    REF_TYPE      VARCHAR,
+    REF_ID        BIGINT,
+    TXN_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE CHEQUE_TRANSACTIONS (
+    ID              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    TXN_DATE        DATE,
+    TXN_TYPE        VARCHAR,
+    CHEQUE_NO       INTEGER,
+    CHEQUE_DATE     DATE,
+    BANK            CHAR(8),
+    AMOUNT          NUMERIC(12,2),
+    REF_TYPE        VARCHAR,
+    REF_ID          BIGINT,
+    CLEARING_STATUS VARCHAR,
+    TXN_TIMESTAMP   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------------------------
+--  CREDITOR / SUPPLIER LEDGER
+-- ------------------------------------------------------------
+
+CREATE TABLE CREDITOR_TRANSACTION (
+    ID            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    SUPPLIER_ID   BIGINT,
+    TXN_DATE      DATE,
+    TXN_TYPE      VARCHAR,        -- PAYABLE | PAYMENT
+    AMOUNT        NUMERIC(12,2),
+    DUE_DATE      DATE,
+    REF_TYPE      VARCHAR,        -- E.G. GRN
+    REF_ID        BIGINT,
+    TXN_TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE VIEW CREDITOR_BALANCE AS
 SELECT
-    supplier_id,
-    due_date,
+    SUPPLIER_ID,
+    DUE_DATE,
     SUM(
         CASE
-            WHEN txn_type = 'PAYABLE' THEN  amount
-            WHEN txn_type = 'PAYMENT' THEN -amount
+            WHEN TXN_TYPE = 'PAYABLE' THEN  AMOUNT
+            WHEN TXN_TYPE = 'PAYMENT' THEN -AMOUNT
             ELSE 0
         END
-    ) AS balance
-FROM creditor_transaction
-GROUP BY supplier_id, due_date;
+    ) AS BALANCE
+FROM CREDITOR_TRANSACTION
+GROUP BY SUPPLIER_ID, DUE_DATE;
 
 -- ------------------------------------------------------------
---  Supplier payments
+--  SUPPLIER PAYMENTS
 -- ------------------------------------------------------------
 
-CREATE TABLE supplier_payment (
-    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    supplier_id          BIGINT,
-    payment_method       VARCHAR,
-    direction            VARCHAR,
-    total_payment_amount NUMERIC(12,2),
-    cheque_number        VARCHAR,
-    bank                 VARCHAR,
-    bank_account         VARCHAR,
-    reference_number     VARCHAR,
-    payment_date         DATE
+CREATE TABLE SUPPLIER_PAYMENT (
+    ID                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    SUPPLIER_ID          BIGINT,
+    PAYMENT_METHOD       VARCHAR,
+    DIRECTION            VARCHAR,
+    TOTAL_PAYMENT_AMOUNT NUMERIC(12,2),
+    CHEQUE_NUMBER        VARCHAR,
+    BANK                 VARCHAR,
+    BANK_ACCOUNT         VARCHAR,
+    REFERENCE_NUMBER     VARCHAR,
+    PAYMENT_DATE         DATE
 );
 
-CREATE TABLE supplier_payment_allocation (
-    id               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    payment_id       BIGINT REFERENCES supplier_payment(id),
-    grn_id           BIGINT REFERENCES grn(id),
-    allocated_amount NUMERIC(12,2)
+CREATE TABLE SUPPLIER_PAYMENT_ALLOCATION (
+    ID               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PAYMENT_ID       BIGINT REFERENCES SUPPLIER_PAYMENT(ID),
+    GRN_ID           BIGINT REFERENCES GRN(ID),
+    ALLOCATED_AMOUNT NUMERIC(12,2)
 );
