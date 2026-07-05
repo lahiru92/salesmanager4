@@ -233,8 +233,8 @@ GROUP BY supplier_id, due_date;
 CREATE TABLE supplier_payment (
     id                   BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     supplier_id          BIGINT,
-    payment_method       VARCHAR,
-	direction            VARCHAR,
+    payment_method       VARCHAR, -- CASH, CHEQUE, BANK_TRANSFER
+	direction            VARCHAR, -- IN, OUT (IN if supplier happens to pay me)
     total_payment_amount NUMERIC(12,2),
     cheque_number        VARCHAR,
     bank                 VARCHAR,
@@ -249,3 +249,217 @@ CREATE TABLE supplier_payment_allocation (
     grn_id           BIGINT REFERENCES grn(id),
     allocated_amount NUMERIC(12,2)
 );
+
+
+-- ------------------------------------------------------------
+--  Views
+-- -----------------------------------------------------------
+
+-- =============================================================================
+-- 1. OUTSTANDING GRNs PER SUPPLIER
+--    One row per GRN that still has an unpaid balance.
+--    Includes how much was originally on credit, how much has been paid,
+--    and what remains — plus the due date and how many days overdue it is.
+-- =============================================================================
+CREATE VIEW OUTSTANDING_GRNS_PER_SUPPLIER AS
+WITH grn_balances AS (
+    SELECT
+        g.id                                    AS grn_id,
+        g.supplier_id,
+        g.received_date,
+        g.credit_due,
+        g.total,
+        g.credit                                AS credit_at_delivery,
+        COALESCE(SUM(
+		    CASE sp.direction
+		        WHEN 'OUT' THEN  spa.allocated_amount   -- payment reduces what you owe
+		        WHEN 'IN'  THEN -spa.allocated_amount   -- refund/credit increases what you owe
+		    END
+		), 0) AS paid_against_grn
+    FROM grn g
+    LEFT JOIN supplier_payment_allocation spa ON spa.grn_id = g.id
+	LEFT JOIN supplier_payment sp             ON sp.id = spa.payment_id
+    WHERE g.credit > 0                          -- only GRNs that had credit
+    GROUP BY g.id, g.supplier_id, g.received_date, g.credit_due, g.total, g.credit
+)
+SELECT
+    grn_id,
+    supplier_id,
+    received_date,
+    credit_due,
+    credit_at_delivery,
+    paid_against_grn,
+    credit_at_delivery - paid_against_grn                   AS outstanding_balance,
+    CASE
+        WHEN credit_due IS NULL THEN NULL
+        ELSE (CURRENT_DATE - credit_due)
+    END                                                     AS days_overdue,
+    CASE
+        WHEN credit_due IS NULL             THEN 'NO DUE DATE'
+        WHEN CURRENT_DATE <= credit_due     THEN 'CURRENT'
+        WHEN CURRENT_DATE - credit_due <= 30 THEN 'OVERDUE 1-30'
+        WHEN CURRENT_DATE - credit_due <= 60 THEN 'OVERDUE 31-60'
+        WHEN CURRENT_DATE - credit_due <= 90 THEN 'OVERDUE 61-90'
+        ELSE                                     'OVERDUE 90+'
+    END                                                     AS aging_bucket
+FROM grn_balances
+WHERE credit_at_delivery - paid_against_grn > 0             -- only open balances
+ORDER BY supplier_id, credit_due NULLS LAST, grn_id;
+
+
+-- =============================================================================
+-- 2. TOTAL OUTSTANDING BALANCE PER SUPPLIER
+--    One row per supplier — a summary of their entire open credit position.
+-- =============================================================================
+
+CREATE VIEW OUTSTANDING_BALANCE_PER_SUPPLIER AS
+WITH grn_balances AS (
+    SELECT
+        g.supplier_id,
+        g.credit                                AS credit_at_delivery,
+        COALESCE(SUM(
+		    CASE sp.direction
+		        WHEN 'OUT' THEN  spa.allocated_amount   -- payment reduces what you owe
+		        WHEN 'IN'  THEN -spa.allocated_amount   -- refund/credit increases what you owe
+		    END
+		), 0) AS paid_against_grn
+    FROM grn g
+    LEFT JOIN supplier_payment_allocation spa ON spa.grn_id = g.id
+	LEFT JOIN supplier_payment sp             ON sp.id = spa.payment_id
+    WHERE g.credit > 0
+    GROUP BY g.id, g.supplier_id, g.credit
+)
+SELECT
+    supplier_id,
+    COUNT(*)                                            AS open_grn_count,
+    SUM(credit_at_delivery)                             AS total_credit_issued,
+    SUM(paid_against_grn)                               AS total_paid,
+    SUM(credit_at_delivery - paid_against_grn)          AS total_outstanding
+FROM grn_balances
+WHERE credit_at_delivery - paid_against_grn > 0
+GROUP BY supplier_id
+ORDER BY total_outstanding DESC;
+
+
+-- =============================================================================
+-- 3. SUPPLIER AGING 
+--    One row per supplier with the outstanding balance broken into time buckets:
+--      CURRENT    — due date not yet passed (or no due date)
+--      1-30       — 1 to 30 days overdue
+--      31-60      — 31 to 60 days overdue
+--      61-90      — 61 to 90 days overdue
+--      90+        — more than 90 days overdue
+-- =============================================================================
+DROP VIEW IF EXISTS SUPPLIER_AGING;
+CREATE VIEW SUPPLIER_AGING AS
+WITH grn_balances AS (
+    SELECT
+        g.id                                    AS grn_id,
+        g.supplier_id,
+        g.credit_due,
+        g.credit                                AS credit_at_delivery,
+        COALESCE(SUM(
+		    CASE sp.direction
+		        WHEN 'OUT' THEN  spa.allocated_amount   -- payment reduces what we owe
+		        WHEN 'IN'  THEN -spa.allocated_amount   -- refund/credit increases what we owe
+		    END
+		), 0) AS paid_against_grn
+    FROM grn g
+    LEFT JOIN supplier_payment_allocation spa ON spa.grn_id = g.id
+	LEFT JOIN supplier_payment sp             ON sp.id = spa.payment_id
+    WHERE g.credit > 0
+    GROUP BY g.id, g.supplier_id, g.credit_due, g.credit
+),
+open_balances AS (
+    SELECT
+        supplier_id,
+        credit_due,
+        credit_at_delivery - paid_against_grn   AS outstanding
+    FROM grn_balances
+    WHERE credit_at_delivery - paid_against_grn > 0
+)
+SELECT
+    b.supplier_id, 
+	s.name                                                          AS supplier_name,
+
+    -- Total outstanding
+    SUM(outstanding)                                                AS total_outstanding,
+
+    -- Current: not yet overdue (or no due date set)
+    SUM(outstanding) FILTER (
+        WHERE credit_due IS NULL OR CURRENT_DATE <= credit_due
+    )                                                               AS current_amount,
+
+    -- 1-30 days overdue
+    SUM(outstanding) FILTER (
+        WHERE credit_due IS NOT NULL
+          AND CURRENT_DATE - credit_due BETWEEN 1 AND 30
+    )                                                               AS overdue_1_30,
+
+    -- 31-60 days overdue
+    SUM(outstanding) FILTER (
+        WHERE credit_due IS NOT NULL
+          AND CURRENT_DATE - credit_due BETWEEN 31 AND 60
+    )                                                               AS overdue_31_60,
+
+    -- 61-90 days overdue
+    SUM(outstanding) FILTER (
+        WHERE credit_due IS NOT NULL
+          AND CURRENT_DATE - credit_due BETWEEN 61 AND 90
+    )                                                               AS overdue_61_90,
+
+    -- Over 90 days
+    SUM(outstanding) FILTER (
+        WHERE credit_due IS NOT NULL
+          AND CURRENT_DATE - credit_due > 90
+    )                                                               AS overdue_90_plus
+
+FROM open_balances b
+LEFT JOIN supplier s ON s.supplier_id = b.supplier_id
+GROUP BY b.supplier_id, s.name
+ORDER BY total_outstanding DESC;
+
+
+-- =============================================================================
+-- 4 : UNALLOCATED PAYMENT CREDITS PER SUPPLIER
+--    Identifies payments where the supplier was paid more than what has
+--    been allocated to GRNs — i.e. the supplier has a credit balance in
+--    our favour that can be applied to future invoices.
+-- =============================================================================
+CREATE VIEW UNALLOCATED_PAYMENT_CR_PER_SUPPLIER AS
+SELECT
+    sp.supplier_id,
+    sp.id                                               AS payment_id,
+    sp.payment_date,
+    sp.payment_method,
+    sp.total_payment_amount,
+    COALESCE(SUM(spa.allocated_amount), 0)              AS allocated,
+    CASE sp.direction
+	    WHEN 'OUT' THEN sp.total_payment_amount - COALESCE(SUM(spa.allocated_amount), 0)
+	    WHEN 'IN'  THEN NULL  -- IN payments are refunds, not credits to apply forward
+	END AS unallocated_credit
+FROM supplier_payment sp
+LEFT JOIN supplier_payment_allocation spa ON spa.payment_id = sp.id
+GROUP BY sp.id, sp.supplier_id, sp.payment_date, sp.payment_method, sp.total_payment_amount
+HAVING sp.direction = 'OUT'
+	AND sp.total_payment_amount - COALESCE(SUM(spa.allocated_amount), 0) > 0
+ORDER BY sp.supplier_id, sp.payment_date;
+
+-- =============================================================================
+-- 5: Unposted supplier refunds (IN payments with unallocated amounts)
+-- =============================================================================
+CREATE VIEW UNPOSTED_SUPPLIER_REFUNDS AS
+SELECT
+    sp.id              AS payment_id,
+    sp.supplier_id,
+    sp.payment_date,
+    sp.total_payment_amount,
+    COALESCE(SUM(spa.allocated_amount), 0)              AS allocated_to_grns,
+    sp.total_payment_amount
+        - COALESCE(SUM(spa.allocated_amount), 0)        AS unposted_refund
+FROM supplier_payment sp
+LEFT JOIN supplier_payment_allocation spa ON spa.payment_id = sp.id
+WHERE sp.direction = 'IN'
+GROUP BY sp.id, sp.supplier_id, sp.payment_date, sp.total_payment_amount
+HAVING sp.total_payment_amount - COALESCE(SUM(spa.allocated_amount), 0) > 0
+ORDER BY sp.payment_date;
