@@ -8,11 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.salesmanager4.cash.CashTransactionService;
-import com.example.salesmanager4.creditors.creditortransaction.CreditorTransactionService;
 import com.example.salesmanager4.finance.payments.PaymentDirection;
 import com.example.salesmanager4.finance.payments.PaymentType;
-import com.example.salesmanager4.finance.payments.payable.SupplierPaymentAllocationService;
 import com.example.salesmanager4.finance.payments.payable.SupplierPaymentRequest;
 import com.example.salesmanager4.finance.payments.payable.SupplierPaymentService;
 import com.example.salesmanager4.inventory.stock.StockTransactionService;
@@ -30,6 +27,7 @@ public class GrnService {
     private final GrnJdbcRepository grnJdbcRepository;
     private final CurrentUserService currentUserService;
     private final StockTransactionService stockTransactionService;
+
     private final SupplierPaymentService supplierPaymentService;
 
     public void createGrn(GrnRequestDto grnRequest) {
@@ -83,16 +81,6 @@ public class GrnService {
             );
         });
 
-        // Update payments
-        // if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  
-        //     cashTransactionService.postCashTransaction(
-        //         new CashTransaction(CashTxnType.IN, grn.getCash(), RefType.GRN, grn.getId())
-        // );
-
-        // if (grn.getCredit() != null && grn.getCredit().compareTo(BigDecimal.ZERO) > 0) {
-        //     creditorTransactionService.postPayable(new CreditorTransaction(grn.getSupplierId(), CreditorTxnType.PAYABLE, grn.getCredit(), grn.getCreditDue(), RefType.GRN, grn.getId()));
-        // }
-
         if (grn.getCash() != null && grn.getCash().compareTo(BigDecimal.ZERO) > 0)  {
 
             supplierPaymentService.createPaymentAndAllocate(grn.getId(), new SupplierPaymentRequest(
@@ -144,10 +132,12 @@ public class GrnService {
         grn.setReceivedDate(grnRequest.getReceivedDate());
         grn.setSupplierId(grnRequest.getSupplierId());
         grn.setEmployeeId(grnRequest.getEmployeeId());
-        grn.setCash(grnRequest.getCash());
-        grn.setCredit(grnRequest.getCredit());
-        grn.setCheque(grnRequest.getCheque());
+        grn.setCash(grnRequest.getCash() != null ? grnRequest.getCash() : BigDecimal.ZERO);
+        grn.setCredit(grnRequest.getCredit() != null ? grnRequest.getCredit() : BigDecimal.ZERO);
+        grn.setCheque(grnRequest.getCheque() != null ? grnRequest.getCheque() : BigDecimal.ZERO);
         grn.setCreditDue(grnRequest.getCreditDue());
+        grn.setTotal(grnRequest.getGrandTotal() != null ? grnRequest.getGrandTotal() : BigDecimal.ZERO);
+        
         // Map items if needed
 
         grn.setItems(grnRequest.getItems().stream()
