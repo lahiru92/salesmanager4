@@ -3,6 +3,7 @@ package com.example.salesmanager4.finance.payments.payable;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.salesmanager4.finance.payments.AllocationRequest;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,23 @@ public class SupplierPaymentService {
 
         Long paymentId = supplierPaymentRepository.save(payment).getId();
         supplierPaymentAllocationRepository.save(SupplierPaymentAllocation.of(paymentId, grnId, paymentRequest.getTotalPaymentAmount()));
+    }
+
+    @Transactional
+    public Long createPaymentWithAllocations(SupplierPaymentRequest paymentRequest) {
+
+        Long paymentId = createPayment(paymentRequest);
+
+        List<SupplierPaymentAllocation> entities = paymentRequest.getAllocations().stream()
+                .filter(a -> a.getGrnId() != null && a.getAmount() != null && a.getAmount().signum() > 0)
+                .map(a -> SupplierPaymentAllocation.of(paymentId, a.getGrnId(), a.getAmount()))
+                .toList();
+
+        if (!entities.isEmpty()) {
+            supplierPaymentAllocationRepository.saveAll(entities);
+        }
+
+        return paymentId;
     }
 
     public void allocatePayment(Long paymentId, List<AllocationRequest> allocations) {

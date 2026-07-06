@@ -2,15 +2,17 @@ package com.example.salesmanager4.finance.payments.payable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.example.salesmanager4.finance.payments.PaymentDirection;
 import com.example.salesmanager4.finance.payments.PaymentType;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@NoArgsConstructor
 public class SupplierPaymentRequest {
 
     private Long supplierId;
@@ -23,5 +25,21 @@ public class SupplierPaymentRequest {
     private String bankAccount;
     private String referenceNumber;
     private LocalDate paymentDate;
+    private List<AllocationLine> allocations = new ArrayList<>();
+
+    public SupplierPaymentRequest(Long supplierId, Long grnId, PaymentType paymentMethod, PaymentDirection direction,
+            BigDecimal totalPaymentAmount, String chequeNumber, String bank, String bankAccount,
+            String referenceNumber, LocalDate paymentDate) {
+        this.supplierId = supplierId;
+        this.grnId = grnId;
+        this.paymentMethod = paymentMethod;
+        this.direction = direction;
+        this.totalPaymentAmount = totalPaymentAmount;
+        this.chequeNumber = chequeNumber;
+        this.bank = bank;
+        this.bankAccount = bankAccount;
+        this.referenceNumber = referenceNumber;
+        this.paymentDate = paymentDate;
+    }
 
 }

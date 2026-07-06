@@ -1,6 +1,7 @@
 import { runInitializers } from './init-registry.js';
 import * as purchaseOrder from '../modules/purchase-order.js';
 import * as grn from '../modules/grn.js';
+import * as supplierPayment from '../modules/supplier-payment.js';
 
 // ACTIONS (user interaction)
 const actions = {
@@ -11,7 +12,8 @@ const actions = {
     'grn:add-item': () => grn.addItem(),
     'grn:remove-item': (e) => {
         grn.removeItem(e.target);
-    }
+    },
+    'payment:fill': (e) => supplierPayment.fill(e)
 };
 
 document.body.addEventListener('click', (e) => {
@@ -30,6 +32,14 @@ document.body.addEventListener('input', (e) => {
 
   if (action === 'grn:subtotal') {
     grn.subtotal(e);
+  }
+
+  if (action === 'payment:recalc') {
+    supplierPayment.recalc();
+  }
+
+  if (action === 'payment:method') {
+    supplierPayment.toggleMethod();
   }
 });
 
