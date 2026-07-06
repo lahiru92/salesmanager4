@@ -225,7 +225,7 @@ GROUP BY SUPPLIER_ID, DUE_DATE;
 --  SUPPLIER PAYMENTS
 -- ------------------------------------------------------------
 CREATE TABLE supplier_payment (
-    id                   BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    id                   BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     supplier_id          BIGINT,
     payment_method       VARCHAR, -- CASH, CHEQUE, BANK_TRANSFER
 	direction            VARCHAR, -- IN, OUT (IN if supplier happens to pay me)
@@ -238,7 +238,7 @@ CREATE TABLE supplier_payment (
 );
 
 CREATE TABLE supplier_payment_allocation (
-    id               BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    id               BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     payment_id       BIGINT REFERENCES supplier_payment(id),
     grn_id           BIGINT REFERENCES grn(id),
     allocated_amount NUMERIC(12,2)
@@ -291,9 +291,9 @@ SELECT
     CASE
         WHEN credit_due IS NULL             THEN 'NO DUE DATE'
         WHEN CURRENT_DATE <= credit_due     THEN 'CURRENT'
-        WHEN CURRENT_DATE - credit_due <= 30 THEN 'OVERDUE 1-30'
-        WHEN CURRENT_DATE - credit_due <= 60 THEN 'OVERDUE 31-60'
-        WHEN CURRENT_DATE - credit_due <= 90 THEN 'OVERDUE 61-90'
+        WHEN DATEDIFF(DAY, CURRENT_DATE, credit_due) <= 30 THEN 'OVERDUE 1-30'
+        WHEN DATEDIFF(DAY, CURRENT_DATE, credit_due) <= 60 THEN 'OVERDUE 31-60'
+        WHEN DATEDIFF(DAY, CURRENT_DATE, credit_due) <= 90 THEN 'OVERDUE 61-90'
         ELSE                                     'OVERDUE 90+'
     END                                                     AS aging_bucket
 FROM grn_balances
@@ -387,25 +387,25 @@ SELECT
     -- 1-30 days overdue
     SUM(outstanding) FILTER (
         WHERE credit_due IS NOT NULL
-          AND CURRENT_DATE - credit_due BETWEEN 1 AND 30
+          AND DATEDIFF(DAY, CURRENT_DATE, CREDIT_DUE) BETWEEN 1 AND 30
     )                                                               AS overdue_1_30,
 
     -- 31-60 days overdue
     SUM(outstanding) FILTER (
         WHERE credit_due IS NOT NULL
-          AND CURRENT_DATE - credit_due BETWEEN 31 AND 60
+          AND DATEDIFF(DAY, CURRENT_DATE, CREDIT_DUE) BETWEEN 31 AND 60
     )                                                               AS overdue_31_60,
 
     -- 61-90 days overdue
     SUM(outstanding) FILTER (
         WHERE credit_due IS NOT NULL
-          AND CURRENT_DATE - credit_due BETWEEN 61 AND 90
+          AND DATEDIFF(DAY, CURRENT_DATE, CREDIT_DUE) BETWEEN 61 AND 90
     )                                                               AS overdue_61_90,
 
     -- Over 90 days
     SUM(outstanding) FILTER (
         WHERE credit_due IS NOT NULL
-          AND CURRENT_DATE - credit_due > 90
+          AND DATEDIFF(DAY, CURRENT_DATE, CREDIT_DUE) > 90
     )                                                               AS overdue_90_plus
 
 FROM open_balances b
