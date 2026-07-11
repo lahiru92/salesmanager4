@@ -18,16 +18,13 @@
 
     <div class="row container-fluid p-0" >
 
-        <div class="col-2 p-0 vh-100 d-flex flex-column sticky-top">
+        <div class="col-2 p-0 vh-100 d-flex flex-column sticky-top scrollable-sidebar" style="overflow-y: auto;">
             <div id="branding" class="text-bg-light pt-3 ps-3">
                 <img th:src="@{/img/3r64.png}" src="../static/img/3r64.png" width="32" height="32" class="me-2">
                 <span class="fw-semibold">3R Marketing</span>
 
             </div>
             <nav class="text-bg-light p-3 d-flex flex-column vh-100">
-
-                <a hx-get="/purchase-orders" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
-                <a hx-get="/grn/create" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">GRN</span></a>
 
                 <a sec:authorize="hasRole('ADMIN')" hx-get="/users" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person"></i><span class="ms-2">Users</span></a>
                 <a sec:authorize="hasAnyRole('ADMIN','HR','MANAGER')" hx-get="/employees" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person-vcard"></i><span class="ms-2">Employees</span></a>
@@ -43,7 +40,7 @@
                 <a hx-get="/invoices" hx-target="#content"  class="btn btn btn-light text-start"><i class="bi bi-receipt"></i><span class="ms-2">Invoice</span></a>
                 <a hx-get="/grn" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">GRN</span></a>
                 <a hx-get="/purchase-orders" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
-                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash</span></a>
+                <a hx-get="/cash-balancing" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash Balancing</span></a>
                 <a href="#" class="btn btn btn-light text-start"><i class="bi bi-cash-coin"></i><span class="ms-2">Cheques</span></a>
                 
                 <!-- Change password-->
@@ -93,6 +90,7 @@
     <script type="module" th:src="@{/js/modules/invoice.js}"></script>
     <script type="module" th:src="@{/js/modules/supplier-payment.js}"></script>
     <script type="module" th:src="@{/js/modules/customer-payment.js}"></script>
+    <script type="module" th:src="@{/js/modules/cash-balancing.js}"></script>
 </body>
 
 </html>

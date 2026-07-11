@@ -24,5 +24,6 @@ public class CustomerPayment {
     private String bankAccount;
     private String referenceNumber;
     private LocalDate paymentDate;
+    private Long collectedBy;
 
 }

@@ -26,6 +26,7 @@ public class CustomerPaymentRequest {
     private String bankAccount;
     private String referenceNumber;
     private LocalDate paymentDate;
+    private Long collectedBy;
     private List<AllocationLine> allocations = new ArrayList<>();
 
     public CustomerPaymentRequest(Long customerId, Long invoiceId, PaymentType paymentMethod, PaymentDirection direction,

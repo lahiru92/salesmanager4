@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.salesmanager4.customers.CustomerService;
+import com.example.salesmanager4.employees.EmployeeRepository;
 import com.example.salesmanager4.finance.payments.AllocationLine;
 import com.example.salesmanager4.finance.payments.PaymentDirection;
 import com.example.salesmanager4.finance.payments.PaymentType;
@@ -37,6 +38,7 @@ public class CustomerPaymentController {
     private final CustomerPaymentService customerPaymentService;
     private final DebtorRepository debtorRepository;
     private final CustomerService customerService;
+    private final EmployeeRepository employeeRepository;
 
     @GetMapping("/create")
     public String createForm(@RequestParam(required = false) Long customerId, Model model) {
@@ -79,6 +81,9 @@ public class CustomerPaymentController {
 
         if (payment.getCustomerId() == null) {
             bindingResult.reject("customer.required", "Customer is required.");
+        }
+        if (payment.getCollectedBy() == null) {
+            bindingResult.reject("collectedBy.required", "Collected by is required.");
         }
         if (payment.getPaymentDate() == null) {
             bindingResult.reject("paymentDate.required", "Payment date is required.");
@@ -128,6 +133,10 @@ public class CustomerPaymentController {
             if (payment.getCustomerId() != null) {
                 model.addAttribute("customerName", customerService.findById(payment.getCustomerId()).getName());
                 model.addAttribute("invoices", invoices);
+            }
+            if (payment.getCollectedBy() != null) {
+                employeeRepository.findById(payment.getCollectedBy())
+                        .ifPresent(e -> model.addAttribute("collectorName", e.getKnownName()));
             }
             model.addAttribute("allocAmounts", allocations.stream()
                     .collect(Collectors.toMap(AllocationLine::getDocumentId, AllocationLine::getAmount, BigDecimal::add)));

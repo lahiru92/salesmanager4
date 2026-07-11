@@ -83,7 +83,7 @@ public class InvoiceService {
 
         if (invoice.getCash() != null && invoice.getCash().compareTo(BigDecimal.ZERO) > 0)  {
 
-            customerPaymentService.createPaymentAndAllocate(invoice.getId(), new CustomerPaymentRequest(
+            CustomerPaymentRequest cashPayment = new CustomerPaymentRequest(
                 invoice.getCustomerId(),
                 invoice.getId(),
                 PaymentType.CASH,
@@ -94,12 +94,15 @@ public class InvoiceService {
                 null,
                 null,
                 invoice.getInvoiceDate()
-            ));
+            );
+            cashPayment.setCollectedBy(invoice.getEmployeeId());
+
+            customerPaymentService.createPaymentAndAllocate(invoice.getId(), cashPayment);
         }
 
         if (invoice.getCheque() != null && invoice.getCheque().compareTo(BigDecimal.ZERO) > 0)  {
 
-            customerPaymentService.createPaymentAndAllocate(invoice.getId(), new CustomerPaymentRequest(
+            CustomerPaymentRequest chequePayment = new CustomerPaymentRequest(
                 invoice.getCustomerId(),
                 invoice.getId(),
                 PaymentType.CHEQUE,
@@ -110,7 +113,10 @@ public class InvoiceService {
                 null,
                 null,
                 invoice.getInvoiceDate()
-            ));
+            );
+            chequePayment.setCollectedBy(invoice.getEmployeeId());
+
+            customerPaymentService.createPaymentAndAllocate(invoice.getId(), chequePayment);
         }
 
 

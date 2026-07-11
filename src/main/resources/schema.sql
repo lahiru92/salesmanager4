@@ -499,7 +499,8 @@ CREATE TABLE customer_payment (
     bank                 VARCHAR,
     bank_account         VARCHAR,
     reference_number     VARCHAR,
-    payment_date         DATE
+    payment_date         DATE,
+    collected_by         BIGINT   -- employee (salesman) who collected the money
 );
 
 CREATE TABLE customer_payment_allocation (
@@ -718,3 +719,49 @@ WHERE sp.direction = 'IN'
 GROUP BY sp.id, sp.supplier_id, sp.payment_date, sp.total_payment_amount
 HAVING sp.total_payment_amount - COALESCE(SUM(spa.allocated_amount), 0) > 0
 ORDER BY sp.payment_date;
+-- ------------------------------------------------------------
+--  Cash balancing
+--  1. Each salesman hands the day's collected cash to the cashier
+--     (part of it may already be deposited via bank CDM machines).
+--  2. Once every salesman is verified, the whole cash drawer is
+--     balanced and the day is closed.
+-- ------------------------------------------------------------
+
+CREATE TABLE cash_handover (
+    id              BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    handover_date   DATE,
+    employee_id     BIGINT,          -- salesman handing over
+    status          VARCHAR,         -- VERIFIED
+    expected_amount NUMERIC(12,2),   -- system-expected cash at verification time
+    declared_cash   NUMERIC(12,2),   -- physical cash handed to the cashier
+    cdm_total       NUMERIC(12,2),   -- total of the CDM deposits below
+    variance        NUMERIC(12,2),   -- declared_cash + cdm_total - expected_amount
+    remarks         VARCHAR,
+    verified_by     BIGINT,          -- cashier employee
+    verified_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cash_handover_deposit (
+    id                BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    cash_handover_key BIGINT,
+    cash_handover_id  BIGINT REFERENCES cash_handover(id),
+    bank              VARCHAR,
+    reference_number  VARCHAR,       -- CDM slip / receipt number
+    amount            NUMERIC(12,2)
+);
+
+CREATE TABLE cash_drawer_session (
+    id               BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    session_date     DATE UNIQUE,
+    status           VARCHAR,        -- CLOSED
+    opening_balance  NUMERIC(12,2),
+    handover_cash    NUMERIC(12,2),  -- sum of verified handover physical cash
+    other_cash_in    NUMERIC(12,2),  -- supplier cash refunds received (IN)
+    cash_out         NUMERIC(12,2),  -- supplier cash payments (OUT)
+    expected_closing NUMERIC(12,2),  -- opening + handover_cash + other_cash_in - cash_out
+    counted_closing  NUMERIC(12,2),
+    variance         NUMERIC(12,2),  -- counted_closing - expected_closing
+    remarks          VARCHAR,
+    closed_by        BIGINT,
+    closed_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

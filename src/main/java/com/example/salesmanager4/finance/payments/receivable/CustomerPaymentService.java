@@ -27,6 +27,7 @@ public class CustomerPaymentService {
         payment.setBankAccount(paymentRequest.getBankAccount());
         payment.setReferenceNumber(paymentRequest.getReferenceNumber());
         payment.setPaymentDate(paymentRequest.getPaymentDate());
+        payment.setCollectedBy(paymentRequest.getCollectedBy());
 
         return customerPaymentRepository.save(payment).getId();
     }

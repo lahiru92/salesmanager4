@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content" data-init="cash-balancing">
+
+    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">Cash Balancing</h1>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label m-0" for="balancing-date">Date</label>
+            <input type="date" id="balancing-date" name="date" class="form-control w-auto" th:value="${date}"
+                hx-get="/cash-balancing" hx-target="#content">
+        </div>
+    </div>
+
+    <div th:if="${message}">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${message}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+
+    <div th:if="${drawerSession == null and unverifiedCount > 0}" class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span>&nbsp</span>
+        <span th:text="|${unverifiedCount} salesman handover(s) not verified yet.|"></span>
+    </div>
+
+    <div class="card overflow-hidden mb-3">
+        <div class="card-header">
+            <h5 class="fs-6 m-0">Salesman handovers</h5>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table m-0 align-middle">
+                <thead>
+                    <tr class="text-uppercase">
+                        <th>Salesman</th>
+                        <th class="text-end">Receipts</th>
+                        <th class="text-end">Expected Cash</th>
+                        <th class="text-end">Physical Cash</th>
+                        <th class="text-end">CDM Deposits</th>
+                        <th class="text-end">Variance</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(summaries)}">
+                        <td colspan="8" class="text-secondary">No cash collections recorded for this date.</td>
+                    </tr>
+                    <tr th:each="s : ${summaries}">
+                        <td th:text="${s.employeeName}"></td>
+                        <td class="text-end" th:text="${s.receiptCount}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(s.expectedCash != null ? s.expectedCash : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" th:text="${s.declaredCash != null ? #numbers.formatDecimal(s.declaredCash, 1, 'COMMA', 2, 'POINT') : '—'}"></td>
+                        <td class="text-end" th:text="${s.cdmTotal != null ? #numbers.formatDecimal(s.cdmTotal, 1, 'COMMA', 2, 'POINT') : '—'}"></td>
+                        <td class="text-end"
+                            th:classappend="${s.variance != null and s.variance.signum() < 0} ? 'text-danger fw-bold' : (${s.variance != null and s.variance.signum() > 0} ? 'text-success' : '')"
+                            th:text="${s.variance != null ? #numbers.formatDecimal(s.variance, 1, 'COMMA', 2, 'POINT') : '—'}"></td>
+                        <td>
+                            <span th:if="${s.verified}" class="badge text-bg-success">Verified</span>
+                            <span th:unless="${s.verified}" class="badge text-bg-dark">Pending</span>
+                        </td>
+                        <td>
+                            <button th:unless="${s.verified}" class="btn btn-sm btn-primary"
+                                th:hx-get="@{/cash-balancing/handovers/create(employeeId=${s.employeeId},date=${date})}"
+                                hx-target="#content">Verify</button>
+                            <button th:if="${s.verified}" class="btn btn-sm btn-light" title="View"
+                                th:hx-get="@{/cash-balancing/handovers/create(employeeId=${s.employeeId},date=${date})}"
+                                hx-target="#content"><i class="bi bi-eye"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot th:if="${!#lists.isEmpty(summaries)}">
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(expectedTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" colspan="2" th:text="${#numbers.formatDecimal(receivedTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end"
+                            th:classappend="${varianceTotal.signum() < 0} ? 'text-danger' : (${varianceTotal.signum() > 0} ? 'text-success' : '')"
+                            th:text="${#numbers.formatDecimal(varianceTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Drawer already closed for this date -->
+    <div class="row" th:if="${drawerSession != null}">
+        <div class="col-6">
+            <div class="card overflow-hidden">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fs-6 m-0">Cash drawer</h5>
+                    <span class="badge text-bg-success">Closed</span>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table m-0">
+                        <tbody>
+                            <tr><td>Opening balance</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.openingBalance, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>+ Handover cash</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.handoverCash, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>+ Supplier cash refunds</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.otherCashIn, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>&minus; Supplier cash payments</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.cashOut, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr class="fw-bold"><td>Expected closing</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.expectedClosing, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>Counted closing</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.countedClosing, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr class="fw-bold">
+                                <td>Variance</td>
+                                <td class="text-end"
+                                    th:classappend="${drawerSession.variance.signum() < 0} ? 'text-danger' : (${drawerSession.variance.signum() > 0} ? 'text-success' : '')"
+                                    th:text="${#numbers.formatDecimal(drawerSession.variance, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr th:if="${drawerSession.remarks != null and !drawerSession.remarks.isBlank()}">
+                                <td>Remarks</td><td class="text-end" th:text="${drawerSession.remarks}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p th:text="${drawerSession}"></p>
+    <!-- Drawer still open: balance and close it -->
+    <div class="row" th:if="${drawerSession == null}">
+    <!-- <div class="row" > -->
+        <div class="col-6">
+            <form id="drawer-form" th:object="${drawerClose}" hx-post="/cash-balancing/close" hx-target="#content"
+                class="needs-validation" novalidate>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:field="*{sessionDate}">
+
+                <div th:if="${#fields.hasGlobalErrors()}">
+                    <div th:each="err : ${#fields.globalErrors()}">
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>&nbsp</span>
+                            <span th:text="${err}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="fs-6 m-0">Cash drawer</h5>
+                        <span class="badge text-bg-dark">Open</span>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table m-0 align-middle" id="drawer-calc"
+                            th:data-handover-cash="${handoverCash}" th:data-cash-in="${otherCashIn}" th:data-cash-out="${cashOut}">
+                            <tbody>
+                                <tr>
+                                    <td><label for="openingBalance" class="form-label m-0">Opening balance</label></td>
+                                    <td class="col-4"><input type="number" step="0.01" min="0" class="form-control text-end"
+                                        th:field="*{openingBalance}" data-action="cashbal:drawer" required></td>
+                                </tr>
+                                <tr><td>+ Handover cash (verified)</td><td class="text-end" th:text="${#numbers.formatDecimal(handoverCash, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                                <tr><td>+ Supplier cash refunds</td><td class="text-end" th:text="${#numbers.formatDecimal(otherCashIn, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                                <tr><td>&minus; Supplier cash payments</td><td class="text-end" th:text="${#numbers.formatDecimal(cashOut, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                                <tr class="fw-bold"><td>Expected closing</td><td class="text-end" id="drawer-expected">0.00</td></tr>
+                                <tr>
+                                    <td><label for="countedClosing" class="form-label m-0">Counted closing cash</label></td>
+                                    <td><input type="number" step="0.01" min="0" class="form-control text-end"
+                                        th:field="*{countedClosing}" data-action="cashbal:drawer" required></td>
+                                </tr>
+                                <tr class="fw-bold"><td>Variance</td><td class="text-end" id="drawer-variance">&mdash;</td></tr>
+                                <tr>
+                                    <td><label for="remarks" class="form-label m-0">Remarks</label></td>
+                                    <td><input type="text" class="form-control" th:field="*{remarks}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-end">
+                        <button type="submit" class="btn btn-primary" hx-confirm="Close the cash drawer for this date?">Close Drawer</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</html>

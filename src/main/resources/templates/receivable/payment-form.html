@@ -43,6 +43,13 @@
                 <div class="invalid-feedback">Customer is required</div>
             </div>
             <div class="col-3">
+                <label class="form-label" for="payment-collector">Collected By</label>
+                <select id="payment-collector" name="collectedBy" placeholder="Salesman" class="form-select" required>
+                    <option th:if="*{collectedBy != null}" th:value="*{collectedBy}" th:text="${collectorName}" selected></option>
+                </select>
+                <div class="invalid-feedback">Collected by is required</div>
+            </div>
+            <div class="col-3">
                 <label class="form-label" for="paymentDate">Payment Date</label>
                 <input type="date" class="form-control" th:field="*{paymentDate}" required>
                 <div class="invalid-feedback">Payment date is required</div>
@@ -55,14 +62,14 @@
                     <option value="BANK_TRANSFER">Bank Transfer</option>
                 </select>
             </div>
+        </div>
+
+        <div class="row p-2 mb-3">
             <div class="col-3">
                 <label class="form-label" for="totalPaymentAmount">Amount</label>
                 <input type="number" step="0.01" min="0.01" class="form-control text-end" th:field="*{totalPaymentAmount}" data-action="payment:recalc" required>
                 <div class="invalid-feedback">Amount must be greater than zero</div>
             </div>
-        </div>
-
-        <div class="row p-2 mb-3">
             <div class="col-3 payment-field d-none" data-methods="CHEQUE">
                 <label class="form-label" for="chequeNumber">Cheque Number</label>
                 <input type="text" class="form-control" th:field="*{chequeNumber}">
