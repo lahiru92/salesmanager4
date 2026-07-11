@@ -1,30 +1,30 @@
 import { toggleMethod, recalc } from './payment-allocation.js';
 
-let supplierSelectInstance;
+let customerSelectInstance;
 
 export function init(root) {
-  initSupplierSelect(root);
+  initCustomerSelect(root);
   toggleMethod();
   recalc();
 }
 
-function initSupplierSelect(root) {
-  const el = root.querySelector('#payment-supplier');
+function initCustomerSelect(root) {
+  const el = root.querySelector('#payment-customer');
   if (!el) return;
 
   if (el.tomselect) {
     el.tomselect.destroy();
   }
 
-  supplierSelectInstance = new TomSelect(el, {
-    valueField: 'supplierId',
+  customerSelectInstance = new TomSelect(el, {
+    valueField: 'customerId',
     labelField: 'name',
     searchField: ['name'],
 
     load: function (query, callback) {
       if (!query.length) return callback();
 
-      fetch('/suppliers/api/list?q=' + query)
+      fetch('/customers/api/list?q=' + query)
         .then(res => res.json())
         .then(json => callback(json))
         .catch(() => callback());
@@ -33,7 +33,7 @@ function initSupplierSelect(root) {
     onChange: function (value) {
       if (!value) return;
 
-      htmx.ajax('GET', '/supplier-payments/outstanding-grns?supplierId=' + value, {
+      htmx.ajax('GET', '/customer-payments/outstanding-invoices?customerId=' + value, {
         target: '#allocation-container',
         swap: 'innerHTML'
       }).then(() => recalc());

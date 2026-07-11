@@ -55,8 +55,8 @@ public class SupplierPaymentService {
         Long paymentId = createPayment(paymentRequest);
 
         List<SupplierPaymentAllocation> entities = paymentRequest.getAllocations().stream()
-                .filter(a -> a.getGrnId() != null && a.getAmount() != null && a.getAmount().signum() > 0)
-                .map(a -> SupplierPaymentAllocation.of(paymentId, a.getGrnId(), a.getAmount()))
+                .filter(a -> a.getDocumentId() != null && a.getAmount() != null && a.getAmount().signum() > 0)
+                .map(a -> SupplierPaymentAllocation.of(paymentId, a.getDocumentId(), a.getAmount()))
                 .toList();
 
         if (!entities.isEmpty()) {

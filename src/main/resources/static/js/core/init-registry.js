@@ -1,11 +1,15 @@
 import * as purchaseOrder from '../modules/purchase-order.js';
 import * as grn from '../modules/grn.js';
+import * as invoice from '../modules/invoice.js';
 import * as supplierPayment from '../modules/supplier-payment.js';
+import * as customerPayment from '../modules/customer-payment.js';
 
 const registry = {
     'purchase-order': purchaseOrder,
     'grn': grn,
-    'supplier-payment': supplierPayment
+    'invoice': invoice,
+    'supplier-payment': supplierPayment,
+    'customer-payment': customerPayment
 };
 
 export function runInitializers(root) {

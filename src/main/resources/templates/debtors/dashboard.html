@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content">
+
+    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">Debtors</h1>
+        <div>
+            <button hx-get="/customer-payments/create" hx-target="#content" class="btn btn-primary">Receive a payment</button>
+        </div>
+    </div>
+
+
+    <div class="card mb-3" style="width:18rem;">
+        <div class="card-body">
+            <h5 class="card-title">Total Outstanding</h5>
+            <h1 class="display-6" th:text="${#numbers.formatDecimal(totalOutstandingBalance.totalOutstanding != null ? totalOutstandingBalance.totalOutstanding : 0, 1, 'COMMA', 2, 'POINT')}"></h1>
+            <p class="text-secondary p-0 m-0" th:text="|${totalOutstandingBalance.openInvoiceCount} open invoices|"></p>
+        </div>
+    </div>
+
+
+    <div class="card overflow-hidden">
+        <div class="card-header">
+            <h5>Aging by customer</h5>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table m-0">
+                <thead>
+                    <tr class="text-uppercase">
+                        <th>Customer</th>
+                        <th class="text-end">Total Outstanding</th>
+                        <th class="text-end">Current</th>
+                        <th class="text-end">1-30 Days</th>
+                        <th class="text-end">31-60 Days</th>
+                        <th class="text-end">61-90 Days</th>
+                        <th class="text-end">90+ Days</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="customer : ${customerAging}">
+                        <td th:text="${customer.customerName}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(customer.totalOutstanding != null ? customer.totalOutstanding : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(customer.currentAmount != null ? customer.currentAmount : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(customer.overdue_1_30 != null ? customer.overdue_1_30 : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(customer.overdue_31_60 != null ? customer.overdue_31_60 : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(customer.overdue_61_90 != null ? customer.overdue_61_90 : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(customer.overdue_90Plus != null ? customer.overdue_90Plus : 0, 1, 'COMMA', 2, 'POINT')}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</html>

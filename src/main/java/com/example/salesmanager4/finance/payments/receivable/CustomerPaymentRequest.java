@@ -1,4 +1,4 @@
-package com.example.salesmanager4.finance.payments.payable;
+package com.example.salesmanager4.finance.payments.receivable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class SupplierPaymentRequest {
+public class CustomerPaymentRequest {
 
-    private Long supplierId;
-    private Long grnId;
+    private Long customerId;
+    private Long invoiceId;
     private PaymentType paymentMethod;
     private PaymentDirection direction;
     private BigDecimal totalPaymentAmount;
@@ -28,11 +28,11 @@ public class SupplierPaymentRequest {
     private LocalDate paymentDate;
     private List<AllocationLine> allocations = new ArrayList<>();
 
-    public SupplierPaymentRequest(Long supplierId, Long grnId, PaymentType paymentMethod, PaymentDirection direction,
+    public CustomerPaymentRequest(Long customerId, Long invoiceId, PaymentType paymentMethod, PaymentDirection direction,
             BigDecimal totalPaymentAmount, String chequeNumber, String bank, String bankAccount,
             String referenceNumber, LocalDate paymentDate) {
-        this.supplierId = supplierId;
-        this.grnId = grnId;
+        this.customerId = customerId;
+        this.invoiceId = invoiceId;
         this.paymentMethod = paymentMethod;
         this.direction = direction;
         this.totalPaymentAmount = totalPaymentAmount;

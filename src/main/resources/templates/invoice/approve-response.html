@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <button th:fragment="approved-response" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i>Approved</button>
+
+    <div th:fragment="approve-error">
+        <a th:hx-post="@{/invoices/{id}/approve (id=*{id}) }" hx-swap="outerHTML" hx-include="#csrf" class="btn btn-outline-secondary">Approve</a>
+        <script th:inline="javascript">
+            Toastify({
+                text: "Error occurred while approving invoice",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+
+    <div th:fragment="inline-approve-error">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${toast}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+</html>

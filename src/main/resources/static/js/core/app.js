@@ -1,7 +1,8 @@
 import { runInitializers } from './init-registry.js';
 import * as purchaseOrder from '../modules/purchase-order.js';
 import * as grn from '../modules/grn.js';
-import * as supplierPayment from '../modules/supplier-payment.js';
+import * as invoice from '../modules/invoice.js';
+import * as paymentAllocation from '../modules/payment-allocation.js';
 
 // ACTIONS (user interaction)
 const actions = {
@@ -13,7 +14,11 @@ const actions = {
     'grn:remove-item': (e) => {
         grn.removeItem(e.target);
     },
-    'payment:fill': (e) => supplierPayment.fill(e)
+    'invoice:add-item': () => invoice.addItem(),
+    'invoice:remove-item': (e) => {
+        invoice.removeItem(e.target);
+    },
+    'payment:fill': (e) => paymentAllocation.fill(e)
 };
 
 document.body.addEventListener('click', (e) => {
@@ -34,12 +39,16 @@ document.body.addEventListener('input', (e) => {
     grn.subtotal(e);
   }
 
+  if (action === 'invoice:subtotal') {
+    invoice.subtotal(e);
+  }
+
   if (action === 'payment:recalc') {
-    supplierPayment.recalc();
+    paymentAllocation.recalc();
   }
 
   if (action === 'payment:method') {
-    supplierPayment.toggleMethod();
+    paymentAllocation.toggleMethod();
   }
 });
 
@@ -66,7 +75,7 @@ document.body.addEventListener('htmx:beforeRequest', function (evt) {
         if (form && !form.checkValidity()) {
             evt.preventDefault();
             form.classList.add('was-validated');
-        }   
+        }
     }
 
 });

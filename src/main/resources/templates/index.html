@@ -34,6 +34,7 @@
                 <a hx-get="/suppliers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-truck"></i><span class="ms-2">Suppliers</span></a>
                 <a hx-get="/customers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-shop-window"></i><span class="ms-2">Customers</span></a>
                 <a hx-get="/creditors" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-up"></i><span class="ms-2">Creditors</span></a>
+                <a hx-get="/debtors" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">Debtors</span></a>
                 <a hx-get="/items" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-boxes"></i><span class="ms-2">Items</span></a>
                 <a hx-get="/categories" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-tags"></i><span class="ms-2">Categories</span></a>
                 <a hx-get="/inventory" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-list-check"></i><span class="ms-2">Inventory</span></a>
@@ -89,7 +90,9 @@
     <script type="module" th:src="@{/js/core/init-registry.js}"></script>
     <script type="module" th:src="@{/js/modules/purchase-order.js}"></script>
     <script type="module" th:src="@{/js/modules/grn.js}"></script>
+    <script type="module" th:src="@{/js/modules/invoice.js}"></script>
     <script type="module" th:src="@{/js/modules/supplier-payment.js}"></script>
+    <script type="module" th:src="@{/js/modules/customer-payment.js}"></script>
 </body>
 
 </html>

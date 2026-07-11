@@ -1,4 +1,4 @@
-package com.example.salesmanager4.finance.payments.payable;
+package com.example.salesmanager4.finance.payments.receivable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.salesmanager4.customers.CustomerService;
 import com.example.salesmanager4.finance.payments.AllocationLine;
 import com.example.salesmanager4.finance.payments.PaymentDirection;
 import com.example.salesmanager4.finance.payments.PaymentType;
-import com.example.salesmanager4.finance.payments.creditors.CreditorRepository;
-import com.example.salesmanager4.finance.payments.creditors.dto.SupplierOutstandingGrn;
-import com.example.salesmanager4.suppliers.SupplierService;
+import com.example.salesmanager4.finance.payments.debtors.DebtorRepository;
+import com.example.salesmanager4.finance.payments.debtors.dto.CustomerOutstandingInvoice;
 import com.example.salesmanager4.util.Breadcrumb;
 
 import lombok.RequiredArgsConstructor;
@@ -31,54 +31,54 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/supplier-payments")
-public class SupplierPaymentController {
+@RequestMapping("/customer-payments")
+public class CustomerPaymentController {
 
-    private final SupplierPaymentService supplierPaymentService;
-    private final CreditorRepository creditorRepository;
-    private final SupplierService supplierService;
+    private final CustomerPaymentService customerPaymentService;
+    private final DebtorRepository debtorRepository;
+    private final CustomerService customerService;
 
     @GetMapping("/create")
-    public String createForm(@RequestParam(required = false) Long supplierId, Model model) {
+    public String createForm(@RequestParam(required = false) Long customerId, Model model) {
 
-        SupplierPaymentRequest payment = new SupplierPaymentRequest();
+        CustomerPaymentRequest payment = new CustomerPaymentRequest();
         payment.setPaymentDate(LocalDate.now());
         payment.setPaymentMethod(PaymentType.CASH);
-        payment.setSupplierId(supplierId);
+        payment.setCustomerId(customerId);
 
-        if (supplierId != null) {
-            model.addAttribute("supplierName", supplierService.findById(supplierId).getName());
-            model.addAttribute("grns", creditorRepository.getSupplierOutstandingGrns(supplierId));
+        if (customerId != null) {
+            model.addAttribute("customerName", customerService.findById(customerId).getName());
+            model.addAttribute("invoices", debtorRepository.getCustomerOutstandingInvoices(customerId));
         }
 
         model.addAttribute("breadcrumbs", breadcrumbs());
         model.addAttribute("payment", payment);
         model.addAttribute("allocAmounts", Map.of());
 
-        return "payable/payment-form::content";
+        return "receivable/payment-form::content";
     }
 
-    @GetMapping("/outstanding-grns")
-    public String outstandingGrns(@RequestParam Long supplierId, Model model) {
-        model.addAttribute("grns", creditorRepository.getSupplierOutstandingGrns(supplierId));
+    @GetMapping("/outstanding-invoices")
+    public String outstandingInvoices(@RequestParam Long customerId, Model model) {
+        model.addAttribute("invoices", debtorRepository.getCustomerOutstandingInvoices(customerId));
         model.addAttribute("allocAmounts", Map.of());
-        return "payable/payment-form::allocation-table";
+        return "receivable/payment-form::allocation-table";
     }
 
     @PostMapping
-    public String create(@ModelAttribute("payment") SupplierPaymentRequest payment, BindingResult bindingResult, Model model) {
+    public String create(@ModelAttribute("payment") CustomerPaymentRequest payment, BindingResult bindingResult, Model model) {
 
-        log.info("Supplier payment request: {}", payment);
+        log.info("Customer payment request: {}", payment);
 
-        payment.setDirection(PaymentDirection.OUT);
+        payment.setDirection(PaymentDirection.IN);
 
         List<AllocationLine> allocations = payment.getAllocations() == null ? List.of()
                 : payment.getAllocations().stream()
                         .filter(a -> a.getDocumentId() != null && a.getAmount() != null && a.getAmount().signum() != 0)
                         .toList();
 
-        if (payment.getSupplierId() == null) {
-            bindingResult.reject("supplier.required", "Supplier is required.");
+        if (payment.getCustomerId() == null) {
+            bindingResult.reject("customer.required", "Customer is required.");
         }
         if (payment.getPaymentDate() == null) {
             bindingResult.reject("paymentDate.required", "Payment date is required.");
@@ -93,27 +93,27 @@ public class SupplierPaymentController {
             bindingResult.reject("chequeNumber.required", "Cheque number is required for cheque payments.");
         }
 
-        List<SupplierOutstandingGrn> grns = payment.getSupplierId() == null ? List.of()
-                : creditorRepository.getSupplierOutstandingGrns(payment.getSupplierId());
-        Map<Long, SupplierOutstandingGrn> outstandingByGrn = grns.stream()
-                .collect(Collectors.toMap(SupplierOutstandingGrn::grnId, Function.identity()));
+        List<CustomerOutstandingInvoice> invoices = payment.getCustomerId() == null ? List.of()
+                : debtorRepository.getCustomerOutstandingInvoices(payment.getCustomerId());
+        Map<Long, CustomerOutstandingInvoice> outstandingByInvoice = invoices.stream()
+                .collect(Collectors.toMap(CustomerOutstandingInvoice::invoiceId, Function.identity()));
 
         BigDecimal allocatedTotal = BigDecimal.ZERO;
         for (AllocationLine allocation : allocations) {
-            SupplierOutstandingGrn grn = outstandingByGrn.get(allocation.getDocumentId());
-            if (grn == null) {
-                bindingResult.reject("allocation.unknownGrn",
-                        "GRN #" + allocation.getDocumentId() + " is not an outstanding GRN of the selected supplier.");
+            CustomerOutstandingInvoice invoice = outstandingByInvoice.get(allocation.getDocumentId());
+            if (invoice == null) {
+                bindingResult.reject("allocation.unknownInvoice",
+                        "Invoice #" + allocation.getDocumentId() + " is not an outstanding invoice of the selected customer.");
                 continue;
             }
             if (allocation.getAmount().signum() < 0) {
                 bindingResult.reject("allocation.negative",
-                        "Allocation for GRN #" + allocation.getDocumentId() + " cannot be negative.");
+                        "Allocation for invoice #" + allocation.getDocumentId() + " cannot be negative.");
                 continue;
             }
-            if (allocation.getAmount().compareTo(grn.outstandingBalance()) > 0) {
+            if (allocation.getAmount().compareTo(invoice.outstandingBalance()) > 0) {
                 bindingResult.reject("allocation.exceedsOutstanding",
-                        "Allocation for GRN #" + allocation.getDocumentId() + " exceeds its outstanding balance.");
+                        "Allocation for invoice #" + allocation.getDocumentId() + " exceeds its outstanding balance.");
             }
             allocatedTotal = allocatedTotal.add(allocation.getAmount());
         }
@@ -123,23 +123,23 @@ public class SupplierPaymentController {
         }
 
         if (bindingResult.hasErrors()) {
-            log.warn("Supplier payment validation errors: {}", bindingResult.getAllErrors());
+            log.warn("Customer payment validation errors: {}", bindingResult.getAllErrors());
 
-            if (payment.getSupplierId() != null) {
-                model.addAttribute("supplierName", supplierService.findById(payment.getSupplierId()).getName());
-                model.addAttribute("grns", grns);
+            if (payment.getCustomerId() != null) {
+                model.addAttribute("customerName", customerService.findById(payment.getCustomerId()).getName());
+                model.addAttribute("invoices", invoices);
             }
             model.addAttribute("allocAmounts", allocations.stream()
                     .collect(Collectors.toMap(AllocationLine::getDocumentId, AllocationLine::getAmount, BigDecimal::add)));
             model.addAttribute("breadcrumbs", breadcrumbs());
 
-            return "payable/payment-form::content";
+            return "receivable/payment-form::content";
         }
 
         payment.setAllocations(allocations);
-        Long paymentId = supplierPaymentService.createPaymentWithAllocations(payment);
+        Long paymentId = customerPaymentService.createPaymentWithAllocations(payment);
 
-        SupplierPaymentRequest fresh = new SupplierPaymentRequest();
+        CustomerPaymentRequest fresh = new CustomerPaymentRequest();
         fresh.setPaymentDate(LocalDate.now());
         fresh.setPaymentMethod(PaymentType.CASH);
 
@@ -148,14 +148,14 @@ public class SupplierPaymentController {
         model.addAttribute("breadcrumbs", breadcrumbs());
         model.addAttribute("message", "Payment #" + paymentId + " recorded.");
 
-        return "payable/payment-form::content";
+        return "receivable/payment-form::content";
     }
 
     private List<Breadcrumb> breadcrumbs() {
         return List.of(
             new Breadcrumb("Home", "/"),
-            new Breadcrumb("Creditors", "/creditors"),
-            new Breadcrumb("Make a Payment", null)
+            new Breadcrumb("Debtors", "/debtors"),
+            new Breadcrumb("Receive a Payment", null)
         );
     }
 }
