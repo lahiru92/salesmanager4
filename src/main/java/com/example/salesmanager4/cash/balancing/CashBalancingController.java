@@ -145,6 +145,22 @@ public class CashBalancingController {
         return "cash/dashboard::content";
     }
 
+    @PostMapping("/reopen")
+    public String reopenDrawer(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sessionDate,
+            Model model) {
+
+        try {
+            cashBalancingService.reopenDrawer(sessionDate);
+            model.addAttribute("message", "Cash drawer reopened for " + sessionDate + ".");
+        } catch (RuntimeException e) {
+            log.error("Error reopening drawer", e);
+            model.addAttribute("message", e.getMessage());
+        }
+
+        populateDashboard(model, sessionDate);
+        return "cash/dashboard::content";
+    }
+
     private void populateDashboard(Model model, LocalDate date) {
 
         List<SalesmanCashSummary> summaries = cashBalancingRepository.getSalesmanCashSummaries(date);
@@ -166,13 +182,22 @@ public class CashBalancingController {
         long unverifiedCount = summaries.stream().filter(s -> !s.isVerified()).count();
 
         CashDrawerSession session = cashDrawerSessionRepository.findBySessionDate(date).orElse(null);
+        boolean reopened = session != null && "REOPENED".equals(session.getStatus());
+        CashDrawerSession closedSession = session != null && "CLOSED".equals(session.getStatus()) ? session : null;
+
         BigDecimal handoverCash = cashBalancingService.handoverCash(date);
         SupplierCashMovement supplierCash = cashBalancingService.supplierCashMovement(date);
 
         if (!model.containsAttribute("drawerClose")) {
             DrawerCloseRequest drawerClose = new DrawerCloseRequest();
             drawerClose.setSessionDate(date);
-            drawerClose.setOpeningBalance(cashBalancingService.defaultOpeningBalance(date));
+            if (session != null && "REOPENED".equals(session.getStatus())) {
+                drawerClose.setOpeningBalance(session.getOpeningBalance());
+                drawerClose.setCountedClosing(session.getCountedClosing());
+                drawerClose.setRemarks(session.getRemarks());
+            } else {
+                drawerClose.setOpeningBalance(cashBalancingService.defaultOpeningBalance(date));
+            }
             model.addAttribute("drawerClose", drawerClose);
         }
 
@@ -188,7 +213,8 @@ public class CashBalancingController {
         model.addAttribute("receivedTotal", receivedTotal);
         model.addAttribute("varianceTotal", varianceTotal);
         model.addAttribute("unverifiedCount", unverifiedCount);
-        model.addAttribute("drawerSession", session);
+        model.addAttribute("drawerSession", closedSession);
+        model.addAttribute("reopened", reopened);
         model.addAttribute("handoverCash", handoverCash);
         model.addAttribute("otherCashIn", supplierCash.cashIn());
         model.addAttribute("cashOut", supplierCash.cashOut());

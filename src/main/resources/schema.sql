@@ -753,7 +753,7 @@ CREATE TABLE cash_handover_deposit (
 CREATE TABLE cash_drawer_session (
     id               BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     session_date     DATE UNIQUE,
-    status           VARCHAR,        -- CLOSED
+    status           VARCHAR,        -- CLOSED | REOPENED
     opening_balance  NUMERIC(12,2),
     handover_cash    NUMERIC(12,2),  -- sum of verified handover physical cash
     other_cash_in    NUMERIC(12,2),  -- supplier cash refunds received (IN)

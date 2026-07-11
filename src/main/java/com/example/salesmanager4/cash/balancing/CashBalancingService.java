@@ -115,10 +115,13 @@ public class CashBalancingService {
             throw new RuntimeException("Employee ID not found for current user");
         }
 
-        cashDrawerSessionRepository.findBySessionDate(request.getSessionDate())
-                .ifPresent(s -> {
-                    throw new RuntimeException("The cash drawer is already closed for this date");
-                });
+        // A reopened session gets updated and closed again; a CLOSED one stays locked
+        CashDrawerSession session = cashDrawerSessionRepository.findBySessionDate(request.getSessionDate())
+                .orElseGet(CashDrawerSession::new);
+
+        if ("CLOSED".equals(session.getStatus())) {
+            throw new RuntimeException("The cash drawer is already closed for this date");
+        }
 
         BigDecimal opening = request.getOpeningBalance() != null ? request.getOpeningBalance() : BigDecimal.ZERO;
         BigDecimal counted = request.getCountedClosing() != null ? request.getCountedClosing() : BigDecimal.ZERO;
@@ -130,7 +133,6 @@ public class CashBalancingService {
                 .add(supplierCash.cashIn())
                 .subtract(supplierCash.cashOut());
 
-        CashDrawerSession session = new CashDrawerSession();
         session.setSessionDate(request.getSessionDate());
         session.setStatus("CLOSED");
         session.setOpeningBalance(opening);
@@ -144,6 +146,28 @@ public class CashBalancingService {
         session.setClosedBy(closerEmployeeId);
 
         log.info("Closing cash drawer: {}", session);
+
+        return cashDrawerSessionRepository.save(session);
+    }
+
+    @Transactional
+    public CashDrawerSession reopenDrawer(LocalDate sessionDate) {
+
+        Long employeeId = currentUserService.getEmployeeId();
+        if (employeeId == null) {
+            throw new RuntimeException("Employee ID not found for current user");
+        }
+
+        CashDrawerSession session = cashDrawerSessionRepository.findBySessionDate(sessionDate)
+                .orElseThrow(() -> new RuntimeException("No drawer session found for " + sessionDate));
+
+        if (!"CLOSED".equals(session.getStatus())) {
+            throw new RuntimeException("The drawer session for this date is not closed");
+        }
+
+        session.setStatus("REOPENED");
+
+        log.info("Reopening cash drawer session: {}", session);
 
         return cashDrawerSessionRepository.save(session);
     }
