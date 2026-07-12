@@ -54,9 +54,11 @@ export function drawerRecalc() {
   const handoverCash = parseFloat(calc.dataset.handoverCash) || 0;
   const cashIn = parseFloat(calc.dataset.cashIn) || 0;
   const cashOut = parseFloat(calc.dataset.cashOut) || 0;
+  const ledgerIn = parseFloat(calc.dataset.ledgerIn) || 0;
+  const ledgerOut = parseFloat(calc.dataset.ledgerOut) || 0;
   const opening = parseFloat(document.querySelector('#openingBalance')?.value) || 0;
 
-  const expected = opening + handoverCash + cashIn - cashOut;
+  const expected = opening + handoverCash + cashIn + ledgerIn - cashOut - ledgerOut;
   setText('#drawer-expected', expected);
 
   const counted = document.querySelector('#countedClosing')?.value;

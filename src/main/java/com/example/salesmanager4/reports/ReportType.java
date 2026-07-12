@@ -26,6 +26,7 @@ public enum ReportType {
 
     // Finance
     CASH_FLOW_PROFIT("cash-flow-profit", "Cash Flow & Profit", "Finance", true, true, false),
+    OTHER_INCOME_EXPENSES("other-income-expenses", "Other Income & Expenses", "Finance", true, true, false),
 
     // Sales & performance
     SALES_SUMMARY("sales-summary", "Sales Summary", "Sales & Performance", true, true, false),

@@ -21,6 +21,8 @@ public class CashDrawerSession {
     private BigDecimal handoverCash;
     private BigDecimal otherCashIn;
     private BigDecimal cashOut;
+    private BigDecimal otherIncome;
+    private BigDecimal expenses;
     private BigDecimal expectedClosing;
     private BigDecimal countedClosing;
     private BigDecimal variance;

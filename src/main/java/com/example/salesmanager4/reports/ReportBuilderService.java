@@ -40,6 +40,7 @@ public class ReportBuilderService {
             case REORDER -> reorder();
             case STOCK_MOVEMENT -> stockMovement(params);
             case CASH_FLOW_PROFIT -> cashFlowProfit(params);
+            case OTHER_INCOME_EXPENSES -> otherIncomeExpenses(params);
             case SALES_SUMMARY -> salesSummary(params);
             case SALES_BY_CUSTOMER -> salesByCustomer(params);
             case DEBTOR_AGING -> debtorAging();
@@ -255,33 +256,106 @@ public class ReportBuilderService {
     private List<ReportTable> cashFlowProfit(ReportParams p) {
         List<Map<String, Object>> cashFlow = repo.cashFlow(p.from(), p.to(), p.grouping());
         List<Map<String, Object>> profit = repo.profit(p.from(), p.to(), p.grouping());
+        List<Map<String, Object>> ledger = repo.ledgerByPeriod(p.from(), p.to(), p.grouping());
 
         ReportTable cashFlowTable = new ReportTable("Cash flow (all payment methods, in vs out)",
                 List.of(ReportColumn.text("Period"), ReportColumn.number("Customer Receipts"),
-                        ReportColumn.number("Supplier Refunds"), ReportColumn.number("Supplier Payments"),
-                        ReportColumn.number("Customer Refunds"), ReportColumn.number("Net Cash Flow")),
+                        ReportColumn.number("Supplier Refunds"), ReportColumn.number("Other Income"),
+                        ReportColumn.number("Supplier Payments"), ReportColumn.number("Customer Refunds"),
+                        ReportColumn.number("Expenses"), ReportColumn.number("Net Cash Flow")),
                 cashFlow.stream().map(r -> List.of(
                         period(r.get("period"), p.grouping()), money(r.get("customer_receipts")),
-                        money(r.get("supplier_refunds")), money(r.get("supplier_payments")),
-                        money(r.get("customer_refunds")), money(r.get("net_cash_flow")))).toList(),
+                        money(r.get("supplier_refunds")), money(r.get("other_income")),
+                        money(r.get("supplier_payments")), money(r.get("customer_refunds")),
+                        money(r.get("other_expenses")), money(r.get("net_cash_flow")))).toList(),
                 List.of("Total", sumMoney(cashFlow, "customer_receipts"), sumMoney(cashFlow, "supplier_refunds"),
-                        sumMoney(cashFlow, "supplier_payments"), sumMoney(cashFlow, "customer_refunds"),
+                        sumMoney(cashFlow, "other_income"), sumMoney(cashFlow, "supplier_payments"),
+                        sumMoney(cashFlow, "customer_refunds"), sumMoney(cashFlow, "other_expenses"),
                         sumMoney(cashFlow, "net_cash_flow")));
 
+        // Merge sales-profit and other-income/expense periods chronologically
+        java.util.TreeMap<Date, Map<String, Object>> profitByPeriod = new java.util.TreeMap<>();
+        profit.forEach(r -> profitByPeriod.put((Date) r.get("period"), r));
+        java.util.TreeMap<Date, Map<String, Object>> ledgerByPeriod = new java.util.TreeMap<>();
+        ledger.forEach(r -> ledgerByPeriod.put((Date) r.get("period"), r));
+
+        java.util.TreeSet<Date> allPeriods = new java.util.TreeSet<>(profitByPeriod.keySet());
+        allPeriods.addAll(ledgerByPeriod.keySet());
+
+        List<List<String>> profitRows = new ArrayList<>();
+        for (Date periodDate : allPeriods) {
+            Map<String, Object> profitRow = profitByPeriod.get(periodDate);
+            Map<String, Object> ledgerRow = ledgerByPeriod.get(periodDate);
+
+            BigDecimal gross = profitRow != null ? decimal(profitRow.get("gross_profit")) : BigDecimal.ZERO;
+            BigDecimal otherIncome = ledgerRow != null ? decimal(ledgerRow.get("other_income")) : BigDecimal.ZERO;
+            BigDecimal otherExpenses = ledgerRow != null ? decimal(ledgerRow.get("other_expenses")) : BigDecimal.ZERO;
+
+            profitRows.add(List.of(
+                    period(periodDate, p.grouping()),
+                    integer(profitRow != null ? profitRow.get("invoice_count") : null),
+                    money(profitRow != null ? profitRow.get("revenue") : null),
+                    money(profitRow != null ? profitRow.get("cogs") : null),
+                    money(gross),
+                    percent(gross, profitRow != null ? decimal(profitRow.get("revenue")) : BigDecimal.ZERO),
+                    money(otherIncome),
+                    money(otherExpenses),
+                    money(gross.add(otherIncome).subtract(otherExpenses))));
+        }
+
+        BigDecimal grossTotal = sum(profit, "gross_profit");
+        BigDecimal incomeTotal = sum(ledger, "other_income");
+        BigDecimal expenseTotal = sum(ledger, "other_expenses");
+
         ReportTable profitTable = new ReportTable(
-                "Gross profit (revenue minus goods shipped at weighted-average cost; expenses not tracked)",
+                "Profit (gross = revenue minus goods shipped at weighted-average cost; net = gross + other income - expenses)",
                 List.of(ReportColumn.text("Period"), ReportColumn.number("Invoices"), ReportColumn.number("Revenue"),
                         ReportColumn.number("Cost of Goods"), ReportColumn.number("Gross Profit"),
-                        ReportColumn.number("Margin %")),
-                profit.stream().map(r -> List.of(
-                        period(r.get("period"), p.grouping()), integer(r.get("invoice_count")),
-                        money(r.get("revenue")), money(r.get("cogs")), money(r.get("gross_profit")),
-                        percent(decimal(r.get("gross_profit")), decimal(r.get("revenue"))))).toList(),
+                        ReportColumn.number("Margin %"), ReportColumn.number("Other Income"),
+                        ReportColumn.number("Expenses"), ReportColumn.number("Net Profit")),
+                profitRows,
                 List.of("Total", sumInt(profit, "invoice_count"), sumMoney(profit, "revenue"),
-                        sumMoney(profit, "cogs"), sumMoney(profit, "gross_profit"),
-                        percent(sum(profit, "gross_profit"), sum(profit, "revenue"))));
+                        sumMoney(profit, "cogs"), money(grossTotal),
+                        percent(grossTotal, sum(profit, "revenue")),
+                        money(incomeTotal), money(expenseTotal),
+                        money(grossTotal.add(incomeTotal).subtract(expenseTotal))));
 
         return List.of(cashFlowTable, profitTable);
+    }
+
+    private List<ReportTable> otherIncomeExpenses(ReportParams p) {
+        List<Map<String, Object>> byCategory = repo.ledgerByCategory(p.from(), p.to());
+        List<Map<String, Object>> byPeriod = repo.ledgerByPeriod(p.from(), p.to(), p.grouping());
+
+        BigDecimal incomeTotal = byCategory.stream()
+                .filter(r -> "INCOME".equals(r.get("kind")))
+                .map(r -> decimal(r.get("amount")))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal expenseTotal = byCategory.stream()
+                .filter(r -> "EXPENSE".equals(r.get("kind")))
+                .map(r -> decimal(r.get("amount")))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        ReportTable categoryTable = new ReportTable("By category",
+                List.of(ReportColumn.text("Type"), ReportColumn.text("Category"),
+                        ReportColumn.number("Entries"), ReportColumn.number("Amount")),
+                byCategory.stream().map(r -> List.of(
+                        str(r.get("kind")), str(r.get("category_name")),
+                        integer(r.get("entry_count")), money(r.get("amount")))).toList(),
+                List.of("Net (income - expenses)", "", sumInt(byCategory, "entry_count"),
+                        money(incomeTotal.subtract(expenseTotal))));
+
+        ReportTable trendTable = new ReportTable("Trend",
+                List.of(ReportColumn.text("Period"), ReportColumn.number("Income"),
+                        ReportColumn.number("Expenses"), ReportColumn.number("Net")),
+                byPeriod.stream().map(r -> List.of(
+                        period(r.get("period"), p.grouping()), money(r.get("other_income")),
+                        money(r.get("other_expenses")),
+                        money(decimal(r.get("other_income")).subtract(decimal(r.get("other_expenses")))))).toList(),
+                List.of("Total", sumMoney(byPeriod, "other_income"), sumMoney(byPeriod, "other_expenses"),
+                        money(incomeTotal.subtract(expenseTotal))));
+
+        return List.of(categoryTable, trendTable);
     }
 
     // ------------------------------------------------------------------

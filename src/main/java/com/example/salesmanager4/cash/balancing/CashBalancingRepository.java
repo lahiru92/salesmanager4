@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.salesmanager4.cash.balancing.dto.CollectionLine;
+import com.example.salesmanager4.cash.balancing.dto.LedgerCashMovement;
 import com.example.salesmanager4.cash.balancing.dto.SalesmanCashSummary;
 import com.example.salesmanager4.cash.balancing.dto.SupplierCashMovement;
 
@@ -75,6 +76,22 @@ public class CashBalancingRepository {
             ORDER BY cp.id
             """;
         return jdbcTemplate.query(sql, new DataClassRowMapper<>(CollectionLine.class), paymentMethod, employeeId, date);
+    }
+
+    /**
+     * Cash-method other income / expenses recorded in the ledger for the
+     * given day (drawer inflow / outflow).
+     */
+    public LedgerCashMovement getLedgerCashMovement(LocalDate date) {
+        String sql = """
+            SELECT
+                COALESCE(SUM(CASE kind WHEN 'INCOME'  THEN amount ELSE 0 END), 0) AS income,
+                COALESCE(SUM(CASE kind WHEN 'EXPENSE' THEN amount ELSE 0 END), 0) AS expense
+            FROM ledger_entry
+            WHERE payment_method = 'CASH'
+              AND entry_date = ?
+            """;
+        return jdbcTemplate.queryForObject(sql, new DataClassRowMapper<>(LedgerCashMovement.class), date);
     }
 
     /**

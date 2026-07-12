@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.salesmanager4.cash.balancing.dto.CollectionLine;
+import com.example.salesmanager4.cash.balancing.dto.LedgerCashMovement;
 import com.example.salesmanager4.cash.balancing.dto.SalesmanCashSummary;
 import com.example.salesmanager4.cash.balancing.dto.SupplierCashMovement;
 import com.example.salesmanager4.employees.EmployeeRepository;
@@ -187,6 +188,7 @@ public class CashBalancingController {
 
         BigDecimal handoverCash = cashBalancingService.handoverCash(date);
         SupplierCashMovement supplierCash = cashBalancingService.supplierCashMovement(date);
+        LedgerCashMovement ledgerCash = cashBalancingService.ledgerCashMovement(date);
 
         if (!model.containsAttribute("drawerClose")) {
             DrawerCloseRequest drawerClose = new DrawerCloseRequest();
@@ -218,6 +220,8 @@ public class CashBalancingController {
         model.addAttribute("handoverCash", handoverCash);
         model.addAttribute("otherCashIn", supplierCash.cashIn());
         model.addAttribute("cashOut", supplierCash.cashOut());
+        model.addAttribute("ledgerCashIn", ledgerCash.income());
+        model.addAttribute("ledgerCashOut", ledgerCash.expense());
     }
 
     private void populateHandoverForm(Model model, Long employeeId, LocalDate date) {

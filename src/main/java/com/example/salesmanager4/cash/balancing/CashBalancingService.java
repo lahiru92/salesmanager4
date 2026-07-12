@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.example.salesmanager4.cash.balancing.dto.CollectionLine;
+import com.example.salesmanager4.cash.balancing.dto.LedgerCashMovement;
 import com.example.salesmanager4.cash.balancing.dto.SupplierCashMovement;
 import com.example.salesmanager4.users.CurrentUserService;
 
@@ -100,6 +101,10 @@ public class CashBalancingService {
         return cashBalancingRepository.getSupplierCashMovement(date);
     }
 
+    public LedgerCashMovement ledgerCashMovement(LocalDate date) {
+        return cashBalancingRepository.getLedgerCashMovement(date);
+    }
+
     /** Default drawer opening balance: the counted closing of the most recent closed session. */
     public BigDecimal defaultOpeningBalance(LocalDate date) {
         return cashDrawerSessionRepository.findLatestBefore(date)
@@ -127,11 +132,14 @@ public class CashBalancingService {
         BigDecimal counted = request.getCountedClosing() != null ? request.getCountedClosing() : BigDecimal.ZERO;
         BigDecimal handoverCash = handoverCash(request.getSessionDate());
         SupplierCashMovement supplierCash = supplierCashMovement(request.getSessionDate());
+        LedgerCashMovement ledgerCash = ledgerCashMovement(request.getSessionDate());
 
         BigDecimal expectedClosing = opening
                 .add(handoverCash)
                 .add(supplierCash.cashIn())
-                .subtract(supplierCash.cashOut());
+                .add(ledgerCash.income())
+                .subtract(supplierCash.cashOut())
+                .subtract(ledgerCash.expense());
 
         session.setSessionDate(request.getSessionDate());
         session.setStatus("CLOSED");
@@ -139,6 +147,8 @@ public class CashBalancingService {
         session.setHandoverCash(handoverCash);
         session.setOtherCashIn(supplierCash.cashIn());
         session.setCashOut(supplierCash.cashOut());
+        session.setOtherIncome(ledgerCash.income());
+        session.setExpenses(ledgerCash.expense());
         session.setExpectedClosing(expectedClosing);
         session.setCountedClosing(counted);
         session.setVariance(counted.subtract(expectedClosing));

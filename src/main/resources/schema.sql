@@ -758,10 +758,38 @@ CREATE TABLE cash_drawer_session (
     handover_cash    NUMERIC(12,2),  -- sum of verified handover physical cash
     other_cash_in    NUMERIC(12,2),  -- supplier cash refunds received (IN)
     cash_out         NUMERIC(12,2),  -- supplier cash payments (OUT)
-    expected_closing NUMERIC(12,2),  -- opening + handover_cash + other_cash_in - cash_out
+    other_income     NUMERIC(12,2),  -- ledger cash income of the day
+    expenses         NUMERIC(12,2),  -- ledger cash expenses of the day
+    expected_closing NUMERIC(12,2),  -- opening + handover_cash + other_cash_in + other_income - cash_out - expenses
     counted_closing  NUMERIC(12,2),
     variance         NUMERIC(12,2),  -- counted_closing - expected_closing
     remarks          VARCHAR,
     closed_by        BIGINT,
     closed_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ------------------------------------------------------------
+--  Other income & expenses ledger
+--  Supplier commissions, scrap sales (income); fuel, repairs
+--  and similar overheads (expense).
+-- ------------------------------------------------------------
+
+CREATE TABLE ledger_category (
+    id     BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    name   VARCHAR(100) NOT NULL,
+    kind   VARCHAR,               -- INCOME | EXPENSE
+    active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE ledger_entry (
+    id             BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    entry_date     DATE,
+    kind           VARCHAR,       -- INCOME | EXPENSE (copied from the category at save time)
+    category_id    BIGINT REFERENCES ledger_category(id),
+    description    VARCHAR,
+    amount         NUMERIC(12,2),
+    payment_method VARCHAR,       -- CASH, CHEQUE, BANK_TRANSFER
+    supplier_id    BIGINT,        -- optional: commission-paying supplier
+    employee_id    BIGINT,        -- recorded by
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

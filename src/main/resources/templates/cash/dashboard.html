@@ -111,7 +111,9 @@
                             <tr><td>Opening balance</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.openingBalance, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                             <tr><td>+ Handover cash</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.handoverCash, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                             <tr><td>+ Supplier cash refunds</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.otherCashIn, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>+ Other cash income</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.otherIncome != null ? drawerSession.otherIncome : 0, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                             <tr><td>&minus; Supplier cash payments</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.cashOut, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>&minus; Cash expenses</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.expenses != null ? drawerSession.expenses : 0, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                             <tr class="fw-bold"><td>Expected closing</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.expectedClosing, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                             <tr><td>Counted closing</td><td class="text-end" th:text="${#numbers.formatDecimal(drawerSession.countedClosing, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                             <tr class="fw-bold">
@@ -157,7 +159,8 @@
                     </div>
                     <div class="card-body table-responsive p-0">
                         <table class="table m-0 align-middle" id="drawer-calc"
-                            th:data-handover-cash="${handoverCash}" th:data-cash-in="${otherCashIn}" th:data-cash-out="${cashOut}">
+                            th:data-handover-cash="${handoverCash}" th:data-cash-in="${otherCashIn}" th:data-cash-out="${cashOut}"
+                            th:data-ledger-in="${ledgerCashIn}" th:data-ledger-out="${ledgerCashOut}">
                             <tbody>
                                 <tr>
                                     <td><label for="openingBalance" class="form-label m-0">Opening balance</label></td>
@@ -166,7 +169,9 @@
                                 </tr>
                                 <tr><td>+ Handover cash (verified)</td><td class="text-end" th:text="${#numbers.formatDecimal(handoverCash, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                                 <tr><td>+ Supplier cash refunds</td><td class="text-end" th:text="${#numbers.formatDecimal(otherCashIn, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                                <tr><td>+ Other cash income</td><td class="text-end" th:text="${#numbers.formatDecimal(ledgerCashIn, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                                 <tr><td>&minus; Supplier cash payments</td><td class="text-end" th:text="${#numbers.formatDecimal(cashOut, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                                <tr><td>&minus; Cash expenses</td><td class="text-end" th:text="${#numbers.formatDecimal(ledgerCashOut, 1, 'COMMA', 2, 'POINT')}"></td></tr>
                                 <tr class="fw-bold"><td>Expected closing</td><td class="text-end" id="drawer-expected">0.00</td></tr>
                                 <tr>
                                     <td><label for="countedClosing" class="form-label m-0">Counted closing cash</label></td>

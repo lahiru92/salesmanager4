@@ -323,20 +323,65 @@ public class ReportQueryRepository {
                 FROM supplier_payment
                 WHERE payment_date BETWEEN ? AND ?
                 GROUP BY 1
+            ),
+            ledger_cf AS (
+                SELECT
+                    date_trunc('%1$s', entry_date::timestamp)::date AS period,
+                    SUM(CASE kind WHEN 'INCOME'  THEN amount ELSE 0 END) AS other_income,
+                    SUM(CASE kind WHEN 'EXPENSE' THEN amount ELSE 0 END) AS other_expenses
+                FROM ledger_entry
+                WHERE entry_date BETWEEN ? AND ?
+                GROUP BY 1
             )
             SELECT
-                COALESCE(c.period, s.period)          AS period,
+                COALESCE(c.period, s.period, l.period) AS period,
                 COALESCE(c.customer_receipts, 0)      AS customer_receipts,
                 COALESCE(s.supplier_refunds, 0)       AS supplier_refunds,
+                COALESCE(l.other_income, 0)           AS other_income,
                 COALESCE(s.supplier_payments, 0)      AS supplier_payments,
                 COALESCE(c.customer_refunds, 0)       AS customer_refunds,
-                COALESCE(c.customer_receipts, 0) + COALESCE(s.supplier_refunds, 0)
-                    - COALESCE(s.supplier_payments, 0) - COALESCE(c.customer_refunds, 0) AS net_cash_flow
+                COALESCE(l.other_expenses, 0)         AS other_expenses,
+                COALESCE(c.customer_receipts, 0) + COALESCE(s.supplier_refunds, 0) + COALESCE(l.other_income, 0)
+                    - COALESCE(s.supplier_payments, 0) - COALESCE(c.customer_refunds, 0)
+                    - COALESCE(l.other_expenses, 0)   AS net_cash_flow
             FROM customer_cf c
             FULL OUTER JOIN supplier_cf s ON s.period = c.period
+            FULL OUTER JOIN ledger_cf l ON l.period = COALESCE(c.period, s.period)
             ORDER BY 1
             """.formatted(grouping);
-        return jdbcTemplate.queryForList(sql, from, to, from, to);
+        return jdbcTemplate.queryForList(sql, from, to, from, to, from, to);
+    }
+
+    /** Other income / expenses per month/quarter (for the net-profit view). */
+    public List<Map<String, Object>> ledgerByPeriod(LocalDate from, LocalDate to, String grouping) {
+        String sql = """
+            SELECT
+                date_trunc('%s', entry_date::timestamp)::date AS period,
+                SUM(CASE kind WHEN 'INCOME'  THEN amount ELSE 0 END) AS other_income,
+                SUM(CASE kind WHEN 'EXPENSE' THEN amount ELSE 0 END) AS other_expenses
+            FROM ledger_entry
+            WHERE entry_date BETWEEN ? AND ?
+            GROUP BY 1
+            ORDER BY 1
+            """.formatted(grouping);
+        return jdbcTemplate.queryForList(sql, from, to);
+    }
+
+    /** Other income / expenses per category over a period. */
+    public List<Map<String, Object>> ledgerByCategory(LocalDate from, LocalDate to) {
+        String sql = """
+            SELECT
+                le.kind,
+                lc.name AS category_name,
+                COUNT(*) AS entry_count,
+                SUM(le.amount) AS amount
+            FROM ledger_entry le
+            LEFT JOIN ledger_category lc ON lc.id = le.category_id
+            WHERE le.entry_date BETWEEN ? AND ?
+            GROUP BY le.kind, lc.name
+            ORDER BY le.kind, amount DESC
+            """;
+        return jdbcTemplate.queryForList(sql, from, to);
     }
 
     /**
