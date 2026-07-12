@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content">
+
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">Reports</h1>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+        <div class="col" th:each="group : ${groups}">
+            <div class="card h-100 overflow-hidden">
+                <div class="card-header">
+                    <h5 class="fs-6 m-0" th:text="${group.key}"></h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a th:each="report : ${group.value}"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                        th:hx-get="@{'/reports/' + ${report.key}}" hx-target="#content" href="#">
+                        <span th:text="${report.title}"></span>
+                        <i class="bi bi-chevron-right text-secondary"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</html>
