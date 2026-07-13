@@ -111,6 +111,7 @@ CREATE TABLE employee (
     drivers_license_no  VARCHAR,
     designation         VARCHAR,
     date_joined         DATE,
+    active              BOOLEAN DEFAULT TRUE,
     created_by          BIGINT,
     created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

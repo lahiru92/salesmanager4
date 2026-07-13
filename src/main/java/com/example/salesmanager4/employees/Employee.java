@@ -55,6 +55,7 @@ public class Employee {
     private String driversLicenseNo;
     private String designation;
     private java.time.LocalDate dateJoined;
+    private Boolean active;
     // private Long createdBy;
     // private java.time.LocalDateTime createdAt;
 }

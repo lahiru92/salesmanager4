@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="content">
+
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <h1 class="fs-5" th:if="${mode == 'create'}">Create new employee</h1>
+    <h1 class="fs-5" th:if="${mode == 'edit'}">Edit employee</h1>
+
+    <div th:if="${message}">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${message}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+
+    <form th:attr="
+            hx-post=${mode=='create' ? '/employees' : null},
+            hx-put=${mode=='edit' ? '/employees' : null}"
+          th:object="${employee}"
+          hx-target="#content">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <input type="hidden" id="id" name="id" th:value="${employee.id}">
+        <input type="hidden" id="page" name="page" th:value="${page}">
+        <input type="hidden" id="size" name="size" th:value="${size}">
+
+        <div class="row">
+
+            <!-- Personal details -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header"><h5 class="fs-6 m-0">Personal</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="knownName" class="form-label">Known Name</label>
+                            <input type="text" class="form-control" id="knownName" name="knownName" th:value="${employee.knownName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" name="fullName" th:value="${employee.fullName}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" th:value="${employee.dateOfBirth}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="nicNumber" class="form-label">NIC Number</label>
+                            <input type="text" class="form-control" id="nicNumber" name="nicNumber" th:value="${employee.nicNumber}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="passportNumber" class="form-label">Passport Number</label>
+                            <input type="text" class="form-control" id="passportNumber" name="passportNumber" th:value="${employee.passportNumber}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="driversLicenseNo" class="form-label">Driver's Licence No.</label>
+                            <input type="text" class="form-control" id="driversLicenseNo" name="driversLicenseNo" th:value="${employee.driversLicenseNo}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment details -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header"><h5 class="fs-6 m-0">Employment</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="designation" class="form-label">Designation</label>
+                            <input type="text" class="form-control" id="designation" name="designation" th:value="${employee.designation}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dateJoined" class="form-label">Date Joined</label>
+                            <input type="date" class="form-control" id="dateJoined" name="dateJoined" th:value="${employee.dateJoined}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header"><h5 class="fs-6 m-0">Contact</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="phoneMobile" class="form-label">Mobile Phone</label>
+                            <input type="text" class="form-control" id="phoneMobile" name="phoneMobile" th:value="${employee.phoneMobile}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phoneHome" class="form-label">Home Phone</label>
+                            <input type="text" class="form-control" id="phoneHome" name="phoneHome" th:value="${employee.phoneHome}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phoneOffice" class="form-label">Office Phone</label>
+                            <input type="text" class="form-control" id="phoneOffice" name="phoneOffice" th:value="${employee.phoneOffice}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailPersonal" class="form-label">Personal Email</label>
+                            <input type="email" class="form-control" id="emailPersonal" name="emailPersonal" th:value="${employee.emailPersonal}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailOffice" class="form-label">Office Email</label>
+                            <input type="email" class="form-control" id="emailOffice" name="emailOffice" th:value="${employee.emailOffice}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header"><h5 class="fs-6 m-0">Address</h5></div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="addressLine1" class="form-label">Address Line 1</label>
+                            <input type="text" class="form-control" id="addressLine1" name="addressLine1" th:value="${employee.addressLine1}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addressLine2" class="form-label">Address Line 2</label>
+                            <input type="text" class="form-control" id="addressLine2" name="addressLine2" th:value="${employee.addressLine2}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addressLine3" class="form-label">Address Line 3</label>
+                            <input type="text" class="form-control" id="addressLine3" name="addressLine3" th:value="${employee.addressLine3}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addressLine4" class="form-label">Address Line 4</label>
+                            <input type="text" class="form-control" id="addressLine4" name="addressLine4" th:value="${employee.addressLine4}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="addressLine5" class="form-label">Address Line 5</label>
+                            <input type="text" class="form-control" id="addressLine5" name="addressLine5" th:value="${employee.addressLine5}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mb-4">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a hx-get="/employees" hx-target="#content" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+
+    </form>
+
+</div>
+</html>
