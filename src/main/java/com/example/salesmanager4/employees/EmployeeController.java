@@ -19,6 +19,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.salesmanager4.util.Breadcrumb;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @Controller
 @RequestMapping("/employees")
 public class EmployeeController {
@@ -32,22 +34,44 @@ public class EmployeeController {
         this.employeeRepository = employeeRepository;
     }
 
-    // List employees with pagination
+    // List employees with search + pagination
     @GetMapping
     public String list(Model model,
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
-        List<Breadcrumb> breadcrumbs = List.of(
-            new Breadcrumb("Home", "/"),
-            new Breadcrumb("Employees", null)
-        );
+            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size,
+            HttpServletRequest req) {
 
-        Page<Employee> employeesPage = employeeService.findAllByPage(page, size);
+        Page<Employee> employeesPage = employeeService.search(q, page, size);
 
-        model.addAttribute("breadcrumbs", breadcrumbs);
         model.addAttribute("employees", employeesPage.getContent());
         model.addAttribute("page", employeesPage);
+        model.addAttribute("q", q);
+
+        // Live search / pagination only swaps the table
+        if ("employee-table".equals(req.getHeader("Hx-Target"))) {
+            return "employee/list::employee-table";
+        }
+
+        model.addAttribute("breadcrumbs", List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Employees", null)
+        ));
         return "employee/list::content";
+    }
+
+    // Read-only employee detail
+    @GetMapping("/{id}")
+    public String view(@PathVariable Long id, Model model) {
+        Employee employee = employeeService.findById(id);
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Employees", "/employees"),
+            new Breadcrumb(employee.getKnownName(), null)
+        );
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("employee", employee);
+        return "employee/view::content";
     }
 
     // Show create employee form
@@ -97,11 +121,12 @@ public class EmployeeController {
     @PutMapping
     public String update(@ModelAttribute Employee employee, RedirectAttributes ra, Model model,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
+            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size,
+            HttpServletRequest req) {
 
         employeeService.update(employee);
         ra.addFlashAttribute("message", "Employee updated");
-        return list(model, page, size);
+        return list(model, null, page, size, req);
     }
 
     // Disable employee (soft delete)

@@ -18,41 +18,55 @@
         <a hx-get="/employees/create" hx-target="#content" class="btn btn-primary">Create Employee</a>
     </div>
 
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Known Name</th>
-                <th>Full Name</th>
-                <th>Designation</th>
-                <th>Mobile</th>
-                <th>Date Joined</th>
-                <th></th>
-            </tr>
-        </thead>
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="search" name="q" th:value="${q}" class="form-control"
+                placeholder="Search by name, designation, mobile or NIC..."
+                hx-get="/employees" hx-target="#employee-table" hx-swap="outerHTML"
+                hx-trigger="keyup changed delay:400ms, search">
+        </div>
+    </div>
 
-        <tbody>
-            <tr th:if="${#lists.isEmpty(employees)}">
-                <td colspan="6" class="text-secondary">No employees yet.</td>
-            </tr>
-            <tr th:each="employee : ${employees}">
-                <td th:text="${employee.knownName}"></td>
-                <td th:text="${employee.fullName}"></td>
-                <td th:text="${employee.designation}"></td>
-                <td th:text="${employee.phoneMobile}"></td>
-                <td th:text="${employee.dateJoined != null ? #temporals.format(employee.dateJoined, 'dd MMM yyyy') : ''}"></td>
-                <td class="text-end">
-                    <button th:hx-get="@{/employees/{id}/edit (id=${employee.id}) }" hx-target="#content"
-                        class="btn btn-sm btn-light"><i class="bi bi-pencil"></i></button>
-                    <button th:hx-delete="@{/employees/{id} (id=${employee.id}) }"
-                        th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|' hx-target="closest tr"
-                        hx-swap="outerHTML swap:0.5s" hx-confirm="Are you sure you want to delete this employee?"
-                        class="btn btn-sm btn-light"><i class="bi bi-trash"></i> </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div th:fragment="employee-table" id="employee-table">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Known Name</th>
+                    <th>Full Name</th>
+                    <th>Designation</th>
+                    <th>Mobile</th>
+                    <th>Date Joined</th>
+                    <th></th>
+                </tr>
+            </thead>
 
-    <div th:replace="~{fragments/pagination :: pagination(target='#content', baseUrl='/employees', page=${page})}"></div>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(employees)}">
+                    <td colspan="6" class="text-secondary">No employees found.</td>
+                </tr>
+                <tr th:each="employee : ${employees}">
+                    <td th:text="${employee.knownName}"></td>
+                    <td th:text="${employee.fullName}"></td>
+                    <td th:text="${employee.designation}"></td>
+                    <td th:text="${employee.phoneMobile}"></td>
+                    <td th:text="${employee.dateJoined != null ? #temporals.format(employee.dateJoined, 'dd MMM yyyy') : ''}"></td>
+                    <td class="text-end">
+                        <button th:hx-get="@{/employees/{id} (id=${employee.id}) }" hx-target="#content"
+                            class="btn btn-sm btn-light" title="View"><i class="bi bi-eye"></i></button>
+                        <button th:hx-get="@{/employees/{id}/edit (id=${employee.id}) }" hx-target="#content"
+                            class="btn btn-sm btn-light" title="Edit"><i class="bi bi-pencil"></i></button>
+                        <button th:hx-delete="@{/employees/{id} (id=${employee.id}) }"
+                            th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|' hx-target="closest tr"
+                            hx-swap="outerHTML swap:0.5s" hx-confirm="Are you sure you want to delete this employee?"
+                            class="btn btn-sm btn-light" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div th:replace="~{fragments/pagination :: pagination(target='#content', baseUrl=@{/employees(q=${q})}, page=${page})}"></div>
+    </div>
 
 </div>
 </html>
