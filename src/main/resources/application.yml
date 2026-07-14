@@ -1,6 +1,8 @@
 spring:
   application:
     name: salesmanager4
+  profiles:
+    active: dev
   # datasource:
   #   url: jdbc:postgresql://localhost:5432/salesmanager4?currentSchema=sales_manager
   #   username: postgres
@@ -14,6 +16,7 @@ spring:
   h2:
     console:
       enabled: true
+
 
 
 
