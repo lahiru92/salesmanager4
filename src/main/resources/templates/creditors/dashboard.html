@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">Creditors</h1>
         <div>
-            <button hx-get="/grn/create" hx-target="#content" class="btn btn-primary">Make a payment</button>
+            <button hx-get="/supplier-payments/create" hx-target="#content" class="btn btn-primary">Make a payment</button>
         </div>
     </div>
 
@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <div style="font-family: monospace; overflow-x: auto;">
+    <!-- <div style="font-family: monospace; overflow-x: auto;">
         <div th:text="${supplierOutstandingBalances}"></div>
         <hr>
         <div th:text="${totalOutstandingBalance}"></div>
@@ -64,6 +64,6 @@
         <div th:text="${supplierAging}"></div>
         <hr>
         <div th:text="${totalAging}"></div>
-    </div>
+    </div> -->
 
 </div>

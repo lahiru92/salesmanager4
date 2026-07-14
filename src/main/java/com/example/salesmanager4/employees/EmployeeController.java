@@ -2,33 +2,144 @@ package com.example.salesmanager4.employees;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.example.salesmanager4.util.Breadcrumb;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 @RequestMapping("/employees")
 public class EmployeeController {
 
-    List<EmployeeDto> employees = List.of(
-            new EmployeeDto("E001", "Alice Johnson", "Sales Manager"),
-            new EmployeeDto("E002", "Bob Smith", "Sales Associate"),
-            new EmployeeDto("E003", "Charlie Brown", "Accountant")
-        );
+    private final EmployeeService employeeService;
+    private final EmployeeRepository employeeRepository;
+    private static final String DEFAULT_PAGE_SIZE = "10";
 
-    @GetMapping("/list")
-    public String dropdownList(@RequestParam(name="q") String q, Model model) {
-        
-        model.addAttribute("employees", employees.stream().filter(e -> e.name().toUpperCase().contains(q.toUpperCase())).toList());
-        return "fragments/employee_dropdown_list";
+    public EmployeeController(EmployeeService employeeService, EmployeeRepository employeeRepository) {
+        this.employeeService = employeeService;
+        this.employeeRepository = employeeRepository;
     }
 
-}
+    // List employees with search + pagination
+    @GetMapping
+    public String list(Model model,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size,
+            HttpServletRequest req) {
 
-record EmployeeDto(
-    String id,
-    String name,
-    String role) {
+        Page<Employee> employeesPage = employeeService.search(q, page, size);
+
+        model.addAttribute("employees", employeesPage.getContent());
+        model.addAttribute("page", employeesPage);
+        model.addAttribute("q", q);
+
+        // Live search / pagination only swaps the table
+        if ("employee-table".equals(req.getHeader("Hx-Target"))) {
+            return "employee/list::employee-table";
+        }
+
+        model.addAttribute("breadcrumbs", List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Employees", null)
+        ));
+        return "employee/list::content";
+    }
+
+    // Read-only employee detail
+    @GetMapping("/{id}")
+    public String view(@PathVariable Long id, Model model) {
+        Employee employee = employeeService.findById(id);
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Employees", "/employees"),
+            new Breadcrumb(employee.getKnownName(), null)
+        );
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("employee", employee);
+        return "employee/view::content";
+    }
+
+    // Show create employee form
+    @GetMapping("/create")
+    public String createForm(Model model) {
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Employees", "/employees"),
+            new Breadcrumb("Create Employee", null)
+        );
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("mode", "create");
+        model.addAttribute("employee", new Employee());
+        return "employee/form::content";
+    }
+
+    // Handle create employee form submission
+    @PostMapping
+    public String create(Employee employee, RedirectAttributes ra) {
+        employeeService.create(employee);
+        ra.addFlashAttribute("message", "Employee created");
+        return "redirect:/employees/create";
+    }
+
+    // Show edit employee form
+    @GetMapping("/{id}/edit")
+    public String editForm(@PathVariable("id") Long id,
+                           Model model,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
+
+        Employee employee = employeeService.findById(id);
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Employees", "/employees"),
+            new Breadcrumb("Edit Employee", null)
+        );
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("mode", "edit");
+        model.addAttribute("employee", employee);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        return "employee/form::content";
+    }
+
+    // Handle edit employee form submission
+    @PutMapping
+    public String update(@ModelAttribute Employee employee, RedirectAttributes ra, Model model,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size,
+            HttpServletRequest req) {
+
+        employeeService.update(employee);
+        ra.addFlashAttribute("message", "Employee updated");
+        return list(model, null, page, size, req);
+    }
+
+    // Disable employee (soft delete)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> disable(@PathVariable("id") Long id) {
+        employeeService.disable(id);
+        return ResponseEntity.ok().build();
+    }
+
+    // Endpoint for employee dropdown list (Tom-Select)
+    @GetMapping("/api/list")
+    @ResponseBody
+    public List<Employee> employeeList(@RequestParam String q) {
+        return employeeRepository.findByKnownName(q);
+    }
 }

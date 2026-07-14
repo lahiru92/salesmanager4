@@ -31,6 +31,11 @@ public class CreditorRepository {
 
     }
 
+    public List<SupplierOutstandingGrn> getSupplierOutstandingGrns(Long supplierId) {
+        String sql = "select * from outstanding_grns_per_supplier where supplier_id = ?";
+        return jdbcTemplate.query(sql, new DataClassRowMapper<>(SupplierOutstandingGrn.class), supplierId);
+    }
+
     public List<SupplierAging> getSupplierAging() {
         String sql = "select * from supplier_aging";
 

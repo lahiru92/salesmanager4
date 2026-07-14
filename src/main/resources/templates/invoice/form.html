@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content" th:object="${invoice}" th:data-init="invoice" th:with="
+    editable=${mode == 'create' || mode == 'edit'}
+">
+
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5" th:if="${mode == 'create'}">Create Invoice</h1>
+        <h1 class="fs-5" th:if="${mode == 'edit'}">Edit Invoice</h1>
+        <h1 class="fs-5" th:if="${mode == 'view'}" th:text="'Invoice #' + ${invoice.id}"></h1>
+        <div id="action-bar">
+            <button th:if="*{status} == 'APPROVED'" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i>Approved</button>
+            <a th:if="${mode == 'view' and #object.status == 'DRAFT'}" th:hx-post="@{/invoices/{id}/approve (id=*{id}) }" hx-swap="outerHTML" hx-include="#csrf" class="btn btn-outline-secondary">Approve</a>
+            <a th:if="${mode =='create'}" hx-post="/invoices" hx-target="#content" hx-include="#invoice-form" class="btn btn-primary">Save</a>
+            <a th:if="${mode =='edit'}" th:hx-post="@{/invoices/{id}/update (id=*{id})}" hx-target="#content" hx-include="#invoice-form" class="btn btn-primary">Update</a>
+        </div>
+    </div>
+
+    <div th:if="${#fields.hasGlobalErrors()}">
+        <div th:each="err : ${#fields.globalErrors()}">
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>&nbsp</span>
+                <span th:text="${err}"></span>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${message}">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${message}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+
+    <div th:fragment="invoice">
+        <form hx-post="/invoices" hx-target="#content" id="invoice-form" class="needs-validation" novalidate>
+            <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" th:field="*{status}">
+            <input type="hidden" th:field="*{id}" th:if="${mode == 'edit'}">
+
+            <div th:if="${!editable}">
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-borderless w-auto">
+                            <tr>
+                                <th scope="row">Invoice ID</th>
+                                <td th:text="*{id}"></td>
+                            </tr>
+                            <tr>
+                                <th>Created By</th>
+                                <td th:text="*{employeeName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Customer</th>
+                                <td th:text="*{customerName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Invoice Date</th>
+                                <td th:text="*{invoiceDate}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <table class="table table-borderless w-auto">
+                            <tr>
+                                <th>Cash</th>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(invoice.cash, 1,'COMMA', 2, 'POINT')}">12345</td>
+                            </tr>
+                            <tr>
+                                <th>Cheques</th>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(invoice.cheque, 1,'COMMA', 2, 'POINT')}">12345</td>
+                            </tr>
+                            <tr>
+                                <th>Credit</th>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(invoice.credit, 1,'COMMA', 2, 'POINT')}">12345</td>
+                            </tr>
+                            <tr>
+                                <th>Credit Due</th>
+                                <td th:text="*{creditDue}">2026-10-12</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:if="${editable}" class="row p-2 mb-3">
+                <div th:if="${mode == 'edit'}" class="col-3">
+                    <label class="form-label" for="id">Invoice ID</label>
+                    <input class="form-control" type="text" id="id" th:field="*{id}" disabled/>
+                </div>
+                <div class="col-3">
+                    <label class="form-label" for="customerName">Customer</label>
+                    <input type="hidden" th:field="*{customerName}">
+                    <select id="customer" type="text" placeholder="Customer" class="form-select" th:field="*{customerId}"
+                        th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid' : ''"
+                     required>
+                        <option th:if="*{customerName != null}" th:value="*{customerId}" th:text="*{customerName}"></option>
+                    </select>
+
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('customerId')}" th:errors="*{customerId}"></div>
+                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('customerId')}">Customer is required</div>
+
+                </div>
+
+                <div class="col-3">
+                    <label class="form-label" for="invoiceDate">Invoice Date</label>
+                    <input class="form-control" type="date" th:name="invoiceDate" th:value="${invoice.invoiceDate}" required/>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('invoiceDate')}" th:errors="*{invoiceDate}"></div>
+                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('invoiceDate')}">Invoice Date is required</div>
+
+                </div>
+            </div>
+
+            <div class="card overflow-hidden shadow-sm">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Free Qty</th>
+                                <th>Unit Price</th>
+                                <th>Discount</th>
+                                <th>Sub Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="invoice-row-container">
+                            <tr th:each="item,itemStat : *{items}" class="invoice-row">
+                                <td>
+                                    <input type="text" class="form-control-plaintext item-name" th:field="*{items[__${itemStat.index}__].itemName}" readonly></input>
+                                    <input class="item-id" type="hidden" th:field="*{items[__${itemStat.index}__].itemId}">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('items[' + itemStat.index + '].itemId')}"
+                                       th:errors="*{items[__${itemStat.index}__].itemId}"></div>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.quantity}"></span>
+                                    <input th:if="${editable}" type="text" data-action="invoice:subtotal" class="qty form-control" th:field="*{items[__${itemStat.index}__].quantity}">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('items[' + itemStat.index + '].quantity')}"
+                                       th:errors="*{items[__${itemStat.index}__].quantity}"></div>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.freeQty}"></span>
+                                    <input th:if="${editable}" type="text" class="free-qty form-control" th:field="*{items[__${itemStat.index}__].freeQty}">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('items[' + itemStat.index + '].freeQty')}"
+                                       th:errors="*{items[__${itemStat.index}__].freeQty}"></div>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.unitPrice}"></span>
+                                    <input th:if="${editable}" type="text" data-action="invoice:subtotal" class="unit-price form-control" th:field="*{items[__${itemStat.index}__].unitPrice}">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('items[' + itemStat.index + '].unitPrice')}"
+                                       th:errors="*{items[__${itemStat.index}__].unitPrice}"></div>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.discount}"></span>
+                                    <input th:if="${editable}" type="text" data-action="invoice:subtotal" class="discount form-control" th:field="*{items[__${itemStat.index}__].discount}">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('items[' + itemStat.index + '].discount')}"
+                                       th:errors="*{items[__${itemStat.index}__].discount}"></div>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.getSubTotal()}"></span>
+                                    <input th:if="${editable}" class="subtotal form-control" th:value="${item.getSubTotal()}">
+                                </td>
+                                <td><button th:if="${editable}" class="btn btn-outline-danger" type="button" data-action="invoice:remove-item"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                        </tbody>
+
+                        <tfoot>
+                            <tr th:if="${editable}">
+                                <td>
+                                    <select id="f-id">
+                                    </select>
+                                </td>
+                                <td><input class="form-control qty" data-action="invoice:subtotal" id="f-qty" type="number"/></td>
+                                <td><input class="form-control free-qty" id="f-free-qty" type="number"/></td>
+                                <td><input class="form-control unit-price" data-action="invoice:subtotal" id="f-price" type="number"/></td>
+                                <td><input class="form-control discount" data-action="invoice:subtotal" id="f-discount" type="number"/></td>
+                                <td><input class="form-control subtotal" id="f-subtotal" type="number" placeholder="Sub Total" readonly/></td>
+                                <td><button class="btn btn-primary" type="button" data-action="invoice:add-item"><i class="bi bi-plus"></i></button></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="5" class="text-end">Grand Total:</td>
+                                <td id="grand-total" colspan="2" th:text="*{getGrandTotal()}">0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <template th:if="${editable}" id="invoice-row-template">
+                        <tr class="invoice-row">
+                            <td>
+                                <input type="text" class="form-control-plaintext item-name" readonly></input>
+                                <input class="item-id" type="hidden">
+                                <div class="invalid-feedback item-error"></div>
+                            </td>
+                            <td>
+                                <input type="text" class="qty form-control" data-action="invoice:subtotal">
+                                <div class="invalid-feedback qty-error"></div>
+                            </td>
+                            <td>
+                                <input type="text" class="free-qty form-control">
+                                <div class="invalid-feedback free-qty-error"></div>
+                            </td>
+                            <td>
+                                <input type="text" class="unit-price form-control" data-action="invoice:subtotal">
+                                <div class="invalid-feedback price-error"></div>
+                            </td>
+                            <td>
+                                <input type="text" class="discount form-control" data-action="invoice:subtotal">
+                                <div class="invalid-feedback discount-error"></div>
+                            </td>
+                            <td><input class="form-control subtotal" type="number" placeholder="Sub Total" readonly/></td>
+                            <td><button class="btn btn-outline-danger" type="button" data-action="invoice:remove-item"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                    </template>
+
+                </div>
+            </div>
+
+            <div class="container p-2 mt-3" th:if="${editable}">
+                <div class="row">
+                    <div class="col-3">
+                        <label class="form-label" for="cash">Cash</label>
+                        <input type="number" class="form-control text-end" id="cash" name="cash" step="0.01" th:value="*{cash}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <label class="form-label" for="cheques">Cheques</label>
+                        <input type="number" class="form-control" id="cheques" name="cheque" step="0.01" th:value="*{cheque}">
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-3">
+                        <label class="form-label" for="credit">Credit</label>
+                        <input type="number" class="form-control" id="credit" name="credit" step="0.01" th:value="*{credit}">
+                    </div>
+                    <div class="col-3">
+                        <label class="form-label" for="dueDate">Due date</label>
+                        <input type="date" class="form-control" id="dueDate" name="creditDue" th:value="*{creditDue}">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+
+</html>

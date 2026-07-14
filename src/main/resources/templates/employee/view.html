@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="content">
+
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5" th:text="${employee.knownName}">Employee</h1>
+        <div>
+            <a th:hx-get="@{/employees/{id}/edit (id=${employee.id}) }" hx-target="#content" class="btn btn-primary">Edit</a>
+            <a hx-get="/employees" hx-target="#content" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <!-- Personal -->
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="fs-6 m-0">Personal</h5></div>
+                <table class="table m-0">
+                    <tbody>
+                        <tr><th class="w-50 fw-normal text-secondary">Known Name</th><td th:text="${employee.knownName}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Full Name</th><td th:text="${employee.fullName}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Date of Birth</th><td th:text="${employee.dateOfBirth != null ? #temporals.format(employee.dateOfBirth, 'dd MMM yyyy') : ''}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">NIC Number</th><td th:text="${employee.nicNumber}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Passport Number</th><td th:text="${employee.passportNumber}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Driver's Licence No.</th><td th:text="${employee.driversLicenseNo}"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Employment -->
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="fs-6 m-0">Employment</h5></div>
+                <table class="table m-0">
+                    <tbody>
+                        <tr><th class="w-50 fw-normal text-secondary">Designation</th><td th:text="${employee.designation}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Date Joined</th><td th:text="${employee.dateJoined != null ? #temporals.format(employee.dateJoined, 'dd MMM yyyy') : ''}"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="fs-6 m-0">Contact</h5></div>
+                <table class="table m-0">
+                    <tbody>
+                        <tr><th class="w-50 fw-normal text-secondary">Mobile Phone</th><td th:text="${employee.phoneMobile}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Home Phone</th><td th:text="${employee.phoneHome}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Office Phone</th><td th:text="${employee.phoneOffice}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Personal Email</th><td th:text="${employee.emailPersonal}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Office Email</th><td th:text="${employee.emailOffice}"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Address -->
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="fs-6 m-0">Address</h5></div>
+                <table class="table m-0">
+                    <tbody>
+                        <tr><th class="w-50 fw-normal text-secondary">Address Line 1</th><td th:text="${employee.addressLine1}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Address Line 2</th><td th:text="${employee.addressLine2}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Address Line 3</th><td th:text="${employee.addressLine3}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Address Line 4</th><td th:text="${employee.addressLine4}"></td></tr>
+                        <tr><th class="fw-normal text-secondary">Address Line 5</th><td th:text="${employee.addressLine5}"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</html>

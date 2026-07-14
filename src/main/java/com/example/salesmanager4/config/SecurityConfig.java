@@ -21,7 +21,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toH2Console()).permitAll()
-                        .requestMatchers("/login","/resources/**", "/font/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/login","/resources/**", "/font/**", "/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers("/users/change-password").authenticated()
                         .requestMatchers("/users").hasRole("ADMIN")
                         .anyRequest().authenticated())

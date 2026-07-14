@@ -1,6 +1,9 @@
 import { runInitializers } from './init-registry.js';
 import * as purchaseOrder from '../modules/purchase-order.js';
 import * as grn from '../modules/grn.js';
+import * as invoice from '../modules/invoice.js';
+import * as paymentAllocation from '../modules/payment-allocation.js';
+import * as cashBalancing from '../modules/cash-balancing.js';
 
 // ACTIONS (user interaction)
 const actions = {
@@ -11,6 +14,15 @@ const actions = {
     'grn:add-item': () => grn.addItem(),
     'grn:remove-item': (e) => {
         grn.removeItem(e.target);
+    },
+    'invoice:add-item': () => invoice.addItem(),
+    'invoice:remove-item': (e) => {
+        invoice.removeItem(e.target);
+    },
+    'payment:fill': (e) => paymentAllocation.fill(e),
+    'cashbal:add-deposit': () => cashBalancing.addDeposit(),
+    'cashbal:remove-deposit': (e) => {
+        cashBalancing.removeDeposit(e.target);
     }
 };
 
@@ -30,6 +42,26 @@ document.body.addEventListener('input', (e) => {
 
   if (action === 'grn:subtotal') {
     grn.subtotal(e);
+  }
+
+  if (action === 'invoice:subtotal') {
+    invoice.subtotal(e);
+  }
+
+  if (action === 'payment:recalc') {
+    paymentAllocation.recalc();
+  }
+
+  if (action === 'payment:method') {
+    paymentAllocation.toggleMethod();
+  }
+
+  if (action === 'cashbal:recalc') {
+    cashBalancing.recalc();
+  }
+
+  if (action === 'cashbal:drawer') {
+    cashBalancing.drawerRecalc();
   }
 });
 
@@ -56,7 +88,7 @@ document.body.addEventListener('htmx:beforeRequest', function (evt) {
         if (form && !form.checkValidity()) {
             evt.preventDefault();
             form.classList.add('was-validated');
-        }   
+        }
     }
 
 });

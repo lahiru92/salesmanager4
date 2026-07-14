@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content" data-init="cash-balancing">
+
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">
+            <span th:text="|Cash Handover — ${employeeName}|"></span>
+            <small class="text-secondary ms-2" th:text="${date}"></small>
+        </h1>
+        <div id="action-bar">
+            <button th:if="${mode == 'view'}" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i>Verified</button>
+            <a th:if="${mode == 'create'}" hx-post="/cash-balancing/handovers" hx-target="#content" hx-include="#handover-form" class="btn btn-primary">Verify Handover</a>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <!-- What the system expects -->
+        <div class="col-7">
+            <div class="card overflow-hidden mb-3">
+                <div class="card-header">
+                    <h5 class="fs-6 m-0">Cash collections</h5>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table m-0">
+                        <thead>
+                            <tr class="text-uppercase">
+                                <th>Receipt #</th>
+                                <th>Customer</th>
+                                <th>Type</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(cashCollections)}">
+                                <td colspan="4" class="text-secondary">No cash collections for this date.</td>
+                            </tr>
+                            <tr th:each="line : ${cashCollections}">
+                                <td th:text="${line.paymentId}"></td>
+                                <td th:text="${line.customerName}"></td>
+                                <td>
+                                    <span th:if="${line.direction == 'IN'}" class="badge text-bg-success">Receipt</span>
+                                    <span th:if="${line.direction == 'OUT'}" class="badge text-bg-danger">Refund</span>
+                                </td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(line.signedAmount(), 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold">
+                                <td colspan="3" class="text-end">Expected cash</td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(expectedCash, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card overflow-hidden">
+                <div class="card-header">
+                    <h5 class="fs-6 m-0">Cheques collected (hand over the leaves)</h5>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table m-0">
+                        <thead>
+                            <tr class="text-uppercase">
+                                <th>Receipt #</th>
+                                <th>Customer</th>
+                                <th>Cheque No</th>
+                                <th>Bank</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(chequeCollections)}">
+                                <td colspan="5" class="text-secondary">No cheques collected for this date.</td>
+                            </tr>
+                            <tr th:each="line : ${chequeCollections}">
+                                <td th:text="${line.paymentId}"></td>
+                                <td th:text="${line.customerName}"></td>
+                                <td th:text="${line.chequeNumber}"></td>
+                                <td th:text="${line.bank}"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(line.signedAmount(), 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold">
+                                <td colspan="4" class="text-end" th:text="|${#lists.size(chequeCollections)} cheque(s) total|"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(chequeTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- What the salesman hands over -->
+        <div class="col-5">
+
+            <!-- Already verified: read-only summary -->
+            <div th:if="${mode == 'view'}" class="card overflow-hidden">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fs-6 m-0">Handover</h5>
+                    <span class="badge text-bg-success">Verified</span>
+                </div>
+                <div class="card-body table-responsive p-0">
+                    <table class="table m-0">
+                        <tbody>
+                            <tr><td>Expected cash</td><td class="text-end" th:text="${#numbers.formatDecimal(handover.expectedAmount, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>Physical cash</td><td class="text-end" th:text="${#numbers.formatDecimal(handover.declaredCash, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr><td>CDM deposits</td><td class="text-end" th:text="${#numbers.formatDecimal(handover.cdmTotal, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                            <tr class="fw-bold">
+                                <td>Variance</td>
+                                <td class="text-end"
+                                    th:classappend="${handover.variance.signum() < 0} ? 'text-danger' : (${handover.variance.signum() > 0} ? 'text-success' : '')"
+                                    th:text="${#numbers.formatDecimal(handover.variance, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                            <tr th:if="${handover.remarks != null and !handover.remarks.isBlank()}">
+                                <td>Remarks</td><td class="text-end" th:text="${handover.remarks}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer" th:if="${!#lists.isEmpty(handover.deposits)}">
+                    <h6 class="text-uppercase fs-6">CDM deposits</h6>
+                    <table class="table table-sm m-0">
+                        <thead>
+                            <tr class="text-uppercase"><th>Bank</th><th>Slip Ref</th><th class="text-end">Amount</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="d : ${handover.deposits}">
+                                <td th:text="${d.bank}"></td>
+                                <td th:text="${d.referenceNumber}"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(d.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Not yet verified: entry form -->
+            <form th:if="${mode == 'create'}" id="handover-form" th:object="${handoverRequest}"
+                hx-post="/cash-balancing/handovers" hx-target="#content" class="needs-validation" novalidate>
+                <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" th:field="*{employeeId}">
+                <input type="hidden" th:field="*{handoverDate}">
+
+                <div th:if="${#fields.hasGlobalErrors()}">
+                    <div th:each="err : ${#fields.globalErrors()}">
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <span>&nbsp</span>
+                            <span th:text="${err}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden mb-3">
+                    <div class="card-header">
+                        <h5 class="fs-6 m-0">Handed over</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="declaredCash">Physical cash</label>
+                            <input type="number" step="0.01" min="0" class="form-control text-end"
+                                th:field="*{declaredCash}" data-action="cashbal:recalc" required>
+                            <div class="invalid-feedback">Physical cash is required (0 if fully deposited)</div>
+                        </div>
+
+                        <label class="form-label">CDM deposits</label>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                    <tr class="text-uppercase">
+                                        <th>Bank</th>
+                                        <th>Slip Ref</th>
+                                        <th class="text-end">Amount</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deposit-rows">
+                                    <tr th:each="d, stat : *{deposits}" class="deposit-row">
+                                        <td><input type="text" class="form-control deposit-bank" th:name="|deposits[${stat.index}].bank|" th:value="${d.bank}"></td>
+                                        <td><input type="text" class="form-control deposit-ref" th:name="|deposits[${stat.index}].referenceNumber|" th:value="${d.referenceNumber}"></td>
+                                        <td><input type="number" step="0.01" min="0" class="form-control text-end deposit-amount" th:name="|deposits[${stat.index}].amount|" th:value="${d.amount}" data-action="cashbal:recalc"></td>
+                                        <td><button class="btn btn-outline-danger btn-sm" type="button" data-action="cashbal:remove-deposit"><i class="bi bi-trash"></i></button></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4">
+                                            <button class="btn btn-outline-secondary btn-sm" type="button" data-action="cashbal:add-deposit">
+                                                <i class="bi bi-plus"></i> Add CDM deposit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <template id="deposit-row-template">
+                                <tr class="deposit-row">
+                                    <td><input type="text" class="form-control deposit-bank"></td>
+                                    <td><input type="text" class="form-control deposit-ref"></td>
+                                    <td><input type="number" step="0.01" min="0" class="form-control text-end deposit-amount" data-action="cashbal:recalc"></td>
+                                    <td><button class="btn btn-outline-danger btn-sm" type="button" data-action="cashbal:remove-deposit"><i class="bi bi-trash"></i></button></td>
+                                </tr>
+                            </template>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="remarks">Remarks</label>
+                            <textarea class="form-control" th:field="*{remarks}" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer p-0">
+                        <table class="table m-0">
+                            <tbody>
+                                <tr>
+                                    <td>Expected cash</td>
+                                    <td class="text-end" id="cashbal-expected" th:data-value="${expectedCash}"
+                                        th:text="${#numbers.formatDecimal(expectedCash, 1, 'COMMA', 2, 'POINT')}"></td>
+                                </tr>
+                                <tr><td>CDM deposits total</td><td class="text-end" id="cashbal-cdm-total">0.00</td></tr>
+                                <tr><td>Physical cash + CDM</td><td class="text-end" id="cashbal-received">0.00</td></tr>
+                                <tr class="fw-bold"><td>Variance</td><td class="text-end" id="cashbal-variance">0.00</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<div th:fragment="content">
+
+    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
+        <h1 class="fs-5">Income / Expenses</h1>
+        <div>
+            <button hx-get="/ledger/categories" hx-target="#content" class="btn btn-outline-secondary">Categories</button>
+            <button hx-get="/ledger/create" hx-target="#content" class="btn btn-primary">New Entry</button>
+        </div>
+    </div>
+
+    <div th:if="${message}">
+        <script th:inline="javascript">
+            Toastify({
+                text: /*[[${message}]]*/"Undefined",
+                duration: 3000
+            }).showToast();
+        </script>
+    </div>
+
+    <form hx-get="/ledger" hx-target="#content" class="card mb-3">
+        <div class="card-body row align-items-end g-2">
+            <div class="col-auto">
+                <label class="form-label" for="from">From</label>
+                <input type="date" class="form-control" id="from" name="from" th:value="${from}">
+            </div>
+            <div class="col-auto">
+                <label class="form-label" for="to">To</label>
+                <input type="date" class="form-control" id="to" name="to" th:value="${to}">
+            </div>
+            <div class="col-auto">
+                <label class="form-label" for="kind">Type</label>
+                <select class="form-select" id="kind" name="kind">
+                    <option value="" th:selected="${kind == null}">All</option>
+                    <option value="INCOME" th:selected="${kind != null and kind.name() == 'INCOME'}">Income</option>
+                    <option value="EXPENSE" th:selected="${kind != null and kind.name() == 'EXPENSE'}">Expense</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label class="form-label" for="categoryId">Category</label>
+                <select class="form-select" id="categoryId" name="categoryId">
+                    <option value="" th:selected="${categoryId == null}">All</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
+                        th:selected="${categoryId == cat.id}"></option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Apply</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="card overflow-hidden mb-3">
+        <div class="card-body table-responsive p-0">
+            <table class="table m-0 align-middle">
+                <thead>
+                    <tr class="text-uppercase">
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Supplier</th>
+                        <th>Method</th>
+                        <th>Recorded By</th>
+                        <th class="text-end">Amount</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(entries)}">
+                        <td colspan="9" class="text-secondary">No entries for the selected filters.</td>
+                    </tr>
+                    <tr th:each="entry : ${entries}">
+                        <td th:text="${entry.entryDate}"></td>
+                        <td>
+                            <span th:if="${entry.kind == 'INCOME'}" class="badge text-bg-success">Income</span>
+                            <span th:if="${entry.kind == 'EXPENSE'}" class="badge text-bg-danger">Expense</span>
+                        </td>
+                        <td th:text="${entry.categoryName}"></td>
+                        <td th:text="${entry.description}"></td>
+                        <td th:text="${entry.supplierName}"></td>
+                        <td th:text="${entry.paymentMethod}"></td>
+                        <td th:text="${entry.recordedBy}"></td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(entry.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td>
+                            <a th:hx-delete="@{/ledger/{id} (id=${entry.id})}"
+                                th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|'
+                                hx-target="closest tr" hx-swap="outerHTML swap:0.5s"
+                                hx-confirm="Delete this entry?" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot th:if="${!#lists.isEmpty(entries)}">
+                    <tr>
+                        <td colspan="7" class="text-end">Income</td>
+                        <td class="text-end text-success" th:text="${#numbers.formatDecimal(incomeTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="7" class="text-end">Expenses</td>
+                        <td class="text-end text-danger" th:text="${#numbers.formatDecimal(expenseTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td colspan="7" class="text-end">Net</td>
+                        <td class="text-end"
+                            th:classappend="${netTotal.signum() < 0} ? 'text-danger' : 'text-success'"
+                            th:text="${#numbers.formatDecimal(netTotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</div>
+</html>
