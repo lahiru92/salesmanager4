@@ -5,6 +5,7 @@ import * as supplierPayment from '../modules/supplier-payment.js';
 import * as customerPayment from '../modules/customer-payment.js';
 import * as cashBalancing from '../modules/cash-balancing.js';
 import * as ledger from '../modules/ledger.js';
+import * as user from '../modules/user.js';
 
 const registry = {
     'purchase-order': purchaseOrder,
@@ -13,7 +14,8 @@ const registry = {
     'supplier-payment': supplierPayment,
     'customer-payment': customerPayment,
     'cash-balancing': cashBalancing,
-    'ledger': ledger
+    'ledger': ledger,
+    'user': user
 };
 
 export function runInitializers(root) {

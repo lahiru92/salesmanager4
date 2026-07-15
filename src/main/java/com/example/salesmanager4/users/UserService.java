@@ -32,6 +32,26 @@ public class UserService {
         return userRepository.findById(username).orElse(null);
     }
 
+    /** True if the employee is already linked to a different user. */
+    public boolean isEmployeeLinkedToOther(Long employeeId, String username) {
+        if (employeeId == null) {
+            return false;
+        }
+        return userRepository.findByEmployeeId(employeeId)
+            .filter(existing -> !existing.username().equals(username))
+            .isPresent();
+    }
+
+    /** Link (or, with a null employeeId, unlink) an employee to a user. */
+    public void linkEmployee(String username, Long employeeId) {
+        if (isEmployeeLinkedToOther(employeeId, username)) {
+            UserDTO existing = userRepository.findByEmployeeId(employeeId).orElseThrow();
+            throw new IllegalStateException(
+                "That employee is already linked to user '" + existing.username() + "'.");
+        }
+        userRepository.updateEmployeeId(username, employeeId);
+    }
+
     public String resetUserPassword(String userId) {
         UserDTO user = userRepository.findById(userId)
             .orElseThrow();

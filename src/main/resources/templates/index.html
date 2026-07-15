@@ -27,9 +27,9 @@
             <nav class="text-bg-light p-3 d-flex flex-column vh-100">
 
                 <a hx-get="/" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-speedometer2"></i><span class="ms-2">Dashboard</span></a>
-                <a sec:authorize="hasRole('ADMIN')" hx-get="/users" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person"></i><span class="ms-2">Users</span></a>
-                <a sec:authorize="hasAnyRole('ADMIN','HR','MANAGER')" hx-get="/employees" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person-vcard"></i><span class="ms-2">Employees</span></a>
-                <a hx-get="/suppliers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-truck"></i><span class="ms-2">Suppliers</span></a>
+                <a hx-get="/users" sec:authorize="hasRole('ADMIN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person"></i><span class="ms-2">Users</span></a>
+                <a hx-get="/employees" sec:authorize="hasAnyRole('ADMIN','HR','MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person-vcard"></i><span class="ms-2">Employees</span></a>
+                <a hx-get="/suppliers" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-truck"></i><span class="ms-2">Suppliers</span></a>
                 <a hx-get="/customers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-shop-window"></i><span class="ms-2">Customers</span></a>
                 <a hx-get="/creditors" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-up"></i><span class="ms-2">Creditors</span></a>
                 <a hx-get="/debtors" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">Debtors</span></a>
@@ -100,6 +100,7 @@
     <script type="module" th:src="@{/js/modules/customer-payment.js}"></script>
     <script type="module" th:src="@{/js/modules/cash-balancing.js}"></script>
     <script type="module" th:src="@{/js/modules/ledger.js}"></script>
+    <script type="module" th:src="@{/js/modules/user.js}"></script>
 </body>
 
 </html>
