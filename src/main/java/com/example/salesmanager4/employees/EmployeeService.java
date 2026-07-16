@@ -90,6 +90,12 @@ public class EmployeeService {
         return employeeRepo.findByActiveIsTrue();
     }
 
+    public List<Employee> findAll() {
+        List<Employee> list = new java.util.ArrayList<>();
+        employeeRepo.findAll().forEach(list::add);
+        return list;
+    }
+
     public List<Employee> findByName(String name) {
         return employeeRepo.findByKnownName(name);
     }

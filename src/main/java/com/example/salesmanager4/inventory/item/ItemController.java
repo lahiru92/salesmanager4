@@ -58,7 +58,8 @@ public class ItemController {
     @ResponseBody
     public List<Item> dropdownList(@RequestParam String q, @RequestParam(required = false) Long supplierId) {
         if (supplierId != null) {
-            return itemService.findByNameAndSupplierId(q, supplierId);
+            // return itemService.findByNameAndSupplierId(q, supplierId);
+            return itemService.findItemByName(q);
         }
         return itemService.findItemByName(q);
     }

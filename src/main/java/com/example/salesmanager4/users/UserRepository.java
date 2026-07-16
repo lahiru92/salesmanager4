@@ -20,4 +20,10 @@ public interface UserRepository extends CrudRepository<UserDTO, String> {
     Iterable<UserDTO> findAllOrderByUsername();
 
     Optional<UserDTO> findByUsername(String username);
+
+    Optional<UserDTO> findByEmployeeId(Long employeeId);
+
+    @Modifying
+    @Query("UPDATE users SET employee_id = :employeeId WHERE username = :username")
+    void updateEmployeeId(String username, Long employeeId);
 }
