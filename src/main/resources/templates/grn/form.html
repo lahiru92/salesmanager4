@@ -107,15 +107,22 @@
                 <div class="col-3">
                     <label class="form-label" for="supplierName">Supplier</label>
                     <input type="hidden" th:field="*{supplierName}">
-                    <select id="supplier" type="text" placeholder="Supplier" class="form-select" th:field="*{supplierId}"
-                        th:classappend="${#fields.hasErrors('supplierId')} ? 'is-invalid' : ''"
-                     required>
-                        <option th:if="*{supplierName != null}" th:value="*{supplierId}" th:text="*{supplierName}"></option>
-                    </select>
 
-                    <div class="invalid-feedback" th:if="${#fields.hasErrors('supplierId')}" th:errors="*{supplierId}"></div>
-                    <div class="invalid-feedback" th:unless="${#fields.hasErrors('supplierId')}">Supplier is required</div>
-                    
+                    <th:block th:if="*{purchaseOrderId == null}">
+                        <select id="supplier" type="text" placeholder="Supplier" class="form-select" th:field="*{supplierId}"
+                            th:classappend="${#fields.hasErrors('supplierId')} ? 'is-invalid' : ''"
+                         required>
+                            <option th:if="*{supplierName != null}" th:value="*{supplierId}" th:text="*{supplierName}"></option>
+                        </select>
+
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('supplierId')}" th:errors="*{supplierId}"></div>
+                        <div class="invalid-feedback" th:unless="${#fields.hasErrors('supplierId')}">Supplier is required</div>
+                    </th:block>
+
+                    <th:block th:if="*{purchaseOrderId != null}">
+                        <input type="hidden" th:field="*{supplierId}">
+                        <input class="form-control" type="text" th:value="*{supplierName}" readonly/>
+                    </th:block>
                 </div>
                 
                 <div class="col-3">

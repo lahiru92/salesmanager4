@@ -1,6 +1,7 @@
 package com.example.salesmanager4.grn;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,8 @@ import com.example.salesmanager4.finance.payments.PaymentType;
 import com.example.salesmanager4.finance.payments.payable.SupplierPaymentRequest;
 import com.example.salesmanager4.finance.payments.payable.SupplierPaymentService;
 import com.example.salesmanager4.inventory.stock.StockTransactionService;
+import com.example.salesmanager4.purchase_order.PurchaseOrderService;
+import com.example.salesmanager4.purchase_order.dto.Po;
 import com.example.salesmanager4.users.CurrentUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ public class GrnService {
     private final StockTransactionService stockTransactionService;
 
     private final SupplierPaymentService supplierPaymentService;
+    private final PurchaseOrderService purchaseOrderService;
 
     public void createGrn(GrnRequestDto grnRequest) {
 
@@ -36,6 +40,10 @@ public class GrnService {
         if (employeeId == null) {
             throw new RuntimeException("Employee ID not found for current user");
         };
+
+        if (grnRequest.getPurchaseOrderId() != null) {
+            validatePurchaseOrder(grnRequest);
+        }
 
         Grn grn = mapToGrn(grnRequest);
         grn.setStatus("DRAFT");
@@ -56,6 +64,67 @@ public class GrnService {
         List<GrnRequestLineDto> items = grnRepository.findGrnRequestLineDtoById(id);
         grnRequestDto.setItems(items);
         return grnRequestDto;
+    }
+
+    public GrnRequestDto prepareFromPurchaseOrder(Long purchaseOrderId) {
+
+        Po po = purchaseOrderService.findById(purchaseOrderId)
+                .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + purchaseOrderId));
+
+        if (!"APPROVED".equals(po.status())) {
+            throw new RuntimeException("Only APPROVED purchase orders can be used to create a GRN. PO #"
+                    + purchaseOrderId + " is " + po.status());
+        }
+
+        if (!grnRepository.findByPurchaseOrderId(purchaseOrderId).isEmpty()) {
+            throw new RuntimeException("A GRN already exists for purchase order #" + purchaseOrderId);
+        }
+
+        GrnRequestDto grnRequest = new GrnRequestDto();
+        grnRequest.setPurchaseOrderId(purchaseOrderId);
+        grnRequest.setSupplierId(po.supplierId());
+        grnRequest.setSupplierName(po.supplierName());
+        grnRequest.setReceivedDate(LocalDate.now());
+
+        grnRequest.setItems(po.items().stream()
+                .map(line -> {
+                    GrnRequestLineDto item = new GrnRequestLineDto();
+                    item.setItemId(line.itemId());
+                    item.setItemName(line.name());
+                    item.setOrderedQty(BigDecimal.valueOf(line.qty()));
+                    item.setOrderedPrice(BigDecimal.valueOf(line.price()));
+                    item.setReceivedQty(BigDecimal.valueOf(line.qty()));
+                    item.setRejectedQty(BigDecimal.ZERO);
+                    item.setAcceptedQty(BigDecimal.valueOf(line.qty()));
+                    item.setUnitPrice(BigDecimal.valueOf(line.price()));
+                    return item;
+                })
+                .toList());
+
+        return grnRequest;
+    }
+
+    private void validatePurchaseOrder(GrnRequestDto grnRequest) {
+
+        Long purchaseOrderId = grnRequest.getPurchaseOrderId();
+
+        Po po = purchaseOrderService.findById(purchaseOrderId)
+                .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + purchaseOrderId));
+
+        if (!"APPROVED".equals(po.status())) {
+            throw new RuntimeException("Only APPROVED purchase orders can be used to create a GRN. PO #"
+                    + purchaseOrderId + " is " + po.status());
+        }
+
+        if (!po.supplierId().equals(grnRequest.getSupplierId())) {
+            throw new RuntimeException("GRN supplier does not match purchase order supplier");
+        }
+
+        boolean otherGrnExists = grnRepository.findByPurchaseOrderId(purchaseOrderId).stream()
+                .anyMatch(existing -> !existing.getId().equals(grnRequest.getId()));
+        if (otherGrnExists) {
+            throw new RuntimeException("A GRN already exists for purchase order #" + purchaseOrderId);
+        }
     }
 
     @Transactional
@@ -109,10 +178,13 @@ public class GrnService {
                 null,
                 null,
                 null,
-                grn.getReceivedDate()                
+                grn.getReceivedDate()
             ));
         }
 
+        if (grn.getPurchaseOrderId() != null) {
+            purchaseOrderService.markReceived(grn.getPurchaseOrderId());
+        }
 
     }
 

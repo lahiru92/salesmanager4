@@ -41,12 +41,28 @@ public class PurchaseOrderController {
         );
 
         // TODO Add pagination, sorting, filtering
-        // TODO Add supplier and employee names to the list view
-        model.addAttribute("purchaseOrders", service.findAll());
+        model.addAttribute("purchaseOrders", service.listRows());
         model.addAttribute("breadcrumbs", breadcrumbs);
 
-        // TODO Color code status
         return "po/list::content";
+    }
+
+    @GetMapping("/{id}")
+    public String view(@PathVariable Long id, Model model) {
+
+        Po po = service.findById(id).orElseThrow();
+
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Purchase Orders", "/purchase-orders"),
+            new Breadcrumb("PO #" + po.id(), null)
+        );
+
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("po", po);
+        model.addAttribute("mode", "view");
+
+        return "po/form::content";
     }
 
     @GetMapping("/create")
@@ -80,6 +96,8 @@ public class PurchaseOrderController {
 
         Po poEntity = service.findById(id).orElseThrow();
 
+        String mode = "DRAFT".equals(poEntity.status()) ? "edit" : "view";
+
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
             new Breadcrumb("Purchase Orders", "/purchase-orders"),
@@ -88,10 +106,10 @@ public class PurchaseOrderController {
 
         model.addAttribute("breadcrumbs", breadcrumbs);
         model.addAttribute("po", poEntity);
-        model.addAttribute("mode", "edit");
+        model.addAttribute("mode", mode);
         model.addAttribute("supplierName", poEntity.supplierName());
 
-        
+
         return "po/form::content";
     }
 
@@ -121,6 +139,20 @@ public class PurchaseOrderController {
     }
 
 
+
+    @PostMapping("/{id}/submit")
+    public String submit(@PathVariable Long id, RedirectAttributes ra) {
+        service.submit(id);
+        ra.addFlashAttribute("toastMessage", "Purchase order submitted for approval");
+        return "redirect:/purchase-orders";
+    }
+
+    @PostMapping("/{id}/approve")
+    public String approve(@PathVariable Long id, RedirectAttributes ra) {
+        service.approve(id);
+        ra.addFlashAttribute("toastMessage", "Purchase order approved");
+        return "redirect:/purchase-orders";
+    }
 
     @GetMapping("/item-row")
     public String itemRow(Model model, @RequestParam int index) {

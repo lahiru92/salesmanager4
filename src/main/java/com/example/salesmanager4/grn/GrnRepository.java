@@ -51,6 +51,8 @@ public interface GrnRepository extends CrudRepository<Grn, Long> {
     @Modifying
     @Query("UPDATE grn SET status = :status WHERE id = :id")
     public void setStatusById(Long id, String status);
+
+    public List<Grn> findByPurchaseOrderId(Long purchaseOrderId);
 }
 
 class GrnRequestDtoRowMapper extends BeanPropertyRowMapper<GrnRequestDto> {

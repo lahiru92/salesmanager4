@@ -1,17 +1,22 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<div th:fragment="content" th:object = ${po} th:class="purchase-order" th:data-init="purchase-order">
-    <!-- <script type="text/javascript" th:src="@{/js/purchase-order.js}"></script> -->
+<div th:fragment="content" th:object="${po}" th:class="purchase-order" th:data-init="purchase-order" th:with="
+    editable=${mode == 'create' || mode == 'edit'}
+">
 
     <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5" th:if="${mode == 'create'}">Create Purchase Order</h1>
         <h1 class="fs-5" th:if="${mode == 'edit'}">Edit Purchase Order</h1>
-        <div>
-            <a hx-post="/purchase-orders/submit" hx-target="#content" class="btn btn-outline-secondary" th:if="*{status == 'DRAFT'}">Submit for Approval</a>
-            <a hx-post="/purchase-orders" hx-target="#content" hx-include="#purchase-order-form" class="btn btn-primary">Save</a>
+        <h1 class="fs-5" th:if="${mode == 'view'}" th:text="'Purchase Order #' + *{id}"></h1>
+        <div id="action-bar">
+            <button th:if="*{status} == 'RECEIVED'" type="button" class="btn btn-success" disabled><i class="bi bi-check-lg"></i> Received</button>
+            <a th:if="${mode != 'create'} and *{status == 'DRAFT'}" th:hx-post="@{/purchase-orders/{id}/submit(id=*{id})}" hx-target="#content" hx-include="#csrf" hx-confirm="Submit this purchase order for approval?" class="btn btn-outline-secondary">Submit for Approval</a>
+            <a th:if="*{status == 'SENT'}" th:hx-post="@{/purchase-orders/{id}/approve(id=*{id})}" hx-target="#content" hx-include="#csrf" hx-confirm="Approve this purchase order?" class="btn btn-outline-secondary">Approve</a>
+            <a th:if="*{status == 'APPROVED'}" th:hx-get="@{/grn/create(purchaseOrderId=*{id})}" hx-target="#content" class="btn btn-primary">Create GRN</a>
+            <a th:if="${editable}" hx-post="/purchase-orders" hx-target="#content" hx-include="#purchase-order-form" class="btn btn-primary">Save</a>
         </div>
     </div>
 
@@ -26,9 +31,52 @@
 
     <div th:fragment="purchase-order">
         <form hx-post="/purchase-orders" hx-target="#content" id="purchase-order-form" class="needs-validation" novalidate>
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <input type="hidden" th:field="*{id}" th:if="${mode == 'edit'}">
-            <div class="row p-2 mb-3">
+
+            <div th:if="${!editable}">
+                <div class="row">
+                    <div class="col">
+                        <table class="table table-borderless w-auto">
+                            <tr>
+                                <th scope="row">PO ID</th>
+                                <td th:text="*{id}"></td>
+                            </tr>
+                            <tr>
+                                <th>Supplier</th>
+                                <td th:text="*{supplierName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Order Date</th>
+                                <td th:text="*{orderDate}"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <table class="table table-borderless w-auto">
+                            <tr>
+                                <th scope="row">Status</th>
+                                <td>
+                                    <span th:if="*{status == 'DRAFT'}" class="badge text-bg-dark">Draft</span>
+                                    <span th:if="*{status == 'SENT'}" class="badge text-bg-warning">Pending Approval</span>
+                                    <span th:if="*{status == 'APPROVED'}" class="badge text-bg-success">Approved</span>
+                                    <span th:if="*{status == 'RECEIVED'}" class="badge text-bg-primary">Received</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Created By</th>
+                                <td th:text="*{createdByName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Created At</th>
+                                <td th:text="*{createdAt != null} ? ${#temporals.format(po.createdAt, 'yyyy-MM-dd HH:mm')} : ''"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${editable}" class="row p-2 mb-3">
                 <div th:if="${mode == 'edit'}" class="col-3">
                     <label class="form-label" for="id">ID</label>
                     <input class="form-control" type="text" id="id" th:field="*{id}" disabled/>
@@ -44,69 +92,85 @@
 
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('supplierId')}" th:errors="*{supplierId}"></div>
                     <div class="invalid-feedback" th:unless="${#fields.hasErrors('supplierId')}">Supplier is required</div>
-                    
+
                 </div>
-                
+
                 <div class="col-3">
                     <label class="form-label" for="orderDate">Order Date</label>
                     <input class="form-control" type="date" th:field="*{orderDate}" required/>
                     <div class="invalid-feedback" th:if="${#fields.hasErrors('orderDate')}" th:errors="*{orderDate}"></div>
                     <div class="invalid-feedback" th:unless="${#fields.hasErrors('orderDate')}">Order Date is required</div>
-                    
+
                 </div>
             </div>
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product ID</th>
-                        <th>Quantity</th>
-                        <th>Unit Price</th>
-                        <th>Sub Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
+            <div class="card overflow-hidden shadow-sm">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Sub Total</th>
+                                <th th:if="${editable}"></th>
+                            </tr>
+                        </thead>
 
-                <tbody id="po-row-container">
-                    <tr th:each="item,itemStat : *{items}" class="po-row">
-                        <td>
-                            <input type="text" class="itemName form-control-plaintext" th:field="*{items[__${itemStat.index}__].name}" readonly></input>
-                            <input class="po-input itemid" type="hidden" th:field="*{items[__${itemStat.index}__].itemId}">
-                            <p th:if="${#fields.hasErrors('items[' + itemStat.index + '].itemId')}" 
-                               th:errors="*{items[__${itemStat.index}__].itemId}"></p>
-                        </td>
-                        <td>
-                            <input type="text" class="po-input qty" th:field="*{items[__${itemStat.index}__].qty}" data-action="po:subtotal">
-                            <p th:if="${#fields.hasErrors('items[' + itemStat.index + '].qty')}" 
-                               th:errors="*{items[__${itemStat.index}__].qty}"></p>
-                        </td>
-                        <td><input type="text" class="po-input price" th:field="*{items[__${itemStat.index}__].price}" data-action="po:subtotal"></td>
-                            <p th:if="${#fields.hasErrors('items[' + itemStat.index + '].price')}" 
-                               th:errors="*{items[__${itemStat.index}__].price}"></p>
-                        <td class="subtotal" th:if="${item.price != null and item.qty != null}" th:text="${item.price * item.qty}"></td>
-                        <td><button type="button" data-action="po:remove-item">Remove</button></td>
-                    </tr>
-                </tbody>
-                <tfoot >
-                    <tr>
-                        <td>
-                            <select id="f-id" type=text placeholder="Item Id"></select>
-                        </td>
-                        <td><input data-action="po:subtotal" id="f-qty" type=number placeholder="Quantity"/></td>
-                        <td><input data-action="po:subtotal" id="f-price" type=number placeholder="Unit Price"/></td>
-                        <td><input id="f-subtotal" type=number placeholder="Sub Total" readonly/></td>
-                        <td><button class="btn btn-primary" type="button" data-action="po:add-item">Add Item</button></td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="text-end">Grand Total:</td>
-                        <td id="grand-total" colspan="2" th:text="*{getGrandTotal()}"></td>
-                    </tr>
-                </tfoot>
-            </table>
-            <input class="btn btn-primary" type="submit" value="Save">
+                        <tbody id="po-row-container">
+                            <tr th:each="item,itemStat : *{items}" class="po-row">
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.name}"></span>
+                                    <th:block th:if="${editable}">
+                                        <input type="text" class="itemName form-control-plaintext" th:field="*{items[__${itemStat.index}__].name}" readonly>
+                                        <input class="po-input itemid" type="hidden" th:field="*{items[__${itemStat.index}__].itemId}">
+                                        <p class="text-danger mb-0" th:if="${#fields.hasErrors('items[' + itemStat.index + '].itemId')}"
+                                           th:errors="*{items[__${itemStat.index}__].itemId}"></p>
+                                    </th:block>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.qty}"></span>
+                                    <th:block th:if="${editable}">
+                                        <input type="text" class="po-input qty form-control" th:field="*{items[__${itemStat.index}__].qty}" data-action="po:subtotal">
+                                        <p class="text-danger mb-0" th:if="${#fields.hasErrors('items[' + itemStat.index + '].qty')}"
+                                           th:errors="*{items[__${itemStat.index}__].qty}"></p>
+                                    </th:block>
+                                </td>
+                                <td>
+                                    <span th:if="${!editable}" th:text="${item.price}"></span>
+                                    <th:block th:if="${editable}">
+                                        <input type="text" class="po-input price form-control" th:field="*{items[__${itemStat.index}__].price}" data-action="po:subtotal">
+                                        <p class="text-danger mb-0" th:if="${#fields.hasErrors('items[' + itemStat.index + '].price')}"
+                                           th:errors="*{items[__${itemStat.index}__].price}"></p>
+                                    </th:block>
+                                </td>
+                                <td class="subtotal" th:text="${item.price != null and item.qty != null} ? ${#numbers.formatDecimal(item.price * item.qty, 1, 'COMMA', 2, 'POINT')} : ''"></td>
+                                <td th:if="${editable}"><button class="btn btn-outline-danger" type="button" data-action="po:remove-item"><i class="bi bi-trash"></i></button></td>
+                            </tr>
+                        </tbody>
+
+                        <tfoot>
+                            <tr th:if="${editable}">
+                                <td>
+                                    <select id="f-id" placeholder="Item"></select>
+                                </td>
+                                <td><input class="form-control" data-action="po:subtotal" id="f-qty" type="number" placeholder="Quantity"/></td>
+                                <td><input class="form-control" data-action="po:subtotal" id="f-price" type="number" placeholder="Unit Price"/></td>
+                                <td><input class="form-control" id="f-subtotal" type="number" placeholder="Sub Total" readonly/></td>
+                                <td><button class="btn btn-primary" type="button" data-action="po:add-item"><i class="bi bi-plus"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end">Grand Total:</td>
+                                <td id="grand-total" th:text="${#numbers.formatDecimal(po.getGrandTotal(), 1, 'COMMA', 2, 'POINT')}">0</td>
+                                <td th:if="${editable}"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
         </form>
     </div>
-    
+
 </div>
 
 

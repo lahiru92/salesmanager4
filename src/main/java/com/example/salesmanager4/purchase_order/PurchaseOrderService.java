@@ -16,6 +16,7 @@ import com.example.salesmanager4.inventory.item.Item;
 import com.example.salesmanager4.inventory.item.ItemRepository;
 import com.example.salesmanager4.purchase_order.dto.Po;
 import com.example.salesmanager4.purchase_order.dto.PoLine;
+import com.example.salesmanager4.purchase_order.dto.PoListRow;
 import com.example.salesmanager4.suppliers.Supplier;
 import com.example.salesmanager4.suppliers.SupplierRepository;
 import com.example.salesmanager4.users.CurrentUserService;
@@ -50,11 +51,39 @@ public class PurchaseOrderService {
         return repo.findAllByOrderByCreatedAtDesc();
     }
 
+    public List<PoListRow> listRows() {
+        return repo.findAllListRows();
+    }
+
     public Optional<Po> findById(Long id) {
         PurchaseOrder purchaseOrder = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + id));
 
         return Optional.of(toPo(purchaseOrder));
+    }
+
+    public void submit(Long id) {
+        changeStatus(id, "DRAFT", "SENT");
+    }
+
+    public void approve(Long id) {
+        changeStatus(id, "SENT", "APPROVED");
+    }
+
+    public void markReceived(Long id) {
+        changeStatus(id, "APPROVED", "RECEIVED");
+    }
+
+    private void changeStatus(Long id, String expectedStatus, String newStatus) {
+        PurchaseOrder purchaseOrder = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + id));
+
+        if (!expectedStatus.equals(purchaseOrder.getStatus())) {
+            throw new RuntimeException("Purchase Order " + id + " is " + purchaseOrder.getStatus()
+                    + ", only " + expectedStatus + " purchase orders can move to " + newStatus);
+        }
+
+        repo.setStatusById(id, newStatus);
     }
 
     private PurchaseOrder toPurchaseOrder(Po po) {

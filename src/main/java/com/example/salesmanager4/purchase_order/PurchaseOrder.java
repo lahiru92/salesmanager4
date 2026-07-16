@@ -20,7 +20,7 @@ public class PurchaseOrder {
 
     private Long supplierId;
     private LocalDate orderDate;
-    private String status; // DRAFT, SENT, RECEIVED
+    private String status; // DRAFT, SENT, APPROVED, RECEIVED
     private Long createdBy;
     private LocalDateTime createdAt;
 
