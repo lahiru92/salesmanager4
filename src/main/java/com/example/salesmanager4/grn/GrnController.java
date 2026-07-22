@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.salesmanager4.suppliers.SupplierService;
 import com.example.salesmanager4.util.Breadcrumb;
@@ -105,7 +107,21 @@ public class GrnController {
     }
 
     @GetMapping("/create")
-    public String createForm(Model model) {
+    public String createForm(@RequestParam(required = false) Long purchaseOrderId, Model model, RedirectAttributes ra) {
+
+        GrnRequestDto grn;
+        if (purchaseOrderId != null) {
+            try {
+                grn = grnService.prepareFromPurchaseOrder(purchaseOrderId);
+            } catch (RuntimeException e) {
+                log.error("Cannot create GRN from purchase order {}: {}", purchaseOrderId, e.getMessage());
+                ra.addFlashAttribute("toastMessage", e.getMessage());
+                return "redirect:/purchase-orders";
+            }
+        } else {
+            grn = new GrnRequestDto();
+        }
+
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
             new Breadcrumb("GRNs", "/grn"),
@@ -114,10 +130,10 @@ public class GrnController {
 
 
         model.addAttribute("breadcrumbs", breadcrumbs);
-        model.addAttribute("grn", new GrnRequestDto());
+        model.addAttribute("grn", grn);
         model.addAttribute("mode", "create");
 
-        
+
         return "grn/form::content";
     }
 
@@ -129,30 +145,32 @@ public class GrnController {
             bindingResult.reject("payments.mismatch","Paid amounts not balanced with the total.");
         }
 
-        if (bindingResult.hasErrors()) {
-            log.error("Validation errors: {}", bindingResult.getAllErrors());
-            // return "grn/form::content";
-            
-            List<Breadcrumb> breadcrumbs = List.of(
-                new Breadcrumb("Home", "/"),
-                new Breadcrumb("GRNs", "/grns"),
-                new Breadcrumb("New GRN", null)
-            );
-
-            model.addAttribute("breadcrumbs", breadcrumbs);
-            model.addAttribute("mode", "create");
-
-            if (grnRequest.getSupplierId() != null) {
-                model.addAttribute("supplierName", supplierService.findById(grnRequest.getSupplierId()).getName());
+        if (!bindingResult.hasErrors()) {
+            try {
+                grnService.createGrn(grnRequest);
+                return "redirect:/grn/create";
+            } catch (RuntimeException e) {
+                log.error("Error creating GRN: {}", e.getMessage());
+                bindingResult.reject("grn.save", e.getMessage());
             }
-
-            return "grn/form::content"; 
-
         }
 
-        grnService.createGrn(grnRequest);
+        log.error("Validation errors: {}", bindingResult.getAllErrors());
 
-        return "redirect:/grn/create";
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("GRNs", "/grns"),
+            new Breadcrumb("New GRN", null)
+        );
+
+        model.addAttribute("breadcrumbs", breadcrumbs);
+        model.addAttribute("mode", "create");
+
+        if (grnRequest.getSupplierId() != null) {
+            model.addAttribute("supplierName", supplierService.findById(grnRequest.getSupplierId()).getName());
+        }
+
+        return "grn/form::content";
     }
 
 

@@ -155,6 +155,12 @@ export function subtotal(e) {
   const row = e.target.closest('tr');
   if (!row) return;
 
+  // Edits on an existing line recalculate that row and the grand total
+  if (row.classList.contains('po-row')) {
+    reIndexAndTotal();
+    return;
+  }
+
   const qty = parseFloat(row.querySelector('#f-qty')?.value) || 0;
   const price = parseFloat(row.querySelector('#f-price')?.value) || 0;
 

@@ -1,28 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <title>Purchase Orders</title>
-    <link rel="stylesheet" href="\src\main\resources\static\css\bootstrap.min.css">
-</head>
-
-
 <div th:fragment="content">
-    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}">
-        <nav class="pt-2" aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="#" hx-get="/" hx-target="#content">Home</a>
-
-                </li>
-                <li class="breadcrumb-item active">
-
-                    <span>Purchase Orders</span>
-                </li>
-
-            </ol>
-        </nav>
-    </div>
+    <input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <div th:replace="~{fragments/breadcrumbs :: breadcrumbs(${breadcrumbs})}"></div>
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">Purchase Orders</h1>
@@ -38,40 +19,46 @@
         </script>
     </div>
 
-    <p>TODO: Implement purchase order list</p>
-
-    <div class="row">
-        <div class="col-12">
-            <table class="table table-striped">
-                <thead>
+    <div class="card overflow-hidden mb-3">
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead class="table-secondary">
                     <tr>
                         <th>ID</th>
                         <th>Supplier</th>
+                        <th>Order Date</th>
                         <th>Status</th>
                         <th>Created By</th>
                         <th>Created At</th>
-                        <th>Last Updated</th>
-                        <th>Actions</th>
+                        <th class="text-end">Total</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="po : ${purchaseOrders}">
                         <td th:text="${po.id}">1</td>
-                        <td th:text="${po.supplierId}">Supplier Name</td>
-                        <td th:text="${po.status}">DRAFT</td>
-                        <td th:text="${po.createdBy}">Employee Name</td>
-                        <td th:text="${#temporals.format(po.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
-                        <td >2024-01-01 12:00</td>
+                        <td th:text="${po.supplierName}">Supplier Name</td>
+                        <td th:text="${po.orderDate}">2024-01-01</td>
                         <td>
-                            <a th:href="@{/purchase-orders/{id}(id=${po.id})}" class="btn btn-sm btn-secondary">View</a>
-                            <a th:hx-get="@{/purchase-orders/edit/{id}(id=${po.id})}" hx-target="#content" class="btn btn-sm btn-secondary">Edit</a>
+                            <span th:if="${po.status == 'DRAFT'}" class="badge text-bg-dark">Draft</span>
+                            <span th:if="${po.status == 'SENT'}" class="badge text-bg-warning">Pending Approval</span>
+                            <span th:if="${po.status == 'APPROVED'}" class="badge text-bg-success">Approved</span>
+                            <span th:if="${po.status == 'RECEIVED'}" class="badge text-bg-primary">Received</span>
+                        </td>
+                        <td th:text="${po.createdByName}">Employee Name</td>
+                        <td th:text="${#temporals.format(po.createdAt, 'yyyy-MM-dd HH:mm')}">2024-01-01 12:00</td>
+                        <td class="text-end" th:text="${#numbers.formatDecimal(po.total, 1, 'COMMA', 2, 'POINT')}">100,000.00</td>
+                        <td>
+                            <button class="btn btn-sm btn-light" th:hx-get="@{/purchase-orders/{id}(id=${po.id})}" hx-target="#content" title="View"><i class="bi bi-eye"></i></button>
+                            <button th:if="${po.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-get="@{/purchase-orders/edit/{id}(id=${po.id})}" hx-target="#content" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                            <button th:if="${po.status == 'SENT'}" class="btn btn-sm btn-light" th:hx-post="@{/purchase-orders/{id}/approve(id=${po.id})}" hx-target="#content" hx-include="#csrf" hx-confirm="Approve this purchase order?" title="Approve"><i class="bi bi-check-lg"></i></button>
+                            <a th:if="${po.status == 'APPROVED'}" th:hx-get="@{/grn/create(purchaseOrderId=${po.id})}" hx-target="#content" class="btn btn-sm btn-primary">Create GRN</a>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
-
 
 </div>
 
