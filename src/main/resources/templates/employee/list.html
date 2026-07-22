@@ -15,7 +15,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">Employees</h1>
-        <a hx-get="/employees/create" hx-target="#content" class="btn btn-primary">Create Employee</a>
+        <a sec:authorize="hasAuthority('employees:create')" hx-get="/employees/create" hx-target="#content" class="btn btn-primary">Create Employee</a>
     </div>
 
     <div class="mb-3">

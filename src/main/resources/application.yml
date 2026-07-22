@@ -17,10 +17,7 @@ spring:
     console:
       enabled: true
 
-
-
-
 logging:
   level:
     "[org.springframework.jdbc.core.JdbcTemplate]": DEBUG
-    web: DEBUG
+    # web: DEBUG

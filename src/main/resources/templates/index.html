@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>3R Marketing</title>
+    <title>Test app</title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap.min.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/css/bootstrap-icons-1.13.1.min.css}"/>
     <link rel="stylesheet" type="text/css" th:href="@{/css/toastify.min.css}"/>
@@ -30,21 +30,21 @@
                 <a hx-get="/users" sec:authorize="hasRole('ADMIN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person"></i><span class="ms-2">Users</span></a>
                 <a hx-get="/employees" sec:authorize="hasAnyRole('ADMIN','HR','MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-person-vcard"></i><span class="ms-2">Employees</span></a>
                 <a hx-get="/suppliers" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-truck"></i><span class="ms-2">Suppliers</span></a>
-                <a hx-get="/customers" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-shop-window"></i><span class="ms-2">Customers</span></a>
-                <a hx-get="/creditors" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-up"></i><span class="ms-2">Creditors</span></a>
-                <a hx-get="/debtors" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">Debtors</span></a>
-                <a hx-get="/items" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-boxes"></i><span class="ms-2">Items</span></a>
-                <a hx-get="/categories" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-tags"></i><span class="ms-2">Categories</span></a>
-                <a hx-get="/inventory" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-list-check"></i><span class="ms-2">Inventory</span></a>
-                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-car-front"></i><span class="ms-2">Vehicles</span></a>
-                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-map"></i><span class="ms-2">Routes</span></a>
-                <a hx-get="/invoices" hx-target="#content"  class="btn btn btn-light text-start"><i class="bi bi-receipt"></i><span class="ms-2">Invoice</span></a>
-                <a hx-get="/grn" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">GRN</span></a>
-                <a hx-get="/purchase-orders" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
-                <a hx-get="/cash-balancing" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash Balancing</span></a>
-                <a hx-get="/ledger" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-wallet2"></i><span class="ms-2">Income / Expenses</span></a>
-                <a hx-get="/reports" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-file-earmark-bar-graph"></i><span class="ms-2">Reports</span></a>
-                <a href="#" class="btn btn btn-light text-start"><i class="bi bi-cash-coin"></i><span class="ms-2">Cheques</span></a>
+                <a hx-get="/customers" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-shop-window"></i><span class="ms-2">Customers</span></a>
+                <a hx-get="/creditors" sec:authorize="hasAnyRole('MANAGER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-up"></i><span class="ms-2">Creditors</span></a>
+                <a hx-get="/debtors" sec:authorize="hasAnyRole('MANAGER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">Debtors</span></a>
+                <a hx-get="/items" sec:authorize="hasAnyRole('MANAGER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-boxes"></i><span class="ms-2">Items</span></a>
+                <a hx-get="/categories" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-tags"></i><span class="ms-2">Categories</span></a>
+                <a hx-get="/inventory" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-list-check"></i><span class="ms-2">Inventory</span></a>
+                <!-- <a href="#" class="btn btn btn-light text-start"><i class="bi bi-car-front"></i><span class="ms-2">Vehicles</span></a> -->
+                <!-- <a href="#" class="btn btn btn-light text-start"><i class="bi bi-map"></i><span class="ms-2">Routes</span></a> -->
+                <a hx-get="/invoices" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content"  class="btn btn btn-light text-start"><i class="bi bi-receipt"></i><span class="ms-2">Invoice</span></a>
+                <a hx-get="/grn" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">GRN</span></a>
+                <a hx-get="/purchase-orders" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
+                <a hx-get="/cash-balancing" sec:authorize="hasAnyRole('CASHIER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash Balancing</span></a>
+                <a hx-get="/ledger" sec:authorize="hasAnyRole('ADMIN','MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-wallet2"></i><span class="ms-2">Income / Expenses</span></a>
+                <a hx-get="/reports" sec:authorize="hasAnyRole('MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-file-earmark-bar-graph"></i><span class="ms-2">Reports</span></a>
+                <!-- <a href="#" class="btn btn btn-light text-start"><i class="bi bi-cash-coin"></i><span class="ms-2">Cheques</span></a> -->
                 
                 <!-- Change password-->
                 <a hx-get="/users/change-password" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-key"></i><span class="ms-2">Change Password</span></a>
@@ -55,8 +55,20 @@
                 </form>
                 <a hx-get="/users/profile" hx-target="#content" class="btn btn btn-light text-start">
                     <i class="bi bi-person-circle"></i>
-                    <span class="ms-2 fs-6" th:text="${employeeName}+'Surname mm'">Lahiru Jaysinghe</span>
+                    <span class="ms-2 fs-6" th:text="${employeeName}">Lahiru Jaysinghe</span>
                 </a>
+
+                <div class="btn-group dropend">
+                    <button type="button" class="btn btn-light text-start dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        Dropend
+                    </button>
+                    <ul class="dropdown-menu">
+                        <a hx-get="/users/change-password" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-key"></i><span class="ms-2">Change Password</span></a>
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="btn btn btn-light text-start"><i class="bi bi-box-arrow-right"></i><span class="ms-2">Log Out</span></button>
+                        </form>
+                    </ul>
+                </div>
             </nav>
 
             </nav>
