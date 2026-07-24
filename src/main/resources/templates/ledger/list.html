@@ -10,7 +10,7 @@
         <h1 class="fs-5">Income / Expenses</h1>
         <div>
             <button hx-get="/ledger/categories" hx-target="#content" class="btn btn-outline-secondary">Categories</button>
-            <button hx-get="/ledger/create" hx-target="#content" class="btn btn-primary">New Entry</button>
+            <button sec:authorize="hasRole('CASHIER')" hx-get="/ledger/create" hx-target="#content" class="btn btn-primary">New Entry</button>
         </div>
     </div>
 
@@ -23,7 +23,7 @@
         </script>
     </div>
 
-    <form hx-get="/ledger" hx-target="#content" class="card mb-3">
+    <form hx-get="/ledger" hx-target="#content" class="card mb-3" sec:authorize="hasAnyRole('MANAGER''CASHIER')">
         <div class="card-body row align-items-end g-2">
             <div class="col-auto">
                 <label class="form-label" for="from">From</label>
@@ -55,7 +55,7 @@
         </div>
     </form>
 
-    <div class="card overflow-hidden mb-3">
+    <div class="card overflow-hidden mb-3" sec:authorize="hasAnyRole('MANAGER''CASHIER')">
         <div class="card-body table-responsive p-0">
             <table class="table m-0 align-middle">
                 <thead>
@@ -91,7 +91,8 @@
                             <a th:hx-delete="@{/ledger/{id} (id=${entry.id})}"
                                 th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|'
                                 hx-target="closest tr" hx-swap="outerHTML swap:0.5s"
-                                hx-confirm="Delete this entry?" class="btn btn-sm btn-outline-danger">
+                                hx-confirm="Delete this entry?" class="btn btn-sm btn-outline-danger"
+                                sec:authorize="hasRole('MANAGER')">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

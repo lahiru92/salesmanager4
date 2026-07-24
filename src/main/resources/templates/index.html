@@ -18,7 +18,7 @@
 
     <div class="row container-fluid p-0" >
 
-        <div class="col-2 p-0 vh-100 d-flex flex-column sticky-top scrollable-sidebar" style="overflow-y: auto;">
+        <div class="col p-0 vh-100 d-flex flex-column sticky-top scrollable-sidebar" style="overflow-y: auto; max-width:250px">
             <div id="branding" class="text-bg-light pt-3 ps-3">
                 <img th:src="@{/img/3r64.png}" src="../static/img/3r64.png" width="32" height="32" class="me-2">
                 <span class="fw-semibold">3R Marketing</span>
@@ -33,7 +33,7 @@
                 <a hx-get="/customers" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-shop-window"></i><span class="ms-2">Customers</span></a>
                 <a hx-get="/creditors" sec:authorize="hasAnyRole('MANAGER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-up"></i><span class="ms-2">Creditors</span></a>
                 <a hx-get="/debtors" sec:authorize="hasAnyRole('MANAGER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">Debtors</span></a>
-                <a hx-get="/items" sec:authorize="hasAnyRole('MANAGER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-boxes"></i><span class="ms-2">Items</span></a>
+                <a hx-get="/items" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-boxes"></i><span class="ms-2">Items</span></a>
                 <a hx-get="/categories" sec:authorize="hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-tags"></i><span class="ms-2">Categories</span></a>
                 <a hx-get="/inventory" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-list-check"></i><span class="ms-2">Inventory</span></a>
                 <!-- <a href="#" class="btn btn btn-light text-start"><i class="bi bi-car-front"></i><span class="ms-2">Vehicles</span></a> -->
@@ -41,7 +41,7 @@
                 <a hx-get="/invoices" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK','SALESMAN')" hx-target="#content"  class="btn btn btn-light text-start"><i class="bi bi-receipt"></i><span class="ms-2">Invoice</span></a>
                 <a hx-get="/grn" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-arrow-down"></i><span class="ms-2">GRN</span></a>
                 <a hx-get="/purchase-orders" sec:authorize="hasAnyRole('MANAGER','STOREKEEPER','CLERK')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-journal-plus"></i><span class="ms-2">Purchase Order</span></a>
-                <a hx-get="/cash-balancing" sec:authorize="hasAnyRole('CASHIER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash Balancing</span></a>
+                <a hx-get="/cash-balancing" sec:authorize="hasAnyRole('CASHIER','MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-currency-dollar"></i><span class="ms-2">Cash Balancing</span></a>
                 <a hx-get="/ledger" sec:authorize="hasAnyRole('ADMIN','MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-wallet2"></i><span class="ms-2">Income / Expenses</span></a>
                 <a hx-get="/reports" sec:authorize="hasAnyRole('MANAGER')" hx-target="#content" class="btn btn btn-light text-start"><i class="bi bi-file-earmark-bar-graph"></i><span class="ms-2">Reports</span></a>
                 <!-- <a href="#" class="btn btn btn-light text-start"><i class="bi bi-cash-coin"></i><span class="ms-2">Cheques</span></a> -->
@@ -53,7 +53,7 @@
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn btn btn-light text-start"><i class="bi bi-box-arrow-right"></i><span class="ms-2">Log Out</span></button>
                 </form>
-                <a hx-get="/users/profile" hx-target="#content" class="btn btn btn-light text-start">
+                <!-- <a hx-get="/users/profile" hx-target="#content" class="btn btn btn-light text-start">
                     <i class="bi bi-person-circle"></i>
                     <span class="ms-2 fs-6" th:text="${employeeName}">Lahiru Jaysinghe</span>
                 </a>
@@ -68,9 +68,8 @@
                             <button type="submit" class="btn btn btn-light text-start"><i class="bi bi-box-arrow-right"></i><span class="ms-2">Log Out</span></button>
                         </form>
                     </ul>
-                </div>
-            </nav>
-
+                </div> -->
+                <!-- <div><span>User full name</span></div> -->
             </nav>
     
 

@@ -100,6 +100,7 @@
                     <div>
                         <span class="badge text-bg-success">Closed</span>
                         <a class="btn btn-sm btn-outline-secondary ms-2"
+                            sec:authorize="hasRole('MANAGER')"
                             th:hx-post="@{/cash-balancing/reopen(sessionDate=${drawerSession.sessionDate})}"
                             hx-include="#csrf" hx-target="#content"
                             hx-confirm="Reopen the closed drawer session for this date?">Reopen</a>
@@ -131,7 +132,7 @@
             </div>
         </div>
     </div>
-    <p th:text="${drawerSession}"></p>
+   
     <!-- Drawer still open: balance and close it -->
     <div class="row" th:if="${drawerSession == null}">
     <!-- <div class="row" > -->

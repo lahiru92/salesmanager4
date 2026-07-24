@@ -15,7 +15,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">Employees</h1>
-        <a sec:authorize="hasAuthority('employees:create')" hx-get="/employees/create" hx-target="#content" class="btn btn-primary">Create Employee</a>
+        <a sec:authorize="hasAnyRole('ADMIN','HR')" hx-get="/employees/create" hx-target="#content" class="btn btn-primary">Create Employee</a>
     </div>
 
     <div class="mb-3">
@@ -54,9 +54,9 @@
                     <td class="text-end">
                         <button th:hx-get="@{/employees/{id} (id=${employee.id}) }" hx-target="#content"
                             class="btn btn-sm btn-light" title="View"><i class="bi bi-eye"></i></button>
-                        <button th:hx-get="@{/employees/{id}/edit (id=${employee.id}) }" hx-target="#content"
+                        <button sec:authorize="hasAnyRole('ADMIN','HR')" th:hx-get="@{/employees/{id}/edit (id=${employee.id}) }" hx-target="#content"
                             class="btn btn-sm btn-light" title="Edit"><i class="bi bi-pencil"></i></button>
-                        <button th:hx-delete="@{/employees/{id} (id=${employee.id}) }"
+                        <button sec:authorize="hasAnyRole('ADMIN','HR')" th:hx-delete="@{/employees/{id} (id=${employee.id}) }"
                             th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|' hx-target="closest tr"
                             hx-swap="outerHTML swap:0.5s" hx-confirm="Are you sure you want to delete this employee?"
                             class="btn btn-sm btn-light" title="Delete"><i class="bi bi-trash"></i></button>
