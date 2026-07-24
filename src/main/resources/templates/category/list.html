@@ -5,8 +5,8 @@
         <div class="container">
             <form>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="text" name="name" placeholder="Category Name">
-                <button type="submit" th:hx-post="@{/categories}" th:hx-target="@{#category-list}">Add Category</button>
+                <input type="text" class="form-control" name="name" placeholder="Category Name">
+                <button type="submit" class="btn btn-primary" th:hx-post="@{/categories}" th:hx-target="@{#category-list}">Add Category</button>
             </form>
             <table>
                 <thead>
@@ -17,6 +17,13 @@
                 <tbody id="category-list" th:fragment="category-list">
                     <tr th:each="category : ${categories}">
                         <td th:text="${category.name}">Category Name</td>
+                        <!-- <td>
+                            <button th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|' 
+                                th:hx-delete="@{/categories/{id} (id=${category.categoryId}) }"
+                                class="btn btn-light">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td> -->
                     </tr>
                 </tbody>
             </table>
