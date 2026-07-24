@@ -288,9 +288,10 @@ SELECT
     supplier_id,
     received_date,
     credit_due,
+	total,
     credit_at_delivery,
     paid_against_grn,
-    credit_at_delivery - paid_against_grn                   AS outstanding_balance,
+    total - paid_against_grn                   AS outstanding_balance,
     CASE
         WHEN credit_due IS NULL THEN NULL
         ELSE (CURRENT_DATE - credit_due)
@@ -317,6 +318,7 @@ CREATE VIEW OUTSTANDING_BALANCE_PER_SUPPLIER AS
 WITH grn_balances AS (
     SELECT
         g.supplier_id,
+		g.total,
         g.credit                                AS credit_at_delivery,
         COALESCE(SUM(
 		    CASE sp.direction
@@ -335,9 +337,9 @@ SELECT
     COUNT(*)                                            AS open_grn_count,
     SUM(credit_at_delivery)                             AS total_credit_issued,
     SUM(paid_against_grn)                               AS total_paid,
-    SUM(credit_at_delivery - paid_against_grn)          AS total_outstanding
+    SUM(total - paid_against_grn)          AS total_outstanding
 FROM grn_balances
-WHERE credit_at_delivery - paid_against_grn > 0
+WHERE total - paid_against_grn > 0
 GROUP BY supplier_id
 ORDER BY total_outstanding DESC;
 
@@ -359,6 +361,7 @@ WITH grn_balances AS (
         g.supplier_id,
         g.credit_due,
         g.credit                                AS credit_at_delivery,
+		g.total,
         COALESCE(SUM(
 		    CASE sp.direction
 		        WHEN 'OUT' THEN  spa.allocated_amount   -- payment reduces what we owe
@@ -375,9 +378,9 @@ open_balances AS (
     SELECT
         supplier_id,
         credit_due,
-        credit_at_delivery - paid_against_grn   AS outstanding
+        total - paid_against_grn   AS outstanding
     FROM grn_balances
-    WHERE credit_at_delivery - paid_against_grn > 0
+    WHERE total - paid_against_grn > 0
 )
 SELECT
     b.supplier_id, 
@@ -543,7 +546,7 @@ SELECT
     credit_due,
     credit_at_sale,
     paid_against_invoice,
-    credit_at_sale - paid_against_invoice                   AS outstanding_balance,
+    total - paid_against_invoice                   AS outstanding_balance,
     CASE
         WHEN credit_due IS NULL THEN NULL
         ELSE (CURRENT_DATE - credit_due)
@@ -557,17 +560,19 @@ SELECT
         ELSE                                     'OVERDUE 90+'
     END                                                     AS aging_bucket
 FROM invoice_balances
-WHERE credit_at_sale - paid_against_invoice > 0             -- only open balances
+WHERE total - paid_against_invoice > 0             -- only open balances
 ORDER BY customer_id, credit_due NULLS LAST, invoice_id;
-
 
 -- =============================================================================
 -- D2. TOTAL OUTSTANDING BALANCE PER CUSTOMER
 -- =============================================================================
+
+DROP VIEW OUTSTANDING_BALANCE_PER_CUSTOMER;
 CREATE VIEW OUTSTANDING_BALANCE_PER_CUSTOMER AS
 WITH invoice_balances AS (
     SELECT
         i.customer_id,
+		i.total,
         i.credit                                AS credit_at_sale,
         COALESCE(SUM(
             CASE cp.direction
@@ -586,9 +591,9 @@ SELECT
     COUNT(*)                                            AS open_invoice_count,
     SUM(credit_at_sale)                                 AS total_credit_issued,
     SUM(paid_against_invoice)                           AS total_paid,
-    SUM(credit_at_sale - paid_against_invoice)          AS total_outstanding
+    SUM(total - paid_against_invoice)          AS total_outstanding
 FROM invoice_balances
-WHERE credit_at_sale - paid_against_invoice > 0
+WHERE total - paid_against_invoice > 0
 GROUP BY customer_id
 ORDER BY total_outstanding DESC;
 

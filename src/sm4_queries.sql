@@ -521,3 +521,22 @@ select * from supplier_aging;
 select * from unallocated_payment_cr_per_supplier;
 select * from unposted_supplier_refunds;
 
+alter table customer_payment add column collected_by         BIGINT;
+
+select * from cash_drawer_session;
+
+select * from employee;
+select * from users;
+
+ALTER TABLE employee ADD COLUMN active BOOLEAN DEFAULT TRUE;
+UPDATE employee SET active = TRUE WHERE active IS NULL;
+
+select * from users;
+select * from authori	ties;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_ADMIN'        WHERE USERNAME = 'testadmin'			  ;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_HR'         WHERE USERNAME = 'testhr'			  ;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_MANAGER'      WHERE USERNAME = 'testmanager'		  ;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_STOREKEEPER'     WHERE USERNAME = 'teststorekeeper'	  ;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_CLERK'        WHERE USERNAME = 'testclerk'			  ;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_SALESMAN'  WHERE USERNAME = 'testsalesman'		  ;
+UPDATE AUTHORITIES SET AUTHORITY = 'ROLE_CASHIER'  WHERE USERNAME = 'testcashier'		  ;
