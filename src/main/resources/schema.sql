@@ -518,7 +518,7 @@ CREATE TABLE customer_payment_allocation (
 -- D1. OUTSTANDING INVOICES PER CUSTOMER
 --     One row per invoice that still has an unpaid balance.
 -- =============================================================================
-CREATE VIEW OUTSTANDING_INVOICES_PER_CUSTOMER AS
+CREATE OR REPLACE VIEW OUTSTANDING_INVOICES_PER_CUSTOMER AS
 WITH invoice_balances AS (
     SELECT
         i.id                                    AS invoice_id,
@@ -601,12 +601,13 @@ ORDER BY total_outstanding DESC;
 -- =============================================================================
 -- D3. CUSTOMER AGING
 -- =============================================================================
-CREATE VIEW CUSTOMER_AGING AS
+CREATE OR REPLACE VIEW CUSTOMER_AGING AS
 WITH invoice_balances AS (
     SELECT
         i.id                                    AS invoice_id,
         i.customer_id,
         i.credit_due,
+		i.total,
         i.credit                                AS credit_at_sale,
         COALESCE(SUM(
             CASE cp.direction
@@ -624,9 +625,9 @@ open_balances AS (
     SELECT
         customer_id,
         credit_due,
-        credit_at_sale - paid_against_invoice   AS outstanding
+        total - paid_against_invoice   AS outstanding
     FROM invoice_balances
-    WHERE credit_at_sale - paid_against_invoice > 0
+    WHERE total - paid_against_invoice > 0
 )
 SELECT
     b.customer_id,

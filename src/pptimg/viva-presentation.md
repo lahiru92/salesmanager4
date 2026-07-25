@@ -52,7 +52,7 @@ Supervisor: Mr. K. D. T. Rangana
 ---
 
 # Agenda
-<style scoped>section{font-size:24px;}</style>
+
 1. Introduction & Motivation
 2. Problem Statement & Objectives
 3. Scope & Key Modules
@@ -77,8 +77,7 @@ Supervisor: Mr. K. D. T. Rangana
 - **3R Marketing** (project codename `salesmanager4`) is a single web
   application that digitizes this entire chain for a real business.
 ---
-![height:600px](pptimg/landingpage.png)
-
+> 🖼️ **Screenshot placeholder:** application landing / dashboard screen
 
 ---
 
@@ -113,7 +112,6 @@ Manually run distribution businesses typically struggle with:
 ---
 
 # Scope & Key Modules
-<style scoped>{font-size:24px}</style>
 
 | Area | Modules |
 |---|---|
@@ -160,7 +158,24 @@ Manually run distribution businesses typically struggle with:
 
 # High-Level Architecture
 
-![height:500px](pptimg/highlevelarchitecture.png)
+```mermaid
+flowchart TB
+    subgraph Client["Browser"]
+        UI["Thymeleaf views + HTMX + Bootstrap"]
+    end
+
+    subgraph Server["Spring Boot Application"]
+        SEC["Spring Security\n(authentication + role checks)"]
+        CTRL["Controllers\n(one per module: Grn, PurchaseOrder, Invoice, ...)"]
+        SVC["Service Layer\n(business rules, workflow, validation)"]
+        REPO["Repositories\n(Spring Data JDBC)"]
+    end
+
+    DB[("PostgreSQL")]
+
+    UI -- "HTTP / HTMX requests" --> SEC --> CTRL --> SVC --> REPO --> DB
+    DB --> REPO --> SVC --> CTRL -- "HTML fragments" --> UI
+```
 
 ---
 
@@ -187,16 +202,13 @@ com.example.salesmanager4
 
 # Database Design — Overview
 
+25 tables, grouped by business concern:
 
 - **Identity:** `users`, `authorities`
 - **Catalogue:** `category`, `item`, `stock_transaction`
 - **People:** `employee`, `supplier`, `customer`
 - **Procurement:** `purchase_order`, `purchase_order_item`, `grn`, `grn_item`
 - **Sales:** `invoice`, `invoice_item`
-
----
-
-# Database Design — Overview
 - **Payables:** `supplier_payment`, `supplier_payment_allocation`,
   `creditor_transaction`
 - **Receivables:** `customer_payment`, `customer_payment_allocation`
@@ -204,6 +216,34 @@ com.example.salesmanager4
   `cash_handover_deposit`, `cash_drawer_session`
 - **Accounting:** `ledger_category`, `ledger_entry`
 
+---
+
+# Entity-Relationship Diagram
+
+```mermaid
+erDiagram
+    SUPPLIER ||--o{ PURCHASE_ORDER : places
+    PURCHASE_ORDER ||--o{ PURCHASE_ORDER_ITEM : contains
+    PURCHASE_ORDER ||--o{ GRN : "fulfilled by"
+    SUPPLIER ||--o{ GRN : delivers
+    GRN ||--o{ GRN_ITEM : contains
+    GRN_ITEM }o--|| ITEM : references
+    SUPPLIER ||--o{ SUPPLIER_PAYMENT : "paid via"
+    SUPPLIER_PAYMENT ||--o{ SUPPLIER_PAYMENT_ALLOCATION : allocates
+    GRN ||--o{ SUPPLIER_PAYMENT_ALLOCATION : "settled by"
+
+    CUSTOMER ||--o{ INVOICE : "billed with"
+    INVOICE ||--o{ INVOICE_ITEM : contains
+    INVOICE_ITEM }o--|| ITEM : references
+    CUSTOMER ||--o{ CUSTOMER_PAYMENT : pays
+    CUSTOMER_PAYMENT ||--o{ CUSTOMER_PAYMENT_ALLOCATION : allocates
+    INVOICE ||--o{ CUSTOMER_PAYMENT_ALLOCATION : "settled by"
+
+    ITEM }o--|| CATEGORY : "belongs to"
+    ITEM ||--o{ STOCK_TRANSACTION : "tracked by"
+    LEDGER_CATEGORY ||--o{ LEDGER_ENTRY : classifies
+    USERS ||--o{ AUTHORITIES : has
+```
 
 ---
 
@@ -220,13 +260,47 @@ com.example.salesmanager4
   2. **UI-level** via Thymeleaf `sec:authorize` — sidebar links only render
      for roles permitted to use that module.
 
-
+> 🖼️ **Screenshot placeholder:** login page
 
 ---
 
-# Role based access control
+# Login Sequence
 
-![height:500px](pptimg/rbacmatrix.png)
+```mermaid
+sequenceDiagram
+    actor U as User
+    participant B as Browser
+    participant S as Spring Security Filter
+    participant M as JdbcUserDetailsManager
+    participant DB as PostgreSQL
+
+    U->>B: Enter username/password
+    B->>S: POST /login
+    S->>M: loadUserByUsername()
+    M->>DB: SELECT users, authorities
+    DB-->>M: user + roles
+    M-->>S: UserDetails
+    S->>S: verify BCrypt hash
+    S-->>B: session cookie + redirect
+    B->>B: Render sidebar filtered by sec:authorize
+```
+
+---
+
+# Role → Module Access (in progress)
+
+Access is being rolled out module-by-module (`sec:authorize` on nav links);
+today's enforced matrix:
+
+| Module | ADMIN | HR | MANAGER | STOREKEEPER | CLERK | SALESMAN | CASHIER |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| Users (create/manage) | ✅ | | | | | | |
+| Employees | ✅ | ✅ | ✅ | | | | |
+| Suppliers | ✅ | | ✅ | ✅ | ✅ | ✅ | |
+| Everything else (GRN, PO, Invoice, Cash, Ledger, Reports, …) | ✅ | Open to all authenticated users — matrix being extended | | | | | |
+
+> Remaining modules are next in line for the same `hasAnyRole(...)` treatment
+> as Users/Employees/Suppliers above.
 
 ---
 
@@ -237,6 +311,7 @@ com.example.salesmanager4
   today's cash position).
 - Sidebar navigation (role-filtered) to every module lives here.
 
+> 🖼️ **Screenshot placeholder:** dashboard with KPI cards
 
 ---
 
@@ -248,6 +323,7 @@ com.example.salesmanager4
 - Stock increases automatically when a GRN is approved, decreases when an
   invoice is issued.
 
+> 🖼️ **Screenshot placeholder:** item list / stock view
 
 ---
 
@@ -257,6 +333,7 @@ com.example.salesmanager4
   **Supplier Payments**.
 - Restricted to ADMIN, MANAGER, STOREKEEPER, CLERK, SALESMAN roles.
 
+> 🖼️ **Screenshot placeholder:** supplier list / detail page
 
 ---
 
@@ -266,7 +343,7 @@ com.example.salesmanager4
 - A PO is the **origin document** for procurement — it is later linked to
   one or more GRNs when goods actually arrive.
 
-
+> 🖼️ **Screenshot placeholder:** purchase order create/edit screen
 
 ---
 
@@ -279,7 +356,24 @@ com.example.salesmanager4
   balances are actually updated.
 - Line items (`GrnItem`) recorded per delivered product.
 
+> 🖼️ **Screenshot placeholder:** GRN detail/approval screen
 
+---
+
+# Procure-to-Pay Workflow
+
+```mermaid
+flowchart LR
+    A["Create Purchase Order"] --> B["Send PO to Supplier"]
+    B --> C["Goods Delivered"]
+    C --> D["Create GRN\n(linked to PO)"]
+    D --> E["Approve GRN"]
+    E --> F["Stock increased"]
+    E --> G["Creditor balance increased"]
+    G --> H["Supplier Payment"]
+    H --> I["Allocate payment to GRN(s)"]
+    I --> J["Ledger entry posted"]
+```
 
 ---
 
@@ -289,8 +383,9 @@ com.example.salesmanager4
   (`InvoiceItem`) referencing catalogue items.
 - Issuing an invoice deducts stock and increases the customer's
   outstanding (debtor) balance.
-- Invoices can be exported/printed as PDF.
+- Invoices can be exported/printed as PDF via OpenHTMLtoPDF.
 
+> 🖼️ **Screenshot placeholder:** invoice creation screen
 
 ---
 
@@ -303,6 +398,20 @@ com.example.salesmanager4
 - Supports multiple **payment instruments** (cash, cheque, etc.) and
   directions (`PaymentType`, `PaymentInstrument`, `PaymentDirection`).
 
+> 🖼️ **Screenshot placeholder:** customer payment / allocation screen
+
+---
+
+# Order-to-Cash Workflow
+
+```mermaid
+flowchart LR
+    A["Create Invoice"] --> B["Stock deducted"]
+    A --> C["Debtor balance increased"]
+    C --> D["Customer Payment received"]
+    D --> E["Allocate payment to Invoice(s)"]
+    E --> F["Ledger entry posted"]
+```
 
 ---
 
@@ -316,6 +425,7 @@ com.example.salesmanager4
   credits/refunds).
 - Both let finance staff see exactly **who owes what, and for how long**.
 
+> 🖼️ **Screenshot placeholder:** creditor/debtor aging report
 
 ---
 
@@ -329,7 +439,21 @@ com.example.salesmanager4
   deposited (`CashHandoverDeposit`), producing a reconciled trail from
   salesman → cashier → bank.
 
+> 🖼️ **Screenshot placeholder:** cash balancing / drawer session screen
 
+---
+
+# Cash Balancing Workflow
+
+```mermaid
+stateDiagram-v2
+    [*] --> DrawerOpen: Open drawer session
+    DrawerOpen --> DrawerOpen: Record cash/cheque transactions
+    DrawerOpen --> DrawerClosed: Close drawer (declare counted cash)
+    DrawerClosed --> HandedOver: Cash handover to cashier
+    HandedOver --> Deposited: Bank deposit recorded
+    Deposited --> [*]
+```
 
 ---
 
@@ -341,6 +465,8 @@ com.example.salesmanager4
   supplier/customer payments and cash movements into one "Income /
   Expenses" view.
 
+> 🖼️ **Screenshot placeholder:** ledger / income-expense report
+
 ---
 
 # Employees & User Administration
@@ -350,6 +476,7 @@ com.example.salesmanager4
   (role); ADMIN-only screen to create/manage accounts and reset
   passwords (`PasswordGenerator`).
 
+> 🖼️ **Screenshot placeholder:** employee search / user management screen
 
 ---
 
@@ -361,6 +488,7 @@ com.example.salesmanager4
 - Export to **CSV** (`ReportCsvService`) or **PDF** (`ReportPdfService`)
   for management/audit use outside the app.
 
+> 🖼️ **Screenshot placeholder:** reports screen with export buttons
 
 ---
 
@@ -393,6 +521,17 @@ com.example.salesmanager4
 - **Server-rendered UI feeling responsive** → HTMX partial swaps instead
   of full page reloads for every action.
 
+---
+
+# Future Enhancements
+
+- Complete the role-based access matrix for all remaining modules
+  (Purchase Orders, GRN, Invoice, Cash, Ledger, Reports).
+- Build out placeholder nav items already reserved in the UI: **Vehicles**,
+  **Routes**, standalone **Cheques** management.
+- Promotions and Retailers modules — deepen sales-side functionality.
+- Notifications/alerts (e.g. low stock, overdue debtor balances).
+- Automated schema migrations (e.g. Flyway) instead of manual SQL.
 
 ---
 
@@ -413,4 +552,8 @@ com.example.salesmanager4
 
 # Thank You
 
+## Questions?
 
+**[Your Name]** — [email/contact placeholder]
+
+> 🖼️ **Screenshot placeholder:** live demo screen (optional closing slide)
