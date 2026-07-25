@@ -131,6 +131,40 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{username}/roles")
+    public String showEditRolesForm(@PathVariable String username, Model model) {
+        UserDetails user = userDetailsManager.loadUserByUsername(username);
+        model.addAttribute("username", username);
+        model.addAttribute("currentRoles", user.getAuthorities().stream()
+            .map(a -> a.getAuthority().startsWith("ROLE_") ? a.getAuthority().substring(5) : a.getAuthority())
+            .collect(java.util.stream.Collectors.toSet()));
+        model.addAttribute("breadcrumbs", List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Users", "/users"),
+            new Breadcrumb("Edit Roles", null)
+        ));
+        return "user/roles::content";
+    }
+
+    @PostMapping("/{username}/roles")
+    public String updateRoles(@PathVariable String username,
+            @RequestParam(required = false, defaultValue = "") String[] authorities,
+            RedirectAttributes ra) {
+
+        UserDetails existing = userDetailsManager.loadUserByUsername(username);
+        String[] roles = authorities.length > 0 ? authorities : new String[]{"USER"};
+        UserDetails updated = User.builder()
+            .username(existing.getUsername())
+            .password(existing.getPassword())
+            .disabled(!existing.isEnabled())
+            .roles(roles)
+            .build();
+        userDetailsManager.updateUser(updated);
+
+        ra.addFlashAttribute("toastMessage", "Roles updated.");
+        return "redirect:/users";
+    }
+
     @PostMapping("/delete")
     @ResponseBody
     public String deleteUser(@RequestParam String username) {

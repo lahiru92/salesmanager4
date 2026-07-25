@@ -55,6 +55,9 @@
                             <a th:hx-get="@{/users/{username}/link (username=${user.username})}" hx-target="#content"
                                 class="btn btn-sm btn-light" title="Link employee"><i class="bi bi-person-vcard"></i></a>
 
+                            <a th:hx-get="@{/users/{username}/roles (username=${user.username})}" hx-target="#content"
+                                class="btn btn-sm btn-light" title="Edit roles"><i class="bi bi-shield-lock"></i></a>
+
                             <button th:if="${user.enabled}" class="btn btn-sm btn-light" title="Deactivate"
                                 hx-post="/users/deactivate" hx-target="#content"
                                 th:hx-vals='|{"username": "${user.username}"}|'

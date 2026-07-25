@@ -1,11 +1,15 @@
 package com.example.salesmanager4.inventory.category;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.salesmanager4.util.Breadcrumb;
 
 @Controller
 @RequestMapping("/categories")
@@ -19,7 +23,14 @@ public class CategoryController {
 
     @GetMapping
     public String list(Model model) {
+
+        List<Breadcrumb> breadcrumbs = List.of(
+            new Breadcrumb("Home", "/"),
+            new Breadcrumb("Categories", null)
+        );
+
         model.addAttribute("categories", service.findAll());
+        model.addAttribute("breadcrumbs", breadcrumbs);
         return "category/list::content";
     }
 
