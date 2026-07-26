@@ -2,6 +2,7 @@ package com.example.salesmanager4.inventory.category;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ public class CategoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')")
     public String list(Model model) {
 
         List<Breadcrumb> breadcrumbs = List.of(
@@ -43,6 +45,7 @@ public class CategoryController {
     // }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public String create(@RequestParam String name, Model model) {
         service.create(name);
         model.addAttribute("categories", service.findAll());

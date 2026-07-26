@@ -23,7 +23,7 @@
         </script>
     </div>
 
-    <form hx-get="/ledger" hx-target="#content" class="card mb-3" sec:authorize="hasAnyRole('MANAGER''CASHIER')">
+    <form hx-get="/ledger" hx-target="#content" class="card mb-3" sec:authorize="hasAnyRole('MANAGER','CASHIER')">
         <div class="card-body row align-items-end g-2">
             <div class="col-auto">
                 <label class="form-label" for="from">From</label>
@@ -55,7 +55,7 @@
         </div>
     </form>
 
-    <div class="card overflow-hidden mb-3" sec:authorize="hasAnyRole('MANAGER''CASHIER')">
+    <div class="card overflow-hidden mb-3" sec:authorize="hasAnyRole('MANAGER','CASHIER')">
         <div class="card-body table-responsive p-0">
             <table class="table m-0 align-middle">
                 <thead>

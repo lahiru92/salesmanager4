@@ -2,6 +2,7 @@ package com.example.salesmanager4.purchase_order;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,6 +34,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER','STOREKEEPER','CLERK')")
     public String list(Model model) {
 
         List<Breadcrumb> breadcrumbs = List.of(
@@ -66,6 +68,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('MANAGER','CLERK')")
     public String createForm(Model model) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -92,6 +95,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER','CLERK')")
     public String editForm(@PathVariable("id") Long id, Model model) {
 
         Po poEntity = service.findById(id).orElseThrow();
@@ -114,6 +118,7 @@ public class PurchaseOrderController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER','CLERK')")
     public String save(@Valid @ModelAttribute Po po,BindingResult bindingResult, Model model,  RedirectAttributes ra) {
 
         // TODO handle proper error if list is empty
@@ -148,6 +153,7 @@ public class PurchaseOrderController {
     }
 
     @PostMapping("/{id}/approve")
+    @PreAuthorize("hasRole('MANAGER')")
     public String approve(@PathVariable Long id, RedirectAttributes ra) {
         service.approve(id);
         ra.addFlashAttribute("toastMessage", "Purchase order approved");

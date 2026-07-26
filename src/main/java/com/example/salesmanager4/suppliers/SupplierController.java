@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,8 @@ public class SupplierController {
 
     // List suppliers with pagination
     @GetMapping
-    public String list(Model model, 
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')")
+    public String list(Model model,
             @RequestParam (defaultValue = "0") int page, 
             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
         List<Breadcrumb> breadcrumbs = List.of(
@@ -51,6 +53,7 @@ public class SupplierController {
 
     // Show create supplier form
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String createForm(Model model) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -65,6 +68,7 @@ public class SupplierController {
 
     // Handle create supplier form submission
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String create(Supplier supplier, RedirectAttributes ra) {
 
         supplier.setActive(true);
@@ -77,7 +81,8 @@ public class SupplierController {
 
     // Show edit supplier form
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable("id") Long id, 
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
+    public String editForm(@PathVariable("id") Long id,
                             Model model, 
                             @RequestParam(defaultValue = "0") int page, 
                             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
@@ -99,6 +104,7 @@ public class SupplierController {
 
     // Handle edit supplier form submission
     @PutMapping()
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String update(@ModelAttribute Supplier supplier, RedirectAttributes ra, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
         supplierService.update(supplier);
@@ -110,6 +116,7 @@ public class SupplierController {
 
     // Disable supplier (soft delete)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<?> disable(@PathVariable("id") Long id) {
         supplierService.disable(id);
         return ResponseEntity.ok().build();

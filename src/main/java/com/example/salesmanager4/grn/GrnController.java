@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -37,6 +38,7 @@ public class GrnController {
     private final SupplierService supplierService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER','STOREKEEPER','CLERK')")
     public String list(GrnListRequestDto requestDto,
         @PageableDefault(page=0, size=10, sort="id", direction = Sort.Direction.DESC) Pageable pageable, 
         Model model,
@@ -81,6 +83,7 @@ public class GrnController {
     }
 
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasAnyRole('STOREKEEPER','CLERK')")
     public String editView(@PathVariable Long id, Model model) {
 
         GrnRequestDto grn = grnService.findRequestDtoById(id);
@@ -175,6 +178,7 @@ public class GrnController {
 
 
     @PostMapping("/{id}/update")
+    @PreAuthorize("hasAnyRole('STOREKEEPER','CLERK')")
     public String update(@PathVariable Long id, @Valid @ModelAttribute("grn") GrnRequestDto grnRequest, BindingResult bindingResult, Model model) {
         
         log.info("Update request for grn {}", id);
@@ -241,6 +245,7 @@ public class GrnController {
     
 
     @PostMapping("/{id}/approve")
+    @PreAuthorize("hasRole('MANAGER')")
     public String approve(@PathVariable Long id, HttpServletRequest req, HttpServletResponse res, Model model) {
         try {
             grnService.approveGrn(id);

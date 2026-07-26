@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
         <h1 class="fs-5">Invoice List</h1>
         <div>
-            <button hx-get="/invoices/create" hx-target="#content" class="btn btn-primary">Create Invoice</button>
+            <button sec:authorize="hasAnyRole('MANAGER','SALESMAN','CLERK')" hx-get="/invoices/create" hx-target="#content" class="btn btn-primary">Create Invoice</button>
         </div>
     </div>
 
@@ -40,8 +40,8 @@
                             </td>
                             <td>
                                 <button class="btn btn-sm btn-light" th:hx-get="@{/invoices/{id}(id=${invoice.id})}" hx-target="#content" title="View"><i class="bi bi-eye"></i></button>
-                                <button th:if="${invoice.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-get="@{/invoices/{id}/edit(id=${invoice.id})}" hx-target="#content" title="Edit"><i class="bi bi-pencil-square"></i></button>
-                                <button th:if="${invoice.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-post="@{/invoices/{id}/approve(id=${invoice.id})}" hx-target="closest td" hx-include="#csrf" th:hx-headers='|{"X-Approvemode":"inline","X-oob-target":"invoice-status-${invoiceStat.index}"}|' hx-confirm="Are you sure?" title="Approve"><i class="bi bi-check-lg"></i></button>
+                                <button sec:authorize="hasAnyRole('MANAGER','CLERK','SALESMAN')" th:if="${invoice.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-get="@{/invoices/{id}/edit(id=${invoice.id})}" hx-target="#content" title="Edit"><i class="bi bi-pencil-square"></i></button>
+                                <button sec:authorize="hasAnyRole('MANAGER')" th:if="${invoice.status == 'DRAFT'}" class="btn btn-sm btn-light" th:hx-post="@{/invoices/{id}/approve(id=${invoice.id})}" hx-target="closest td" hx-include="#csrf" th:hx-headers='|{"X-Approvemode":"inline","X-oob-target":"invoice-status-${invoiceStat.index}"}|' hx-confirm="Are you sure?" title="Approve"><i class="bi bi-check-lg"></i></button>
                             </td>
                         </tr>
                     </tbody>

@@ -2,6 +2,7 @@ package com.example.salesmanager4.inventory;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,7 @@ public class InventoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER','STOREKEEPER','CLERK','SALESMAN')")
     public String summary(Model model) {
 
 

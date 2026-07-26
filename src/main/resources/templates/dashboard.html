@@ -4,7 +4,7 @@
 <div th:fragment="content">
 
     <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-        <h1 class="fs-5 m-0">Dashboard</h1>
+        <h1 class="fs-5 m-0" th:text="${'Welcome, ' + employeeName}">Welcome</h1>
         <span class="text-secondary" th:text="${#temporals.format(today, 'EEEE, dd MMMM yyyy')}"></span>
     </div>
 

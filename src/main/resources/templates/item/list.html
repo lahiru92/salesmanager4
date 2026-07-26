@@ -6,7 +6,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3 align-self-center">
             <h1 class="fs-5">Items</h1>
-            <a hx-get="/items/create" hx-target="#content" class="btn btn-primary">Create Item</a>
+            <a sec:authorize="hasAnyRole('MANAGER','ADMIN')" hx-get="/items/create" hx-target="#content" class="btn btn-primary">Create Item</a>
         </div>
         <table class="table">
             <thead>
@@ -31,8 +31,9 @@
                 <td class="text-end"
                     th:text="${item.reorderLevel}"></td>
                 <td>
-                    <a th:hx-get="@{/items/{id}/edit (id=${item.itemId}) }" hx-target="#content" th:hx-vals='|{"page":${page.getNumber()},"size":${page.getSize()}}|' class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a th:hx-get="@{/items/{id}/edit (id=${item.itemId}) }" sec:authorize="hasAnyRole('MANAGER','ADMIN')" hx-target="#content" th:hx-vals='|{"page":${page.getNumber()},"size":${page.getSize()}}|' class="btn btn-sm btn-outline-primary">Edit</a>
                     <a th:hx-delete="@{/items/{id} (id=${item.itemId}) }" 
+                       sec:authorize="hasAnyRole('MANAGER','ADMIN')"
                        th:hx-headers='|{"${_csrf.headerName}": "${_csrf.token}"}|'
                        hx-target="closest tr"
                        hx-swap="outerHTML swap:0.5s"

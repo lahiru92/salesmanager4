@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +33,7 @@ public class CustomerController {
 
     // List customers with pagination
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')")
     public String list(Model model,
             @RequestParam (defaultValue = "0") int page,
             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
@@ -51,6 +53,7 @@ public class CustomerController {
 
     // Show create customer form
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String createForm(Model model) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -65,6 +68,7 @@ public class CustomerController {
 
     // Handle create customer form submission
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String create(Customer customer, RedirectAttributes ra) {
 
         customer.setActive(true);
@@ -77,6 +81,7 @@ public class CustomerController {
 
     // Show edit customer form
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String editForm(@PathVariable("id") Long id,
                             Model model,
                             @RequestParam(defaultValue = "0") int page,
@@ -98,6 +103,7 @@ public class CustomerController {
 
     // Handle edit customer form submission
     @PutMapping()
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public String update(@ModelAttribute Customer customer, RedirectAttributes ra, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
         customerService.update(customer);
@@ -109,6 +115,7 @@ public class CustomerController {
 
     // Disable customer (soft delete)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<?> disable(@PathVariable("id") Long id) {
         customerService.disable(id);
         return ResponseEntity.ok().build();

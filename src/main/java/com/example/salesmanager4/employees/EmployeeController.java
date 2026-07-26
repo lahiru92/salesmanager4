@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +37,7 @@ public class EmployeeController {
 
     // List employees with search + pagination
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     public String list(Model model,
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
@@ -76,6 +78,7 @@ public class EmployeeController {
 
     // Show create employee form
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public String createForm(Model model) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -90,6 +93,7 @@ public class EmployeeController {
 
     // Handle create employee form submission
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public String create(Employee employee, RedirectAttributes ra) {
         employeeService.create(employee);
         ra.addFlashAttribute("message", "Employee created");
@@ -98,6 +102,7 @@ public class EmployeeController {
 
     // Show edit employee form
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public String editForm(@PathVariable("id") Long id,
                            Model model,
                            @RequestParam(defaultValue = "0") int page,
@@ -119,6 +124,7 @@ public class EmployeeController {
 
     // Handle edit employee form submission
     @PutMapping
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public String update(@ModelAttribute Employee employee, RedirectAttributes ra, Model model,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size,
@@ -131,6 +137,7 @@ public class EmployeeController {
 
     // Disable employee (soft delete)
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     public ResponseEntity<?> disable(@PathVariable("id") Long id) {
         employeeService.disable(id);
         return ResponseEntity.ok().build();

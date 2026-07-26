@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,6 +35,7 @@ public class InvoiceController {
     private final CustomerService customerService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER','STOREKEEPER','CLERK','SALESMAN')")
     public String list(InvoiceListRequestDto requestDto,
         @PageableDefault(page=0, size=10, sort="id", direction = Sort.Direction.DESC) Pageable pageable,
         Model model,
@@ -75,6 +77,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasAnyRole('MANAGER','CLERK','SALESMAN')")
     public String editView(@PathVariable Long id, Model model) {
 
         InvoiceRequestDto invoice = invoiceService.findRequestDtoById(id);
@@ -100,6 +103,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('MANAGER','SALESMAN','CLERK')")
     public String createForm(Model model) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -115,6 +119,7 @@ public class InvoiceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER','SALESMAN','CLERK')")
     public String create(@Valid @ModelAttribute("invoice") InvoiceRequestDto invoiceRequest, BindingResult bindingResult, Model model) {
         log.info("Received Invoice Header: {}", invoiceRequest);
 
@@ -149,6 +154,7 @@ public class InvoiceController {
 
 
     @PostMapping("/{id}/update")
+    @PreAuthorize("hasAnyRole('MANAGER','CLERK','SALESMAN')")
     public String update(@PathVariable Long id, @Valid @ModelAttribute("invoice") InvoiceRequestDto invoiceRequest, BindingResult bindingResult, Model model) {
 
         log.info("Update request for invoice {}", id);
@@ -210,6 +216,7 @@ public class InvoiceController {
 
 
     @PostMapping("/{id}/approve")
+    @PreAuthorize("hasRole('MANAGER')")
     public String approve(@PathVariable Long id, HttpServletRequest req, HttpServletResponse res, Model model) {
         try {
             invoiceService.approveInvoice(id);

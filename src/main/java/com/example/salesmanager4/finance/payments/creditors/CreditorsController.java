@@ -3,6 +3,7 @@ package com.example.salesmanager4.finance.payments.creditors;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ public class CreditorsController {
     private final CreditorRepository creditorRepository;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER','CLERK')")
     public String creditors(Model model) {
 
         List<Breadcrumb> breadcrumbs = List.of(

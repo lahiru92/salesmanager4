@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -74,7 +75,8 @@ public class ItemController {
     
 
     @GetMapping
-    public String list(Model model, 
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','STOREKEEPER','CLERK','SALESMAN')")
+    public String list(Model model,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
         List<Breadcrumb> breadcrumbs = List.of(
@@ -91,6 +93,7 @@ public class ItemController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public String form(Model model) {
         List<Breadcrumb> breadcrumbs = List.of(
             new Breadcrumb("Home", "/"),
@@ -106,6 +109,7 @@ public class ItemController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public String save(@ModelAttribute Item item,
                        RedirectAttributes ra) {
         itemService.create(item);
@@ -114,7 +118,8 @@ public class ItemController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable("id") Long id, 
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    public String editForm(@PathVariable("id") Long id,
                             Model model, 
                             @RequestParam(defaultValue = "0") int page, 
                             @RequestParam(defaultValue = "${DEFAULT_PAGE_SIZE}") int size) {
@@ -136,6 +141,7 @@ public class ItemController {
     }
 
     @PutMapping("/edit")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public String update(@ModelAttribute Item item, RedirectAttributes ra, Model model, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 
         // TODO: Fix too many redirects
@@ -150,6 +156,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
     public ResponseEntity<?> disable(@PathVariable("id") Long id) {
         itemService.disable(id);
         return ResponseEntity.ok().build();

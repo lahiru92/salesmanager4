@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -38,6 +39,7 @@ public class CashBalancingController {
     private final EmployeeRepository employeeRepository;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String dashboard(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             Model model) {
 
@@ -46,6 +48,7 @@ public class CashBalancingController {
     }
 
     @GetMapping("/handovers/create")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String handoverForm(@RequestParam Long employeeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             Model model) {
@@ -111,6 +114,7 @@ public class CashBalancingController {
     }
 
     @PostMapping("/close")
+    @PreAuthorize("hasAnyRole('MANAGER', 'CASHIER')")
     public String closeDrawer(@ModelAttribute("drawerClose") DrawerCloseRequest request,
             BindingResult bindingResult, Model model) {
 
@@ -147,6 +151,7 @@ public class CashBalancingController {
     }
 
     @PostMapping("/reopen")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public String reopenDrawer(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate sessionDate,
             Model model) {
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,7 @@ public class LedgerController {
     private final LedgerCategoryRepository categoryRepository;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','CASHIER')")
     public String list(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
@@ -46,6 +48,7 @@ public class LedgerController {
     }
 
     @GetMapping("/create")
+    @PreAuthorize("hasRole('CASHIER')")
     public String createForm(Model model) {
 
         LedgerEntryRequest entry = new LedgerEntryRequest();
@@ -57,6 +60,7 @@ public class LedgerController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('CASHIER')")
     public String create(@ModelAttribute("entry") LedgerEntryRequest entry, BindingResult bindingResult, Model model) {
 
         log.info("Ledger entry request: {}", entry);
@@ -94,6 +98,7 @@ public class LedgerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         ledgerService.deleteEntry(id);
         return ResponseEntity.ok().build();
